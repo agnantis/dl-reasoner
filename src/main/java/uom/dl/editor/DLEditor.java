@@ -1,11 +1,15 @@
 package uom.dl.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -13,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.Border;
 
 public class DLEditor extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6701509284138703800L;
@@ -36,10 +39,15 @@ public class DLEditor extends JFrame implements ActionListener {
 
 	// ⌐≥≤∀∃⊓⊔⊑⊒≡⊤⊥
 	private void initComponents() {
-		setLayout(new BorderLayout());
-		JLabel lbl1 = new JLabel("Add your DL statement:");
+		setLayout(new BorderLayout(10, 10));
+		JLabel lbl1 = new JLabel("Add your DL statements:");
 
 		textArea = new JTextArea(10, 30);
+		//textArea.setMargin(new Insets(14, 14, 14, 14));
+		textArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		textArea.setForeground(Color.BLUE);
+		Font f = new Font(Font.SANS_SERIF, Font.BOLD, 14);
+		textArea.setFont(f);
 
 		JPanel charsPnl = new JPanel(new GridLayout(4, 2));
 		existsBtn 		= new JButton(" ∃ ");
@@ -114,7 +122,8 @@ public class DLEditor extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		if (event.getSource() instanceof JButton) {
 			String text = ((JButton)event.getSource()).getText().trim();
-			textArea.append(text);			
+			textArea.append(text);	
+			textArea.requestFocus();
 		}
 	}
 
