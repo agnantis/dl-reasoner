@@ -3,3 +3,15 @@
 target
 .classpath
 .project
+
+#Temp files
+*~
+*.tmp
+
+#Java bytecode
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
