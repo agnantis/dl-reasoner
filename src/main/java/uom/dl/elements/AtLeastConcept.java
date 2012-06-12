@@ -3,18 +3,20 @@ package uom.dl.elements;
 public class AtLeastConcept implements Concept {
 	private int number;
 	private Concept concept;
+	private Role role;
 
-	public AtLeastConcept(int number, Concept concept) {
+	public AtLeastConcept(int number, Role role, Concept concept) {
 		this.number = number;
+		this.role = role;
 		this.concept = concept;
 	}
 	
-	public AtLeastConcept(int number) {
-		this(number, Constants.TOP_CONCEPT);
+	public AtLeastConcept(int number, Role role) {
+		this(number, role, Constants.TOP_CONCEPT);
 	}
 	
 	@Override
 	public String toString() {
-		return "≥" + this.number + this.concept;
+		return "" + Constants.ATLEAST_CHAR + this.number + this.role + "." + this.concept;
 	}
 }

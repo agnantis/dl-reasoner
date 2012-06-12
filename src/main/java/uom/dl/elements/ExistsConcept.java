@@ -18,7 +18,7 @@ public class ExistsConcept implements Concept {
 	@Override
 	public String toString() {
 		//(∃R.C)
-		return "(∃" + this.role + "." + this.concept + ")";
+		return "(" + Constants.EXISTS_CHAR + this.role + "." + this.concept + ")";
 	}
 
 }

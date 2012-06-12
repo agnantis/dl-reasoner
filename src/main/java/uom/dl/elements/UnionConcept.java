@@ -11,7 +11,7 @@ public class UnionConcept implements Concept {
 	
 	@Override
 	public String toString() {
-		return "(" + this.concept1 + "⊔" + this.concept2 + ")";
+		return "(" + this.concept1 + Constants.UNION_CHAR + this.concept2 + ")";
 	}
 
 }

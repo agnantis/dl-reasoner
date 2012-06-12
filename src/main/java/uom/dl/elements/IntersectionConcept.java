@@ -11,7 +11,7 @@ public class IntersectionConcept implements Concept {
 	
 	@Override
 	public String toString() {
-		return "(" + this.concept1 + "⊓" + this.concept2 + ")";
+		return "(" + this.concept1 + Constants.INTERSECTION_CHAR + this.concept2 + ")";
 	}
 
 }

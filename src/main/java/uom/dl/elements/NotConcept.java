@@ -11,7 +11,7 @@ public class NotConcept implements Concept {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "¬" + this.concept;
+		return "" + Constants.NOT_CHAR + this.concept;
 	}
 
 }

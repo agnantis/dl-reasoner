@@ -15,77 +15,6 @@ public class ConceptFactory {
 	public ConceptFactory() {
 		this(null);
 	}
-	/*
-	public ConceptFactory concept(String name) {
-		this.concept = new BaseConcept(name);
-		return this;
-	}
-	public Concept newConcept(String name) {
-		return new BaseConcept(name);
-	}
-	
-	public Role role(String name) {
-		return new BaseRole(name);
-	}
-	
-	public ConceptFactory exists(Role role, Concept c) {
-		this.concept = new ExistsConcept(role, c);
-		return this;
-	}
-	
-	public ConceptFactory exists(Role role) {
-		this.concept = new ExistsConcept(role);
-		return this;
-	}
-	
-	public ConceptFactory forall(Role role, Concept c) {
-		this.concept = new ForAllConcept(role, c);
-		return this;
-	}
-	
-	public ConceptFactory forall(Role role) {
-		this.concept = new ForAllConcept(role);
-		return this;
-	}
-	
-	public ConceptFactory not(Concept c){
-		this.concept = new NotConcept(c);
-		return this;
-	}
-	
-	public Concept union(Concept c, Concept d){
-		return new UnionConcept(c, d);
-	}
-	
-	public Concept intersection(Concept c, Concept d){
-		return new IntersectionConcept(c, d);
-	}
-	
-	public ConceptFactory union(Concept c){
-		this.concept = new UnionConcept(this.concept, c);
-		return this;
-	}
-	
-	public ConceptFactory intersection(Concept c){
-		this.concept = new IntersectionConcept(this.concept, c);
-		return this;
-	}
-	
-	public Concept atleast(int num, Concept c){
-		return new AtLeastConcept(num, c);
-	}
-	
-	public Concept atleast(int num){
-		return new AtLeastConcept(num);
-	}
-	
-	public Concept atmostt(int num, Concept c){
-		return new AtMostConcept(num, c);
-	}
-	
-	public Concept atmost(int num){
-		return new AtMostConcept(num);
-	}*/
 	
 	public Concept build(){
 		if (this.nest > 0)
@@ -157,13 +86,13 @@ public class ConceptFactory {
 		return this;
 	}
 	
-	public ConceptFactory atleast(int num) {
-		this.conceptReciever = new AtLeast(num, checkForComplement());
+	public ConceptFactory atleast(int num, Role r) {
+		this.conceptReciever = new AtLeast(num, r, checkForComplement());
 		return this;
 	}
 	
-	public ConceptFactory atmost(int num) {
-		this.conceptReciever = new AtMost(num, checkForComplement());
+	public ConceptFactory atmost(int num, Role r) {
+		this.conceptReciever = new AtMost(num, r, checkForComplement());
 		return this;
 	}
 	
@@ -201,7 +130,6 @@ public class ConceptFactory {
 			.start().c(A).intersection().c(B).end()
 		.end();//(((∃R.A)⊓(∃R.B))⊓¬(∃R.(A⊓B)))
 		//c = cf1.start().not().exists(R).c(A);//¬(∃R.A)
-		//Concept c = cf1.exists(R, A).intersection(cf2.exists(R, B).build()).build();
 		//c = cf1.not().c(A).union().c(B); //(¬A⊔B)
 		//c = cf1.not().c(A).union().not().c(B); //(¬A⊔¬B)
 		//c = cf1.not().start().c(A).union().not().c(B).end(); //¬(A⊔¬B)
@@ -309,9 +237,11 @@ public class ConceptFactory {
 		private int num = -1;
 		private Concept c = null;
 		private boolean isComplement;
+		private Role r;
 		
-		public AtMost(int num, boolean isComplement) {
+		public AtMost(int num, Role r, boolean isComplement) {
 			 this.num = num;
+			 this.r = r;
 			 this.isComplement = isComplement;
 		}
 		
@@ -323,7 +253,7 @@ public class ConceptFactory {
 		public Concept getConcept() {
 			assert this.c != null;
 			assert this.num != -1;
-			Concept cTemp = new AtMostConcept(this.num, this.c);
+			Concept cTemp = new AtMostConcept(this.num, this.r, this.c);
 			if (this.isComplement)
 				return new NotConcept(cTemp);
 			return cTemp;
@@ -334,10 +264,12 @@ public class ConceptFactory {
 	private static class AtLeast implements ConceptReceiver {
 		private int num = -1;
 		private Concept c = null;
+		private Role r;
 		private boolean isComplement;
 		
-		public AtLeast(int num, boolean isComplement) {
+		public AtLeast(int num, Role r, boolean isComplement) {
 			 this.num = num;
+			 this.r = r;
 			 this.isComplement = isComplement;
 		}
 		
@@ -349,7 +281,7 @@ public class ConceptFactory {
 		public Concept getConcept() {
 			assert this.c != null;
 			assert this.num != -1;
-			Concept c1 = new AtLeastConcept(this.num, this.c);
+			Concept c1 = new AtLeastConcept(this.num, this.r, this.c);
 			if (this.isComplement)
 				return new NotConcept(c1);
 			return c1;
