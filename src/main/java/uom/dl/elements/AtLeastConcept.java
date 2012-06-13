@@ -33,6 +33,11 @@ public class AtLeastConcept implements Concept {
 	}
 	
 	@Override
+	public int hashCode() {
+		return number + role.hashCode() + concept.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof AtLeastConcept))
 			return false;

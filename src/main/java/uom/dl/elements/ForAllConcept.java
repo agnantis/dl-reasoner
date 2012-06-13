@@ -37,6 +37,11 @@ public class ForAllConcept implements Concept {
 	}
 	
 	@Override
+	public int hashCode() {
+		return role.hashCode() + concept.hashCode();
+	}
+	
+	@Override
 	public String toString() {
 		//(∀R.C)
 		if (this.concept instanceof BinaryConcept)

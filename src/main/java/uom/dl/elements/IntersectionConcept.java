@@ -40,6 +40,11 @@ public class IntersectionConcept implements BinaryConcept {
 	}
 	
 	@Override
+	public int hashCode() {
+		return concept1.hashCode() + concept2.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof IntersectionConcept))
 			return false;

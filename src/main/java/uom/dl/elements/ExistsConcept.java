@@ -27,6 +27,11 @@ public class ExistsConcept implements Concept {
 	}
 	
 	@Override
+	public int hashCode() {
+		return role.hashCode() + concept.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ExistsConcept))
 			return false;

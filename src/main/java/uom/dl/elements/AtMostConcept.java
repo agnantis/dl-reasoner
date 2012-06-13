@@ -50,6 +50,11 @@ public class AtMostConcept implements Concept {
 				&& this.getRole().equals(other.getRole())
 				&& this.getConceptA().equals(other.getConceptA());
 	}
+	
+	@Override
+	public int hashCode() {
+		return number + role.hashCode() + concept.hashCode();
+	}
 
 	@Override
 	public boolean isNNF() {

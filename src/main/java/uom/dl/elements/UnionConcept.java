@@ -48,6 +48,11 @@ public class UnionConcept implements BinaryConcept {
 		return this.getConceptA().equals(((UnionConcept)obj).getConceptA()) 
 				&& this.getConceptB().equals(((UnionConcept)obj).getConceptB());
 	}
+	
+	@Override
+	public int hashCode() {
+		return concept1.hashCode() + concept2.hashCode();
+	}
 
 	@Override
 	public boolean isNNF() {

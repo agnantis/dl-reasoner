@@ -17,6 +17,11 @@ public class AtomicRole implements Role {
 	}	
 	
 	@Override
+	public int hashCode() {
+		return this.name.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof AtomicRole))
 			return false;

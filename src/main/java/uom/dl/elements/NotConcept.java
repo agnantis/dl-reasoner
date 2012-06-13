@@ -37,6 +37,11 @@ public class NotConcept implements Concept {
 		
 		return this.getConceptA().equals(((NotConcept)obj).getConceptA());
 	}
+	
+	@Override
+	public int hashCode() {
+		return this.concept.hashCode();
+	}
 
 	@Override
 	public boolean isNNF() {

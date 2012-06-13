@@ -32,6 +32,12 @@ public class AtomicConcept implements Concept {
 		
 		return this.name.equals(((AtomicConcept)obj).getName());
 	}
+	
+	
+	@Override
+	public int hashCode() {
+		return this.name.hashCode();
+	}
 
 	@Override
 	public boolean isNNF() {
