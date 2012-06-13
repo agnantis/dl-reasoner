@@ -130,6 +130,12 @@ public class NNFFactory {
 		c = getNNF(c);
 		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
 		
+		c = new IntersectionConcept(new ExistsConcept(R, A), new IntersectionConcept(new ExistsConcept(R, B), 
+				new NotConcept(new ExistsConcept(R, new IntersectionConcept(A, B))))); 
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		c = getNNF(c);
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
 	}
 
 }

@@ -25,7 +25,18 @@ public class IntersectionConcept implements BinaryConcept {
 	
 	@Override
 	public String toString() {
-		return "(" + this.concept1 + Constants.INTERSECTION_CHAR + this.concept2 + ")";
+		//return "(" + this.concept1 + Constants.INTERSECTION_CHAR + this.concept2 + ")";
+		StringBuffer sb = new StringBuffer();
+		if (this.concept1 instanceof BinaryConcept)
+			sb.append("(" + this.concept1 + ")");
+		else
+			sb.append(this.concept1);
+		sb.append(Constants.INTERSECTION_CHAR);
+		if (this.concept2 instanceof BinaryConcept)
+			sb.append("(" + this.concept2 + ")");
+		else
+			sb.append(this.concept2);
+		return sb.toString();
 	}
 	
 	@Override

@@ -24,7 +24,10 @@ public class NotConcept implements Concept {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
+		if (this.concept instanceof BinaryConcept)
+			return "" + Constants.NOT_CHAR +  "(" + this.concept + ")"; 
 		return "" + Constants.NOT_CHAR + this.concept;
+		
 	}
 	
 	@Override

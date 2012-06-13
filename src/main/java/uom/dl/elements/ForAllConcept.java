@@ -39,7 +39,9 @@ public class ForAllConcept implements Concept {
 	@Override
 	public String toString() {
 		//(∀R.C)
-		return "(" + Constants.FORALL_CHAR + this.role + "." + this.concept + ")";
+		if (this.concept instanceof BinaryConcept)
+			return "" + Constants.FORALL_CHAR + this.role + ".(" + this.concept + ")";
+		return "" + Constants.FORALL_CHAR + this.role + "." + this.concept;
 	}
 
 	@Override

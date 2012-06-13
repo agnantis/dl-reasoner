@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ConceptFactoryTest.class})
+@SuiteClasses({ConceptBuilderTest.class})
 public class AllTests {
 
 }

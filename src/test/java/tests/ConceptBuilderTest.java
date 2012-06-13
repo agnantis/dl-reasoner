@@ -11,19 +11,19 @@ import org.junit.Test;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
-import uom.dl.elements.ConceptFactory;
+import uom.dl.elements.ConceptBuilder;
 import uom.dl.elements.Role;
 
-public class ConceptFactoryTest {
+public class ConceptBuilderTest {
 	Concept A = new AtomicConcept("A");
 	Concept B = new AtomicConcept("B");
 	Role R = new AtomicRole("R");
 	
-	ConceptFactory factory;
+	ConceptBuilder factory;
 	
 	@Before
 	public void setUp() {
-		factory = new ConceptFactory();
+		factory = new ConceptBuilder();
 		A = new AtomicConcept("A");
 		B = new AtomicConcept("B");
 		R = new AtomicRole("R");

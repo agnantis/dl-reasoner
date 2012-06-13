@@ -39,7 +39,9 @@ public class ExistsConcept implements Concept {
 	@Override
 	public String toString() {
 		//(∃R.C)
-		return "(" + Constants.EXISTS_CHAR + this.role + "." + this.concept + ")";
+		if (this.concept instanceof BinaryConcept)
+			return "" + Constants.EXISTS_CHAR + this.role + ".(" + this.concept + ")";
+		return "" + Constants.EXISTS_CHAR + this.role + "." + this.concept;
 	}
 
 	@Override

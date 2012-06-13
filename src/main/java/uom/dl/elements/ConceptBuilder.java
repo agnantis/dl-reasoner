@@ -1,18 +1,18 @@
 package uom.dl.elements;
 
 
-public class ConceptFactory {
+public class ConceptBuilder {
 	Concept concept;
 	private int nest;
-	private ConceptFactory parent;
+	private ConceptBuilder parent;
 	private ConceptReceiver conceptReciever;
 	private boolean isComplement = false;
 	
-	public ConceptFactory(ConceptFactory parent) {
+	public ConceptBuilder(ConceptBuilder parent) {
 		this.parent = parent;
 	}
 	
-	public ConceptFactory() {
+	public ConceptBuilder() {
 		this(null);
 	}
 	
@@ -22,13 +22,13 @@ public class ConceptFactory {
 		return this.concept;
 	}
 	
-	public ConceptFactory start() {
+	public ConceptBuilder start() {
 		//++this.nest;
-		ConceptFactory inner = new ConceptFactory(this);
+		ConceptBuilder inner = new ConceptBuilder(this);
 		return inner;
 	}
 	
-	public ConceptFactory end() {
+	public ConceptBuilder end() {
 		//--this.nest;
 		//if (this.nest < 0)
 		//	throw new RuntimeException("Wrong number of parenthesis. Too many closings");
@@ -37,7 +37,7 @@ public class ConceptFactory {
 		return this.parent;
 	}
 	
-	public ConceptFactory not() {
+	public ConceptBuilder not() {
 		this.isComplement = !this.isComplement; //in case of a -(-A)
 		//this.conceptReciever = new Not();	
 		return this;
@@ -53,7 +53,7 @@ public class ConceptFactory {
 		
 	}
 	
-	public ConceptFactory union() {
+	public ConceptBuilder union() {
 		checkForComplement();
 		this.conceptReciever = new Union(this.concept);
 		return this;
@@ -69,34 +69,34 @@ public class ConceptFactory {
 		return false;
 	}
 	
-	public ConceptFactory intersection() {
+	public ConceptBuilder intersection() {
 		checkForComplement();
 		this.conceptReciever = new Intersection(this.concept);
 		return this;
 	}
 	
-	public ConceptFactory forall(Role r) {
+	public ConceptBuilder forall(Role r) {
 		this.conceptReciever = new ForAll(r, checkForComplement());
 		return this;
 	}
 	
-	public ConceptFactory exists(Role r) {
+	public ConceptBuilder exists(Role r) {
 		
 		this.conceptReciever = new Exists(r, checkForComplement());
 		return this;
 	}
 	
-	public ConceptFactory atleast(int num, Role r) {
+	public ConceptBuilder atleast(int num, Role r) {
 		this.conceptReciever = new AtLeast(num, r, checkForComplement());
 		return this;
 	}
 	
-	public ConceptFactory atmost(int num, Role r) {
+	public ConceptBuilder atmost(int num, Role r) {
 		this.conceptReciever = new AtMost(num, r, checkForComplement());
 		return this;
 	}
 	
-	public ConceptFactory c(Concept c) {
+	public ConceptBuilder c(Concept c) {
 		if (this.isComplement) {
 			c = new NotConcept(c);
 			this.isComplement = false;
@@ -113,14 +113,14 @@ public class ConceptFactory {
 	}
 	
 	public static void main(String[] args) {
-		ConceptFactory cf1 = new ConceptFactory();
-		ConceptFactory cf2 = new ConceptFactory();
+		ConceptBuilder cf1 = new ConceptBuilder();
+		ConceptBuilder cf2 = new ConceptBuilder();
 		
 		Concept A = new AtomicConcept("A");
 		Concept B = new AtomicConcept("B");
 		Role R = new AtomicRole("R");
 		
-		ConceptFactory c;
+		ConceptBuilder c;
 		
 		c = cf1.start().exists(R).c(A).end()
 		.intersection()
