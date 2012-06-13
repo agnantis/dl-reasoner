@@ -1,5 +1,7 @@
 package uom.dl.elements;
 
 public interface Concept extends DLElement {
-	//public boolean isAtomic();
+	public Concept getConceptA();
+	public boolean isNNF();
+	public void toNNF();
 }

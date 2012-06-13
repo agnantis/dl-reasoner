@@ -1,6 +1,6 @@
 package tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
 import org.junit.Before;
@@ -10,7 +10,6 @@ import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
 import uom.dl.elements.ConceptFactory;
-import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.Role;
 
 public class ConceptFactoryTest {
