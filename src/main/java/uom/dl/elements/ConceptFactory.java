@@ -116,9 +116,9 @@ public class ConceptFactory {
 		ConceptFactory cf1 = new ConceptFactory();
 		ConceptFactory cf2 = new ConceptFactory();
 		
-		Concept A = new BaseConcept("A");
-		Concept B = new BaseConcept("B");
-		Role R = new BaseRole("R");
+		Concept A = new AtomicConcept("A");
+		Concept B = new AtomicConcept("B");
+		Role R = new AtomicRole("R");
 		
 		ConceptFactory c;
 		

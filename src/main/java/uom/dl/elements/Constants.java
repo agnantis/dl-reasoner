@@ -11,6 +11,6 @@ public class Constants {
 	public static final char TOPCONCEPT_CHAR = '⊤';
 	public static final char BOTTOMCONCEPT_CHAR = '⊥';
 
-	public static final Concept TOP_CONCEPT = new BaseConcept(TOPCONCEPT_CHAR);
-	public static final Concept BOTTOM_CONCEPT = new BaseConcept(BOTTOMCONCEPT_CHAR);
+	public static final Concept TOP_CONCEPT = new AtomicConcept(TOPCONCEPT_CHAR);
+	public static final Concept BOTTOM_CONCEPT = new AtomicConcept(BOTTOMCONCEPT_CHAR);
 }

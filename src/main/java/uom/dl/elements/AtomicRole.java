@@ -1,9 +1,9 @@
 package uom.dl.elements;
 
-public class BaseRole implements Role {
+public class AtomicRole implements Role {
 	private String name;
 
-	public BaseRole(String name) {
+	public AtomicRole(String name) {
 		this.name = name;
 	}
 	

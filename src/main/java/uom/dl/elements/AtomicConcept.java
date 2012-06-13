@@ -1,13 +1,13 @@
 package uom.dl.elements;
 
-public class BaseConcept implements Concept {
+public class AtomicConcept implements Concept {
 	private String name;
 
-	public BaseConcept(char name) {
+	public AtomicConcept(char name) {
 		this(name + "");
 	}
 	
-	public BaseConcept(String name) {
+	public AtomicConcept(String name) {
 		this.name = name;
 	}
 	

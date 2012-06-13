@@ -6,26 +6,26 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import uom.dl.elements.BaseConcept;
-import uom.dl.elements.BaseRole;
+import uom.dl.elements.AtomicConcept;
+import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
 import uom.dl.elements.ConceptFactory;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.Role;
 
 public class ConceptFactoryTest {
-	Concept A = new BaseConcept("A");
-	Concept B = new BaseConcept("B");
-	Role R = new BaseRole("R");
+	Concept A = new AtomicConcept("A");
+	Concept B = new AtomicConcept("B");
+	Role R = new AtomicRole("R");
 	
 	ConceptFactory factory;
 	
 	@Before
 	public void setUp() {
 		factory = new ConceptFactory();
-		A = new BaseConcept("A");
-		B = new BaseConcept("B");
-		R = new BaseRole("R");
+		A = new AtomicConcept("A");
+		B = new AtomicConcept("B");
+		R = new AtomicRole("R");
 	}
 	
 	@After
