@@ -125,5 +125,4 @@ public class NNFFactoryTest {
 		//c_old = NNFFactory.getNNF(c_old);
 		//assertEquals(c_old, c_new);		
 	}
-
 }

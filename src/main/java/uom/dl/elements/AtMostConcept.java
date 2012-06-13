@@ -1,5 +1,7 @@
 package uom.dl.elements;
 
+import uom.dl.utils.NNFFactory;
+
 public class AtMostConcept implements Concept {
 	private final int number;
 	private final Concept concept;
@@ -10,6 +12,7 @@ public class AtMostConcept implements Concept {
 		this.number = number;
 		this.concept = concept;
 		this.role = role;
+		this.isNNF = concept.isNNF();
 	}
 	
 	public AtMostConcept(int number, Role role) {
@@ -51,9 +54,10 @@ public class AtMostConcept implements Concept {
 	}
 
 	@Override
-	public void toNNF() {
-		// TODO Auto-generated method stub
-		
+	public Concept toNNF() {
+		if (isNNF())
+			return this;
+		return NNFFactory.getNNF(this);				
 	}
 	
 }

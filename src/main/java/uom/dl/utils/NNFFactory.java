@@ -3,16 +3,21 @@ package uom.dl.utils;
 import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
+import uom.dl.elements.AtomicRole;
 import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
+import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 
 public class NNFFactory {
 	public static Concept getNNF(Concept c) {
+		if (c.isNNF())
+			return c;
+		
 		if (c instanceof BinaryConcept)
 			return getNNF((BinaryConcept)c);
 		
@@ -20,29 +25,44 @@ public class NNFFactory {
 		if (c instanceof NotConcept) {
 			Concept child = c.getConceptA();
 			if (child instanceof UnionConcept){
-				Concept A = getNNF(((UnionConcept)child).getConceptA());
-				Concept B = getNNF(((UnionConcept)child).getConceptB());
-				Concept newC = new IntersectionConcept(new NotConcept(A), new NotConcept(B));
+				UnionConcept uc = (UnionConcept) child;
+				Concept tmp1 = new NotConcept(uc.getConceptA());
+				Concept tmp2 = new NotConcept(uc.getConceptB());
+						
+				Concept A = getNNF(tmp1);
+				Concept B = getNNF(tmp2);
+				Concept newC = new IntersectionConcept(A, B);
 				return newC;
 			}
 			if (child instanceof IntersectionConcept){
-				Concept A = getNNF(((IntersectionConcept)child).getConceptA());
-				Concept B = getNNF(((IntersectionConcept)child).getConceptB());
-				Concept newC = new UnionConcept(new NotConcept(A), new NotConcept(B));
+				IntersectionConcept uc = (IntersectionConcept) child;
+				Concept tmp1 = new NotConcept(uc.getConceptA());
+				Concept tmp2 = new NotConcept(uc.getConceptB());
+						
+				Concept A = getNNF(tmp1);
+				Concept B = getNNF(tmp2);
+				Concept newC = new UnionConcept(A, B);
 				return newC;
 			}
 			if (child instanceof ExistsConcept) {
-				Concept A = getNNF(((ExistsConcept)child).getConceptA());
-				Concept newC = new ForAllConcept(((ExistsConcept)child).getRole(), new NotConcept(A));
+				ExistsConcept ec = (ExistsConcept) child;
+				Concept tmp = new NotConcept(ec.getConceptA());
+				
+				Concept nnfConcept = getNNF(tmp);
+				Concept newC = new ForAllConcept(ec.getRole(), nnfConcept);
 				return newC;
 			}
 			if (child instanceof ForAllConcept) {
-				Concept A = getNNF(((ForAllConcept)child).getConceptA());
-				Concept newC = new ExistsConcept(((ForAllConcept)child).getRole(), new NotConcept(A));
+				ForAllConcept fac = (ForAllConcept) child;
+				Concept tmp = new NotConcept(fac.getConceptA());
+				
+				Concept nnfConcept = getNNF(tmp);
+				Concept newC = new ExistsConcept(fac.getRole(), nnfConcept);
 				return newC;
 			}
 			if (child instanceof AtMostConcept) {
 				AtMostConcept amc = (AtMostConcept) child;
+				
 				Concept A = getNNF(amc.getConceptA());
 				Concept newC = new AtLeastConcept(amc.getCardinality()+1, amc.getRole(), A);
 				return newC;
@@ -56,8 +76,7 @@ public class NNFFactory {
 				return newC;
 			}
 			if (child instanceof NotConcept) {
-				//not not
-				return child.getConceptA(); 
+				return getNNF(child.getConceptA()); 
 			}
 		}
 			
@@ -82,12 +101,35 @@ public class NNFFactory {
 	}
 	
 	public static void main(String[] args) {
-		AtomicConcept A = new AtomicConcept("A");
-		AtomicConcept B = new AtomicConcept("B");
-		Concept c = new UnionConcept(A, B);
-		System.out.println("Normal:\t" + c.toString());
+		Concept A = new AtomicConcept("A");
+		Concept B = new AtomicConcept("B");
+		Role R = new AtomicRole("R");
+		
+		Concept c = new NotConcept(new NotConcept(new NotConcept(new NotConcept(new IntersectionConcept(A,B)))));
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
 		c = getNNF(c);
-		System.out.println("NNF:\t" + c.toString());
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
+		c = new NotConcept(new ForAllConcept(R, new NotConcept(new IntersectionConcept(A, new NotConcept(new IntersectionConcept(B, new NotConcept(A)))))));
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		c = getNNF(c);
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
+		c = new NotConcept(new ExistsConcept(R, new NotConcept(new IntersectionConcept(A, B))));
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		c = getNNF(c);
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
+		c = new NotConcept(new ExistsConcept(R, new NotConcept(new NotConcept(new IntersectionConcept(A, B)))));
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		c = getNNF(c);
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
+		c = new NotConcept(new AtMostConcept(3, R, new NotConcept(new IntersectionConcept(A, new IntersectionConcept(B, new NotConcept(A))))));
+		System.out.println("Normal:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		c = getNNF(c);
+		System.out.println("NNF:\t" + c.toString() + ". Is in NNF: " + (c.isNNF() ? "Yes" : "No"));
+		
 	}
 
 }

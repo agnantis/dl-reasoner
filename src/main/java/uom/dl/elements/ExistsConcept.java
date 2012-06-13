@@ -1,5 +1,7 @@
 package uom.dl.elements;
 
+import uom.dl.utils.NNFFactory;
+
 public class ExistsConcept implements Concept {
 	private Role role;
 	private Concept concept;
@@ -8,6 +10,7 @@ public class ExistsConcept implements Concept {
 	public ExistsConcept(Role role, Concept concept) {
 		this.role = role;
 		this.concept = concept;
+		this.isNNF = concept.isNNF();
 	}
 	
 	public ExistsConcept(Role role) {
@@ -45,9 +48,10 @@ public class ExistsConcept implements Concept {
 	}
 
 	@Override
-	public void toNNF() {
-		// TODO Auto-generated method stub
-		
+	public Concept toNNF() {
+		if (isNNF())
+			return this;
+		return NNFFactory.getNNF(this);		
 	}
 
 }

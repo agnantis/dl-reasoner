@@ -2,13 +2,18 @@ package uom.dl.elements;
 
 import uom.dl.utils.NNFFactory;
 
+
 public class NotConcept implements Concept {
 	
-	private Concept concept;
-	private boolean isNNF = false;
+	private final Concept concept;
+	private final boolean isNNF;
 	
 	public NotConcept(Concept concept){
 		this.concept = concept;
+		if (concept instanceof AtomicConcept)
+			this.isNNF = true;
+		else
+			this.isNNF = false;
 	}
 	
 	@Override
@@ -36,12 +41,10 @@ public class NotConcept implements Concept {
 	}
 
 	@Override
-	public void toNNF() {
+	public Concept toNNF() {
 		if (isNNF())
-			return;
-		
-		this.concept = NNFFactory.getNNF(this.concept);
-		this.isNNF = true;		
+			return this;
+		return NNFFactory.getNNF(this.concept);
 	}
 
 }

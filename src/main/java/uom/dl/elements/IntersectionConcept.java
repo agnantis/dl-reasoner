@@ -1,13 +1,16 @@
 package uom.dl.elements;
 
+import uom.dl.utils.NNFFactory;
+
 public class IntersectionConcept implements BinaryConcept {
 	private Concept concept1;
 	private Concept concept2;
-	private boolean isNNF = false;
+	private boolean isNNF;
 
 	public IntersectionConcept(Concept c, Concept d) {
 		this.concept1 = c;
 		this.concept2 = d;
+		this.isNNF = c.isNNF() && d.isNNF();
 	}
 
 	@Override
@@ -40,9 +43,10 @@ public class IntersectionConcept implements BinaryConcept {
 	}
 
 	@Override
-	public void toNNF() {
-		// TODO Auto-generated method stub
-		
+	public Concept toNNF() {
+		if (isNNF())
+			return this;
+		return NNFFactory.getNNF(this);		
 	}
 
 }

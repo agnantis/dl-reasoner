@@ -39,7 +39,7 @@ public class AtomicConcept implements Concept {
 	}
 
 	@Override
-	public void toNNF() {
-		return;		
+	public Concept toNNF() {
+		return this;		
 	}
 }
