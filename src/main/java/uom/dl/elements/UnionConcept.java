@@ -66,4 +66,14 @@ public class UnionConcept implements BinaryConcept {
 		return NNFFactory.getNNF(this);		
 	}
 
+	@Override
+	public boolean isNegation() {
+		return false;
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return false;
+	}
+
 }

@@ -66,4 +66,14 @@ public class AtLeastConcept implements Concept {
 			return this;
 		return NNFFactory.getNNF(this);				
 	}
+
+	@Override
+	public boolean isNegation() {
+		return false;
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return false;
+	}
 }

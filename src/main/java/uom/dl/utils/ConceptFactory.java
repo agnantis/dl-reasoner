@@ -1,10 +1,8 @@
 package uom.dl.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import uom.dl.elements.AtomicConcept;
@@ -12,6 +10,7 @@ import uom.dl.elements.Concept;
 import uom.dl.elements.ConceptBuilder;
 import uom.dl.elements.Constants;
 import uom.dl.elements.IntersectionConcept;
+import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
 
 public class ConceptFactory {
@@ -75,6 +74,17 @@ public class ConceptFactory {
 		return conceptList;
 	}
 	
+	public static boolean isComplement(Concept A, Concept B) {
+		if (A.isAtomic() && B.isAtomic()) {
+			if (A.isNegation())
+				return A.getConceptA().equals(B);
+			if (B.isNegation())
+				return B.getConceptA().equals(A);
+		}
+
+		return false;
+	}
+	
 	public static void main(String[] main) {
 		ConceptBuilder factory = new ConceptBuilder();
 		AtomicConcept A = new AtomicConcept("A");
@@ -96,6 +106,11 @@ public class ConceptFactory {
 		System.out.println("\n" +concept.toString());
 		for (Concept c : intersectionConcepts)
 			System.out.println("\t" + c);
+		
+		A = new AtomicConcept('A');
+		Concept notA = new NotConcept(A);
+		
+		System.out.println("Is complement: " + isComplement(A, notA));
 	}
 
 }

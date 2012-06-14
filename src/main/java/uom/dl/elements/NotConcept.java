@@ -55,4 +55,14 @@ public class NotConcept implements Concept {
 		return NNFFactory.getNNF(this.concept);
 	}
 
+	@Override
+	public boolean isNegation() {
+		return true;
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return this.concept.isAtomic();
+	}
+
 }

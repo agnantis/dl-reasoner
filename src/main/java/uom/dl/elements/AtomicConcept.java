@@ -48,4 +48,14 @@ public class AtomicConcept implements Concept {
 	public Concept toNNF() {
 		return this;		
 	}
+
+	@Override
+	public boolean isNegation() {
+		return false;
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return true;
+	}
 }
