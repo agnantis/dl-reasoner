@@ -1,6 +1,8 @@
 package uom.dl.reasoner;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -89,12 +91,17 @@ public class TableauxTree {
 		Node node = new Node(null);
 		try {
 			node.add(c);
+			runTableauxNode(node);
 		} catch (ClashException e) {
 			log.error("This should not happen to the parent node: " + e.getMessage());
 		}
+		return false;
+	}
+	
+	public static boolean runTableauxNode(Node node) {
 		while (!node.isEmpty()) {
 			boolean clash = false;
-			c = node.pop();
+			Concept c = node.pop();
 			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(c);
 			//execute intersection rule
 			if (concepts.size() > 1) {
@@ -111,11 +118,17 @@ public class TableauxTree {
 			//execute union rule
 			while (!node.isEmpty()) {
 				c = node.pop();
+				if (c.isAtomic()) { continue; }
 				concepts = ConceptFactory.getUnionConcepts(c);
 				Node branch = new Node(node);
 				if (concepts.size() > 1) {
 					for (Iterator<Concept> it = concepts.iterator(); it.hasNext();) {
-						branch.add(it.next());
+						try {
+							branch.add(it.next());
+						} catch (ClashException e) {
+							log.debug(e.getMessage());
+							clash = true;
+						}
 					}
 				}
 			}
@@ -124,7 +137,69 @@ public class TableauxTree {
 		
 		return false;
 	}
-
 	
-
+	private static Node execIntersectionRule(Node node) {
+		//if (node.isEmpty())
+		//	return null;
+		Concept c = node.pop();
+		boolean foundNonAtomicConcept = !c.isAtomic();
+		while (!foundNonAtomicConcept) {
+			if (!node.isEmpty())
+				c = node.pop();
+			else
+				break;
+			foundNonAtomicConcept = !c.isAtomic();
+		} 
+		if (!foundNonAtomicConcept)
+			return null;
+		
+		Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(c);
+		//execute intersection rule
+		if (concepts.size() > 1) {
+			for (Iterator<Concept> it = concepts.iterator(); it.hasNext();) {
+				try {
+					node.add(it.next());
+				} catch (ClashException e) {
+					log.debug(e.getMessage());
+					return null;
+				}
+			}
+		}
+		return node;
+	}
+	
+	private static List<Node> execUnionRule(Node node) {
+		//if (node.isEmpty())
+		//	return;
+		
+		List<Node> children = new ArrayList<>();
+		Concept c = node.pop();
+		boolean foundNonAtomicConcept = !c.isAtomic();
+		while (!foundNonAtomicConcept) {
+			if (!node.isEmpty())
+				c = node.pop();
+			else
+				break;
+			foundNonAtomicConcept = !c.isAtomic();
+		} 
+		if (!foundNonAtomicConcept)
+			return null;
+		
+		Set<Concept> concepts = ConceptFactory.getUnionConcepts(c);
+		if (concepts.size() > 1) {
+			for (Iterator<Concept> it = concepts.iterator(); it.hasNext();) {
+				try {
+					Node branch = new Node(node);
+					branch.add(it.next());
+					//no clash happened -> added to the children list
+					children.add(branch);
+				} catch (ClashException e) {
+					log.debug(e.getMessage());
+				}
+			}
+		}
+		//add parent also
+		children.add(node);
+		return children;		
+	}
 }

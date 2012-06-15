@@ -12,11 +12,13 @@ import uom.dl.utils.ConceptFactory;
 
 public class Node {
 	private Node parent;
+	private List<Node> children = new ArrayList<>(2);
 	private List<Concept> values = new ArrayList<>();
 	private Set<Concept> atomics = new HashSet<>();
 	
 	public Node(Node parent) {
 		this.parent = parent;
+		this.parent.addChildrenNode(this);
 	}
 	
 	public boolean isEmpty() {
@@ -25,6 +27,10 @@ public class Node {
 	
 	public Concept pop() {
 		return values.get(0);		
+	}
+	
+	public void addChildrenNode(Node node){
+		this.children.add(node);
 	}
 	
 	public boolean add(Concept c) throws ClashException {
