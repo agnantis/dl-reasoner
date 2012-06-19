@@ -3,6 +3,7 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
+import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
 import uom.dl.utils.ConceptFactory;
 
@@ -52,7 +53,11 @@ public class TTree {
 				return true;
 			}
 		}
-		//there is no child or each child contains a clash
+		
+		//there is no child 
+		if (this.getChildren().isEmpty())
+			return isExpandable();
+		//or each child contains a clash
 		return false;
 	}
 	
@@ -106,5 +111,75 @@ public class TTree {
 		}
 		this.addChild(node, !clashFound);
 		return true;
+	}
+	
+	public String toString(){
+		return this.print("");
+	}
+	
+	//└──├──│
+	public String print(String prefix) {
+		StringBuffer s = new StringBuffer();
+		//s.append(prefix);
+		if (!this.isExpandable())
+			s.append("*");
+		s.append(this.getValue().toString());
+		s.append("\n");
+		//for (TTree child : this.getChildren()) {
+		for (int i = 0; i < this.getChildren().size()-1; ++i) {
+			TTree child = this.getChildren().get(i);
+			s.append(prefix);
+			s.append("├── ");
+			s.append(child.print(prefix+"|   ")); 
+		}
+		if (!this.getChildren().isEmpty()) {
+			TTree child = this.getChildren().get(this.getChildren().size()-1);
+			s.append(prefix);
+			s.append("└── ");
+			s.append(child.print(prefix+"    "));
+		}
+		return s.toString();
+	}
+	
+	public static void main(String[] args) {
+		/*
+		AtomicConcept A = new AtomicConcept("A");
+		AtomicConcept B = new AtomicConcept("B");
+		AtomicConcept B1 = new AtomicConcept("B1");
+		AtomicConcept B2 = new AtomicConcept("B2");
+		AtomicConcept B3 = new AtomicConcept("B3");
+		AtomicConcept C = new AtomicConcept("C");
+		AtomicConcept D = new AtomicConcept("D");
+		AtomicConcept D1 = new AtomicConcept("D1");
+		AtomicConcept D2 = new AtomicConcept("D2");
+		AtomicConcept D3 = new AtomicConcept("D3");
+		
+		TTree nodeA = new TTree(A);
+		TTree nodeB = new TTree(B);
+		TTree nodeB1 = new TTree(B1);
+		TTree nodeB2 = new TTree(B2);
+		TTree nodeB3 = new TTree(B3);
+		TTree nodeC = new TTree(C);
+		TTree nodeD = new TTree(D);
+		TTree nodeD1 = new TTree(D1);
+		TTree nodeD2 = new TTree(D2);
+		TTree nodeD3 = new TTree(D3);
+		
+		nodeA.add(nodeB);
+		nodeB.add(nodeB1);
+		nodeB.add(nodeB2);
+		nodeB.add(nodeB3);
+		nodeA.add(nodeC);
+		nodeC.add(nodeD);
+		nodeD.add(nodeD1);
+		nodeD.add(nodeD2);
+		nodeD.add(nodeD3);
+		
+		System.out.println(nodeA);
+		*/
+		
+		
+		
+		
 	}
 }

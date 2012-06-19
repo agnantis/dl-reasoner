@@ -1,6 +1,8 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -8,7 +10,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
+import uom.dl.elements.IntersectionConcept;
+import uom.dl.elements.NotConcept;
+import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
 
 public class TableauxTree {
@@ -144,24 +150,36 @@ public class TableauxTree {
 		frontier.add(tree);
 		while (!frontier.isEmpty()) {
 			TTree current = frontier.remove(0);
-			//execute intersection rule
-			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue());
-			if (concepts.size() > 1) {
-				current.append(new ArrayList<>(concepts), TTree.ADD_IN_PARALLEL);
+			//An atomic concept cannot be expanded. Add
+			if (!current.getValue().isAtomic()) {
+				//execute intersection rule
+				Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue());
+				if (concepts.size() > 1) {
+					current.append(new ArrayList<>(concepts), TTree.ADD_IN_SEQUENCE);
+				}
+				//execute union rule
+				concepts = ConceptFactory.getUnionConcepts(current.getValue());
+				if (concepts.size() > 1) {
+					current.append(new ArrayList<>(concepts), TTree.ADD_IN_PARALLEL);
+				}
+				//check if a model exists
+				if (!current.modelExists()) {
+					log.info("No model exists. Concept is unsatisfiable: " + concept);
+					System.out.println("Whole Model:");
+					System.out.println(tree);
+					System.out.println("Current Model:");
+					System.out.println(current);
+					return false;
+				}
 			}
-			//execute union rule
-			concepts = ConceptFactory.getUnionConcepts(current.getValue());
-			if (concepts.size() > 1) {
-				current.append(new ArrayList<>(concepts), TTree.ADD_IN_SEQUENCE);
-			}
-			//check if a model exists
-			if (!current.modelExists()) {
-				log.info("No model exists. Concept is unsatisfiable: " + concept);
-				return false;
-			}
+			
+			//add its children
 			if (!current.getChildren().isEmpty())
 				frontier.addAll(current.getChildren());
-		}				
+			
+		}		
+		System.out.println("The Model:");
+		System.out.println(tree);
 		return true;
 	}
 	
@@ -229,4 +247,15 @@ public class TableauxTree {
 		children.add(node);
 		return children;		
 	}
+	
+	public static void main(String[] args) {
+		AtomicConcept A = new AtomicConcept("A");
+		AtomicConcept B = new AtomicConcept("B");
+		AtomicConcept C = new AtomicConcept("C");
+		AtomicConcept D = new AtomicConcept("D");
+		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
+		TableauxTree.runTableauxForConcept(ConceptFactory.intersectionOfConcepts(conSet));
+	}
+	
+	
 }
