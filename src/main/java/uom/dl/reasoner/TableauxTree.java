@@ -1,5 +1,6 @@
 package uom.dl.reasoner;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
+import uom.dl.utils.TreeVisualizer;
 
 public class TableauxTree {
 	private static Logger log = LoggerFactory.getLogger(TableauxTree.class);
@@ -166,9 +168,15 @@ public class TableauxTree {
 				if (!current.modelExists()) {
 					log.info("No model exists. Concept is unsatisfiable: " + concept);
 					System.out.println("Whole Model:");
-					System.out.println(tree);
+					System.out.println(tree.print());
+					System.out.println("--------------------");
+					TreeVisualizer visual = new TreeVisualizer(tree);
+					System.out.println(visual.toDotFormat());
+					visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));					
+					visual.showGraph();
+					System.out.println("--------------------");
 					System.out.println("Current Model:");
-					System.out.println(current);
+					System.out.println(current.print());
 					return false;
 				}
 			}
@@ -179,7 +187,13 @@ public class TableauxTree {
 			
 		}		
 		System.out.println("The Model:");
-		System.out.println(tree);
+		System.out.println(tree.print());
+		System.out.println("--------------------");
+		TreeVisualizer visual = new TreeVisualizer(tree);
+		System.out.println(visual.toDotFormat());
+		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));
+		visual.showGraph();
+		System.out.println("--------------------");
 		return true;
 	}
 	
@@ -253,7 +267,20 @@ public class TableauxTree {
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept C = new AtomicConcept("C");
 		AtomicConcept D = new AtomicConcept("D");
-		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
+		//HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
+		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(
+				(Concept)new IntersectionConcept(A, B), 
+				new UnionConcept(new NotConcept(A), C), 
+				new UnionConcept(new NotConcept(C), new NotConcept(B))
+			));
+		/*
+		conSet = new HashSet<>(Arrays.asList(
+				(Concept)new UnionConcept(D, A), 
+				new UnionConcept(
+						new IntersectionConcept(A, B),
+						new UnionConcept(D, A)) 
+			));
+		*/
 		TableauxTree.runTableauxForConcept(ConceptFactory.intersectionOfConcepts(conSet));
 	}
 	
