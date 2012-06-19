@@ -138,6 +138,33 @@ public class TableauxTree {
 		return false;
 	}
 	
+	public static boolean runTableauxForConcept(Concept concept) {
+		List<TTree> frontier = new ArrayList<>();
+		TTree tree = new TTree(concept);
+		frontier.add(tree);
+		while (!frontier.isEmpty()) {
+			TTree current = frontier.remove(0);
+			//execute intersection rule
+			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue());
+			if (concepts.size() > 1) {
+				current.append(new ArrayList<>(concepts), TTree.ADD_IN_PARALLEL);
+			}
+			//execute union rule
+			concepts = ConceptFactory.getUnionConcepts(current.getValue());
+			if (concepts.size() > 1) {
+				current.append(new ArrayList<>(concepts), TTree.ADD_IN_SEQUENCE);
+			}
+			//check if a model exists
+			if (!current.modelExists()) {
+				log.info("No model exists. Concept is unsatisfiable: " + concept);
+				return false;
+			}
+			if (!current.getChildren().isEmpty())
+				frontier.addAll(current.getChildren());
+		}				
+		return true;
+	}
+	
 	private static Node execIntersectionRule(Node node) {
 		//if (node.isEmpty())
 		//	return null;
