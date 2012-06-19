@@ -3,11 +3,8 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
-import uom.dl.elements.NotConcept;
 import uom.dl.utils.ConceptFactory;
-import uom.dl.utils.NNFFactory;
 
 public class TTree {
 	public static final boolean ADD_IN_PARALLEL = true;
