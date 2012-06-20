@@ -36,6 +36,30 @@ public class AtomicRole implements Role {
 
 	@Override
 	public boolean isComplement(DLElement other) {
+		if (other instanceof NotConcept) {
+			Concept that = ((NotConcept)other).getConceptA();
+			return this.equals(that);
+		}			
+		return false;
+	}
+
+	@Override
+	public Concept getConceptA() {
+		return this;
+	}
+
+	@Override
+	public boolean isNNF() {
+		return true;
+	}
+
+	@Override
+	public Concept toNNF() {
+		return this;
+	}
+
+	@Override
+	public boolean isNegation() {
 		return false;
 	}
 	

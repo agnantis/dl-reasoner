@@ -44,17 +44,7 @@ public class TableauxAlgorithmWithAssertions {
 				}
 				//check if a model exists
 				if (!current.modelExists()) {
-					log.info("No model exists. Concept is unsatisfiable: " + conceptAssertion);
-					System.out.println("Whole Model:");
-					System.out.println(tree.print());
-					System.out.println("--------------------");
-					TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(tree);
-					System.out.println(visual.toDotFormat());
-					visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));					
-					visual.showGraph();
-					System.out.println("--------------------");
-					System.out.println("Current Model:");
-					System.out.println(current.print());
+					printModel(tree, true);
 					return false;
 				}
 			}
@@ -63,17 +53,28 @@ public class TableauxAlgorithmWithAssertions {
 			if (!current.getChildren().isEmpty())
 				frontier.addAll(current.getChildren());
 			
-		}		
-		System.out.println("The Model:");
+		}	
+		printModel(tree, true);
+		return true;
+	}
+
+	
+	private static void 
+
+	private static void printModel(TTree<ConceptAssertion> tree, boolean showModelImage) {
+		log.info("No model exists. Concept is unsatisfiable: " + conceptAssertion);
+		System.out.println("Whole Model:");
 		System.out.println(tree.print());
 		System.out.println("--------------------");
 		TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(tree);
 		System.out.println(visual.toDotFormat());
-		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));
+		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));					
 		visual.showGraph();
 		System.out.println("--------------------");
-		return true;
+		System.out.println("Current Model:");
+		System.out.println(current.print());
 	}
+	
 		
 	public static void main(String[] args) {
 		AtomicConcept A = new AtomicConcept("A");

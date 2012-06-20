@@ -1,5 +1,10 @@
 package uom.dl.reasoner;
 
-public interface Assertion {
+import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
+import uom.dl.elements.Individual;
 
+public interface Assertion extends DLElement {
+	public Concept getElement();
+	public Individual getIndividualA();
 }

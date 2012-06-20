@@ -4,7 +4,7 @@ import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 
-public class ConceptAssertion implements Assertion, DLElement {
+public class ConceptAssertion implements Assertion {
 	private final Concept concept;
 	private final Individual ind;
 	
@@ -13,11 +13,13 @@ public class ConceptAssertion implements Assertion, DLElement {
 		this.ind = ind;
 	}
 
-	public Concept getConcept() {
+	@Override
+	public Concept getElement() {
 		return concept;
 	}
 
-	public Individual getIndividual() {
+	@Override
+	public Individual getIndividualA() {
 		return ind;
 	}
 
