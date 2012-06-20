@@ -42,25 +42,5 @@ public class AtomicRole implements Role {
 		}			
 		return false;
 	}
-
-	@Override
-	public Concept getConceptA() {
-		return this;
-	}
-
-	@Override
-	public boolean isNNF() {
-		return true;
-	}
-
-	@Override
-	public Concept toNNF() {
-		return this;
-	}
-
-	@Override
-	public boolean isNegation() {
-		return false;
-	}
 	
 }

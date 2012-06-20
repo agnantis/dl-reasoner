@@ -3,9 +3,7 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import uom.dl.elements.DLElement;
-
-public class TTree<T extends DLElement> {
+public class TTree<T extends Assertion> {
 	public static final boolean ADD_IN_PARALLEL = true;
 	public static final boolean ADD_IN_SEQUENCE = !ADD_IN_PARALLEL;
 	

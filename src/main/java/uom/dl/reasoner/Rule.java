@@ -1,5 +1,5 @@
 package uom.dl.reasoner;
 
 public interface Rule {
-	public boolean execute();
+	public boolean execute(TTree<Assertion> model, Assertion assertion);
 }

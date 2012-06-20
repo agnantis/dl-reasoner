@@ -1,12 +1,11 @@
 package uom.dl.reasoner;
 
-import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
 
 public class RoleAssertion implements BinaryAssertion {
-	private final Concept role;
+	private final Role role;
 	private final Individual indA;
 	private final Individual indB;
 
@@ -17,7 +16,7 @@ public class RoleAssertion implements BinaryAssertion {
 	}
 
 	@Override
-	public Concept getElement() {
+	public DLElement getElement() {
 		return role;
 	}
 
@@ -41,6 +40,11 @@ public class RoleAssertion implements BinaryAssertion {
 	public boolean isComplement(DLElement other) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public boolean executeRule(TTree<Assertion> model) {
+		return true;
 	}
 
 }

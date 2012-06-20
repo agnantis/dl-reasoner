@@ -1,5 +1,5 @@
 package uom.dl.elements;
 
-public interface Role extends Concept {
+public interface Role extends DLElement {
 
 }

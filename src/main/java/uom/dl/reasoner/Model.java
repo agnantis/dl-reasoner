@@ -5,16 +5,17 @@ import org.slf4j.LoggerFactory;
 
 import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
 import uom.dl.utils.TreeVisualizer;
 
 
 public class Model {
 	private static final Logger log = LoggerFactory.getLogger(Model.class);
 	private final boolean isSatisfiable;
-	private final TTree<ConceptAssertion> extension;
+	private final TTree<Assertion> extension;
 	private Interpretation interpretation;
 	
-	public Model(TTree<ConceptAssertion> extension, boolean isSatisfiable) {
+	public Model(TTree<Assertion> extension, boolean isSatisfiable) {
 		this.extension = extension;
 		this.isSatisfiable = isSatisfiable;
 	}
@@ -23,12 +24,12 @@ public class Model {
 		return isSatisfiable;
 	}
 
-	public TTree<ConceptAssertion> getExtension() {
+	public TTree<Assertion> getExtension() {
 		return extension;
 	}
 	
-	public Concept initialConcept() {
-		return this.extension.getValue().getConcept();
+	public DLElement initialConcept() {
+		return this.extension.getValue().getElement();
 	}
 	
 	public Interpretation getInterpretation(){
@@ -37,7 +38,7 @@ public class Model {
 		
 		if (this.interpretation == null) {
 			this.interpretation = new Interpretation();
-			ConceptAssertion currentNode = this.extension.getValue();
+			Assertion currentNode = this.extension.getValue();
 			while (currentNode != null) {
 				if (currentNode.isAtomic()) {
 					if (currentNode instanceof AtomicRole) {
@@ -58,7 +59,7 @@ public class Model {
 		}
 		System.out.println("Tableaux Extension:");
 		System.out.println(getExtension().print());
-		TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(getExtension());
+		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(getExtension());
 		System.out.println(visual.toDotFormat());
 		if (showImage)
 			visual.showGraph();

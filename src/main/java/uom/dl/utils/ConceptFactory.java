@@ -12,6 +12,7 @@ import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
+import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.ConceptAssertion;
 
 public class ConceptFactory {
@@ -156,8 +157,8 @@ public class ConceptFactory {
 		System.out.println("Is complement: " + A.isComplement(notA));
 	}
 	
-	public static Set<ConceptAssertion> createAssertions(Set<Concept> concepts, Individual ind) {
-		Set<ConceptAssertion> assertions = new HashSet<>(concepts.size());
+	public static Set<Assertion> createAssertions(Set<Concept> concepts, Individual ind) {
+		Set<Assertion> assertions = new HashSet<>(concepts.size());
 		for (Concept c : concepts) {
 			assertions.add(new ConceptAssertion(c, ind));
 		}

@@ -1,11 +1,11 @@
 package uom.dl.reasoner;
 
+
 public class IntersectionRule implements Rule {
 
 	@Override
-	public boolean execute() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean execute(TTree<Assertion> model, Assertion assertion) {
+		return true;
 	}
 
 }

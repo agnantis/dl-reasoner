@@ -11,10 +11,10 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uom.dl.elements.DLElement;
+import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.TTree;
 
-public class TreeVisualizer<T extends DLElement> {
+public class TreeVisualizer<T extends Assertion> {
 	private static final Logger log = LoggerFactory
 			.getLogger(TreeVisualizer.class);
 

@@ -19,6 +19,7 @@ import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.TreeVisualizer;
 
 public class TableauxAlgorithm {
+	/*
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithm.class);
 	
 	public static boolean runTableauxForConcept(Concept concept) {
@@ -64,7 +65,7 @@ public class TableauxAlgorithm {
 		System.out.println("The Model:");
 		System.out.println(tree.print());
 		System.out.println("--------------------");
-		TreeVisualizer<Concept> visual = new TreeVisualizer<Concept>(tree);
+		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(tree);
 		System.out.println(visual.toDotFormat());
 		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));
 		visual.showGraph();
@@ -83,16 +84,16 @@ public class TableauxAlgorithm {
 				new UnionConcept(new NotConcept(A), C), 
 				new UnionConcept(new NotConcept(C), new NotConcept(B))
 			));
-		/*
+		
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(D, A), 
 				new UnionConcept(
 						new IntersectionConcept(A, B),
 						new UnionConcept(D, A)) 
 			));
-		*/
+		
 		TableauxAlgorithm.runTableauxForConcept(ConceptFactory.intersectionOfConcepts(conSet));
-	}
+	}*/
 	
 	
 }

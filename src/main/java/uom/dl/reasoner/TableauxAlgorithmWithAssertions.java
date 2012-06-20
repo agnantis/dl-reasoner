@@ -22,31 +22,18 @@ import uom.dl.utils.TreeVisualizer;
 public class TableauxAlgorithmWithAssertions {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
 	
-	public static boolean runTableauxForConcept(ConceptAssertion conceptAssertion) {
-		List<TTree<ConceptAssertion>> frontier = new ArrayList<>();
-		TTree<ConceptAssertion> tree = new TTree<ConceptAssertion>(conceptAssertion);
+	public static boolean runTableauxForConcept(Assertion assertion) {
+		List<TTree<Assertion>> frontier = new ArrayList<>();
+		TTree<Assertion> tree = new TTree<Assertion>(assertion);
 		frontier.add(tree);
 		while (!frontier.isEmpty()) {
-			TTree<ConceptAssertion> current = frontier.remove(0);
-			//An atomic concept cannot be expanded. Add
-			if (!current.getValue().isAtomic()) {
-				//execute intersection rule
-				Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue().getConcept());
-				Set<ConceptAssertion> assertions = ConceptFactory.createAssertions(concepts, conceptAssertion.getIndividual());
-				if (concepts.size() > 1) {
-					current.append(new ArrayList<>(assertions), TTree.ADD_IN_SEQUENCE);
-				}
-				//execute union rule
-				concepts = ConceptFactory.getUnionConcepts(current.getValue().getConcept());
-				assertions = ConceptFactory.createAssertions(concepts, conceptAssertion.getIndividual());
-				if (concepts.size() > 1) {
-					current.append(new ArrayList<>(assertions), TTree.ADD_IN_PARALLEL);
-				}
-				//check if a model exists
-				if (!current.modelExists()) {
-					printModel(tree, true);
-					return false;
-				}
+			TTree<Assertion> current = frontier.remove(0);
+			Assertion value = current.getValue();
+			value.executeRule(current);
+			//check if a model exists
+			if (!current.modelExists()) {
+				printModel(tree, true);
+				return false;
 			}
 			
 			//add its children
@@ -59,20 +46,15 @@ public class TableauxAlgorithmWithAssertions {
 	}
 
 	
-	private static void 
 
-	private static void printModel(TTree<ConceptAssertion> tree, boolean showModelImage) {
-		log.info("No model exists. Concept is unsatisfiable: " + conceptAssertion);
+	private static void printModel(TTree<Assertion> tree, boolean showModelImage) {
 		System.out.println("Whole Model:");
 		System.out.println(tree.print());
 		System.out.println("--------------------");
-		TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(tree);
+		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(tree);
 		System.out.println(visual.toDotFormat());
 		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));					
 		visual.showGraph();
-		System.out.println("--------------------");
-		System.out.println("Current Model:");
-		System.out.println(current.print());
 	}
 	
 		
