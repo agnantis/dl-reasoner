@@ -46,5 +46,21 @@ public class RoleAssertion implements BinaryAssertion {
 	public boolean executeRule(TTree<Assertion> model) {
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getElement() + "(" + this.getIndividualA() + "," + this.getIndividualB() + ")";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof RoleAssertion))
+			return false;
+		RoleAssertion other = (RoleAssertion) obj;
+		return getIndividualA().equals(other.getIndividualA()) 
+				&& getIndividualB().equals(other.getIndividualB())
+				&& getElement().equals(other);
+		
+	}
 
 }

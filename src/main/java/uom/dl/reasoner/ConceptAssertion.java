@@ -1,12 +1,15 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
+import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
+import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
 
@@ -49,6 +52,15 @@ public class ConceptAssertion implements Assertion {
 		}
 		return "(" + this.getElement() + ")" + "(" + this.getIndividualA() + ")";
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ConceptAssertion))
+			return false;
+		ConceptAssertion other = (ConceptAssertion) obj;
+		return getIndividualA().equals(other.getIndividualA()) && getElement().equals(other);
+		
+	}
 
 	@Override
 	public boolean executeRule(TTree<Assertion> model) {
@@ -62,6 +74,23 @@ public class ConceptAssertion implements Assertion {
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
 			model.append(new ArrayList<>(assertions), TTree.ADD_IN_PARALLEL);
+			return true;
+		}
+		if (concept instanceof ExistsConcept) {
+			ExistsConcept ec = (ExistsConcept) concept;
+			Concept c = ec.getConceptA();
+			Role role = ec.getRole();
+			boolean containsInd = model.containsFiller(role, c, getIndividualA());
+			if (!containsInd) {
+				//create a random individual
+				Individual newInd = new Individual();
+				//add C(x), R(b,x)
+				List<Assertion> toBeAdded = new ArrayList<>(2);
+				toBeAdded.add(new ConceptAssertion(c, newInd));
+				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
+				model.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
+				return true;
+			}
 		}
 		
 		return false;

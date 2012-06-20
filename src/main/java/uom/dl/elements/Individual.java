@@ -2,7 +2,12 @@ package uom.dl.elements;
 
 public class Individual {
 	private final String name;
+	private static int index = 1;
 
+	public Individual() {
+		this("z" + index);
+		++index;
+	}
 	public Individual(String name) {
 		this.name = name;
 	}

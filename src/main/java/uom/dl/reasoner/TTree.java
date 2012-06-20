@@ -3,6 +3,14 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.relation.RoleStatus;
+
+import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
+import uom.dl.elements.Individual;
+import uom.dl.elements.Role;
+import uom.dl.reasoner.Interpretation.RoleCouple;
+
 public class TTree<T extends Assertion> {
 	public static final boolean ADD_IN_PARALLEL = true;
 	public static final boolean ADD_IN_SEQUENCE = !ADD_IN_PARALLEL;
@@ -66,6 +74,7 @@ public class TTree<T extends Assertion> {
 		frontier.add(this);
 		while (!frontier.isEmpty()) {
 			TTree<T> tree = frontier.remove(0);
+			//check if already exists
 			if (tree.isLeaf() && tree.isExpandable()) {
 				if (inParallel == TTree.ADD_IN_PARALLEL) {
 					for (T c: children) {
@@ -108,6 +117,57 @@ public class TTree<T extends Assertion> {
 		}
 		this.addChild(node, !clashFound);
 		return true;
+	}
+	
+	public List<Individual> getFiller(Role role, Concept concept, Individual ind) {
+		TTree<T> current = this;
+		List<Individual> candidateRoles = new ArrayList<>();
+		List<Individual> candidateInds = new ArrayList<>();
+		while (current != null) {
+			T aValue = current.getValue();
+			if (aValue instanceof RoleAssertion) {
+				RoleAssertion ra = (RoleAssertion) aValue;
+				DLElement el = ra.getElement();
+				if (role.equals(el) && ind.equals(ra.getIndividualA()))
+					candidateRoles.add(ra.getIndividualB());
+			} else if (aValue instanceof ConceptAssertion) {
+				if (concept.equals(aValue.getElement()))
+					candidateInds.add(aValue.getIndividualA());
+			}
+			current = current.getParent();
+		}
+		//find individuals
+		candidateInds.retainAll(candidateRoles);
+		return candidateInds;
+	}
+	
+	public boolean containsFiller(Role role, Concept concept, Individual ind) {
+		TTree<T> current = this;
+		List<Individual> candidateRoles = new ArrayList<>();
+		List<Individual> candidateInds = new ArrayList<>();
+		while (current != null) {
+			T aValue = current.getValue();
+			if (aValue instanceof RoleAssertion) {
+				RoleAssertion ra = (RoleAssertion) aValue;
+				DLElement el = ra.getElement();
+				if (role.equals(el) && ind.equals(ra.getIndividualA())) {
+					if (candidateInds.contains(ra.getIndividualB()))
+						return true;
+					else
+						candidateRoles.add(ra.getIndividualB());
+				}
+			} else if (aValue instanceof ConceptAssertion) {
+				if (concept.equals(aValue.getElement())) {
+					if (candidateRoles.contains(aValue.getIndividualA()))
+						return true;
+					else
+						candidateInds.add(aValue.getIndividualA());
+				}
+			}
+			current = current.getParent();
+		}
+		//find individuals
+		return false;
 	}
 	
 	public String toString(){
