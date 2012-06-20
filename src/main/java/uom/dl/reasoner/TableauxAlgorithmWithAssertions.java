@@ -22,7 +22,7 @@ import uom.dl.utils.TreeVisualizer;
 public class TableauxAlgorithmWithAssertions {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
 	
-	public static boolean runTableauxForConcept(Assertion assertion) {
+	public static Model runTableauxForConcept(Assertion assertion) {
 		List<TTree<Assertion>> frontier = new ArrayList<>();
 		TTree<Assertion> tree = new TTree<Assertion>(assertion);
 		frontier.add(tree);
@@ -32,8 +32,8 @@ public class TableauxAlgorithmWithAssertions {
 			value.executeRule(current);
 			//check if a model exists
 			if (!current.modelExists()) {
-				printModel(tree, true);
-				return false;
+				//printModel(tree, true);
+				return new Model(tree, false);
 			}
 			
 			//add its children
@@ -41,8 +41,8 @@ public class TableauxAlgorithmWithAssertions {
 				frontier.addAll(current.getChildren());
 			
 		}	
-		printModel(tree, true);
-		return true;
+		//printModel(tree, true);
+		return new Model(tree, true);
 	}
 
 	
@@ -79,7 +79,10 @@ public class TableauxAlgorithmWithAssertions {
 		
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
-		TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);
+		Model model = TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);
+		model.printModel(true);
+		if (model.isSatisfiable())
+			System.out.println(model.getInterpretation());
 	}
 	
 	

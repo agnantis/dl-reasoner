@@ -3,9 +3,9 @@ package uom.dl.reasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
+import uom.dl.elements.Role;
 import uom.dl.utils.TreeVisualizer;
 
 
@@ -38,14 +38,19 @@ public class Model {
 		
 		if (this.interpretation == null) {
 			this.interpretation = new Interpretation();
-			Assertion currentNode = this.extension.getValue();
-			while (currentNode != null) {
-				if (currentNode.isAtomic()) {
-					if (currentNode instanceof AtomicRole) {
-						
+			TTree<Assertion> curNode = this.extension; 
+			while (curNode != null) {
+				Assertion assertion = curNode.getValue();
+				this.interpretation.addAssertion(assertion);
+				TTree<Assertion> tempNode = curNode;
+				curNode = null;
+				for (TTree<Assertion> a : tempNode.getChildren()) {
+					if (a.isExpandable()) {
+						curNode = a;
+						break;
 					}
 				}
-			}
+			}			
 		}
 		
 		return this.interpretation;
@@ -60,7 +65,6 @@ public class Model {
 		System.out.println("Tableaux Extension:");
 		System.out.println(getExtension().print());
 		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(getExtension());
-		System.out.println(visual.toDotFormat());
 		if (showImage)
 			visual.showGraph();
 	}

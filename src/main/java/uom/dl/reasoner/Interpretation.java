@@ -2,19 +2,17 @@ package uom.dl.reasoner;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uom.dl.elements.AtomicConcept;
-import uom.dl.elements.AtomicRole;
+import uom.dl.elements.Concept;
 import uom.dl.elements.Individual;
-import uom.dl.reasoner.Interpretation.RoleCouple;
+import uom.dl.elements.Role;
 
 public class Interpretation {
 	private Set<Individual> domain = new HashSet<>();
-	private Map<AtomicConcept, Set<Individual>> conceptAssertions = new HashMap<>();
-	private Map<AtomicRole, Set<RoleCouple>> roleAssertions = new HashMap<>();
+	private Map<Concept, Set<Individual>> conceptAssertions = new HashMap<>();
+	private Map<Role, Set<RoleCouple>> roleAssertions = new HashMap<>();
 	
 	public Set<Individual> getDomain() {
 		return domain;
@@ -24,11 +22,11 @@ public class Interpretation {
 		return this.domain.add(ind);
 	}
 	
-	public Map<AtomicConcept, Set<Individual>> getConceptAssertions() {
+	public Map<Concept, Set<Individual>> getConceptAssertions() {
 		return conceptAssertions;
 	}
 	
-	public boolean addConceptAssertion(AtomicConcept concept, Individual ind) {
+	private boolean addConceptAssertion(Concept concept, Individual ind) {
 		Set<Individual> aSet = conceptAssertions.get(concept);
 		if (aSet == null)
 			aSet = new HashSet<>();
@@ -37,17 +35,70 @@ public class Interpretation {
 		return returnValue;
 	}
 	
-	public Map<AtomicRole, Set<RoleCouple>> getRoleAssertions() {
+	public boolean addAssertion(Assertion assertion) {
+		addToDomain(assertion.getIndividualA());
+		if (assertion instanceof ConceptAssertion) {
+			ConceptAssertion ca = (ConceptAssertion) assertion;
+			if (ca.isAtomic()) 
+				return addConceptAssertion((Concept)ca.getElement(), ca.getIndividualA());
+			
+		}
+		if (assertion instanceof RoleAssertion) {
+			RoleAssertion ra = (RoleAssertion) assertion;
+			return addRoleAssertion((Role) ra.getElement(), ra.getIndividualA(), ra.getIndividualB());
+		}
+		return false;
+	}
+	
+	public Map<Role, Set<RoleCouple>> getRoleAssertions() {
 		return roleAssertions;
 	}
 	
-	public boolean addRoleAssertion(AtomicRole role, RoleCouple roleCouple) {
+	private boolean addRoleAssertion(Role role, Individual indA, Individual indB) {
 		Set<RoleCouple> aSet = roleAssertions.get(role);
 		if (aSet == null)
 			aSet = new HashSet<>();
-		boolean returnValue = aSet.add(roleCouple);
+		boolean returnValue = aSet.add(new RoleCouple(indA, indB));
 		roleAssertions.put(role, aSet);
 		return returnValue;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Model Interpretation:\n");
+		if (!getDomain().isEmpty()) {
+			sb.append("  Δ = {");
+			for (Individual i : getDomain()) {
+				sb.append(i + ","); 
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append("}\n");
+		}
+		if (!roleAssertions.keySet().isEmpty()) {
+			for (Role c : roleAssertions.keySet()) {
+				Set<RoleCouple> couple = roleAssertions.get(c);
+				sb.append("  " + c + " = {");
+				for (RoleCouple ind : couple) {
+					sb.append(ind + ", ");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append("}\n");
+			}
+			sb.append("}\n");
+		}
+		if (!conceptAssertions.keySet().isEmpty()) {
+			for (Concept c : conceptAssertions.keySet()) {
+				Set<Individual> inds = conceptAssertions.get(c);
+				sb.append("  " + c + " = {");
+				for (Individual ind : inds) {
+					sb.append(ind + ",");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append("}\n");
+			}			
+		}
+		return sb.toString(); 
 	}
 	
 	
