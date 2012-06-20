@@ -1,5 +1,6 @@
 package uom.dl.utils;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -62,17 +63,26 @@ public class TreeVisualizer {
 	}
 
 	public boolean showGraph() {
-		String pathName = "/tmp/graph.dot";
-		Path path = Paths.get(pathName);
-		boolean fileCreated = saveGraph(path);
+		String tmpFolder = System.getProperty("java.io.tmpdir");
+		String dotFile = "graph.dot";
+		String pngFile = "graph.png";
+		Path inputPath = Paths.get(tmpFolder, dotFile);
+		Path outputPath = Paths.get(tmpFolder, pngFile);
+		boolean fileCreated = saveGraph(inputPath);
 		if (fileCreated) {
 			try {
 				Runtime rt = Runtime.getRuntime();
-				Process p = rt.exec("dot -Tpng " + pathName + " -o /tmp/graph.png");
+				Process p = rt.exec("dot -Tpng " + inputPath.toString() + " -o " + outputPath.toString());
 				p.waitFor();
 				if (p.exitValue() == 0){
-					p = rt.exec("gnome-open /tmp/graph.png");
-					p.waitFor();
+					if (Desktop.isDesktopSupported()) {
+						Desktop.getDesktop().open(outputPath.toFile());
+					} else {
+						log.error("Can't open with default application. File: " + outputPath.toString());
+					}
+					//gnome specific
+					//p = rt.exec("gnome-open " + outputPath.toString());
+					//p.waitFor();
 				}
 			} catch (Exception exc) {
 				log.error("Exception: " + exc);
