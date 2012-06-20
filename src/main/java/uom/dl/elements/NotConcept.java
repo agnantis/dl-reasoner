@@ -4,7 +4,6 @@ import uom.dl.utils.NNFFactory;
 
 
 public class NotConcept implements Concept {
-	
 	private final Concept concept;
 	private final boolean isNNF;
 	
@@ -64,5 +63,13 @@ public class NotConcept implements Concept {
 	public boolean isAtomic() {
 		return this.concept.isAtomic();
 	}
-
+	
+	@Override
+	public boolean isComplement(DLElement other) {
+		if (!(other instanceof AtomicConcept) || (!this.concept.isAtomic()))
+			return false;
+		AtomicConcept c = (AtomicConcept) other;
+		return this.getConceptA().equals(c);				
+	}
+	
 }

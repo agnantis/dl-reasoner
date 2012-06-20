@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
 import uom.dl.utils.ConceptFactory;
 
-public class TTree {
+public class TTree<T extends DLElement> {
 	public static final boolean ADD_IN_PARALLEL = true;
 	public static final boolean ADD_IN_SEQUENCE = !ADD_IN_PARALLEL;
 	
-	private Concept value;
-	private List<TTree> children = new ArrayList<>();
-	private TTree parent = null;
+	private T value;
+	private List<TTree<T>> children = new ArrayList<>();
+	private TTree<T> parent = null;
 	private boolean isExpandable = true;
 
-	public TTree(Concept c) {
+	public TTree(T c) {
 		this.value = c;
 	}	
 	
@@ -23,15 +24,15 @@ public class TTree {
 		return children.isEmpty();
 	}
 	
-	public List<TTree> getChildren() {
+	public List<TTree<T>> getChildren() {
 		return this.children;
 	}
 	
-	public Concept getValue() {
+	public T getValue() {
 		return this.value;
 	}
 	
-	private void addChild(TTree child, boolean isExpandable){
+	private void addChild(TTree<T> child, boolean isExpandable){
 		child.parent = this;
 		child.isExpandable = isExpandable;
 		this.children.add(child);
@@ -46,7 +47,7 @@ public class TTree {
 			//this node causes a clash
 			return false;
 		}
-		for (TTree child : this.getChildren()) {
+		for (TTree<T> child : this.getChildren()) {
 			if (child.modelExists()) {
 				//there is at least one child that contains a valid model
 				return true;
@@ -60,24 +61,24 @@ public class TTree {
 		return false;
 	}
 	
-	public TTree getParent() {
+	public TTree<T> getParent() {
 		return this.parent;
 	}
 	
-	public void append(List<Concept> children, boolean inParallel){
-		List<TTree> frontier = new ArrayList<>();
+	public void append(List<T> children, boolean inParallel){
+		List<TTree<T>> frontier = new ArrayList<>();
 		frontier.add(this);
 		while (!frontier.isEmpty()) {
-			TTree tree = frontier.remove(0);
+			TTree<T> tree = frontier.remove(0);
 			if (tree.isLeaf() && tree.isExpandable()) {
 				if (inParallel == TTree.ADD_IN_PARALLEL) {
-					for (Concept c: children) {
-						TTree n = new TTree(c);
+					for (T c: children) {
+						TTree<T> n = new TTree<T>(c);
 						tree.add(n);
 					}
 				} else {
-					for (Concept c: children) {
-						TTree n = new TTree(c);
+					for (T c: children) {
+						TTree<T> n = new TTree<T>(c);
 						tree.add(n);
 						tree = n;
 					}
@@ -88,17 +89,18 @@ public class TTree {
 		}
 	}
 
-	public boolean add(TTree node) {
-		Concept c = node.getValue();
+	public boolean add(TTree<T> node) {
+		T c = node.getValue();
 		if (c == null)
 			throw new NullPointerException("Concept cannot be null");
 		
 		//check if already exists or there is a clash
 		boolean clashFound = false;
 		if (c.isAtomic()) {
-			TTree current = this;
+			TTree<T> current = this;
 			while (current != null) {
-				if (ConceptFactory.isComplement(c, current.getValue())) {
+				if (c.isComplement(current.getValue())) {
+				//if (ConceptFactory.isComplement(c, current.getValue())) {
 					clashFound = true;
 				}
 				if (current.getValue().equals(c))
@@ -132,13 +134,13 @@ public class TTree {
 		s.append("\n");
 		//for (TTree child : this.getChildren()) {
 		for (int i = 0; i < this.getChildren().size()-1; ++i) {
-			TTree child = this.getChildren().get(i);
+			TTree<T> child = this.getChildren().get(i);
 			s.append(prefix);
 			s.append("├── ");
 			s.append(child.print(prefix+"|   ")); 
 		}
 		if (!this.getChildren().isEmpty()) {
-			TTree child = this.getChildren().get(this.getChildren().size()-1);
+			TTree<T> child = this.getChildren().get(this.getChildren().size()-1);
 			s.append(prefix);
 			s.append("└── ");
 			s.append(child.print(prefix+"    "));

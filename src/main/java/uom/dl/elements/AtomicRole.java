@@ -29,4 +29,14 @@ public class AtomicRole implements Role {
 		return this.name.equals(((AtomicRole)obj).getName());
 	}
 
+	@Override
+	public boolean isAtomic() {
+		return true;
+	}
+
+	@Override
+	public boolean isComplement(DLElement other) {
+		return false;
+	}
+	
 }

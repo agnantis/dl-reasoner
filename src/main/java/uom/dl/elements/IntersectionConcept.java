@@ -75,4 +75,9 @@ public class IntersectionConcept implements BinaryConcept {
 		return false;
 	}
 
+	@Override
+	public boolean isComplement(DLElement other) {
+		return false;
+	}
+	
 }

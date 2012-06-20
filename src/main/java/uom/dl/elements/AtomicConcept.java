@@ -1,5 +1,6 @@
 package uom.dl.elements;
 
+
 public class AtomicConcept implements Concept {
 	private String name;
 
@@ -58,4 +59,12 @@ public class AtomicConcept implements Concept {
 	public boolean isAtomic() {
 		return true;
 	}
+	@Override
+	public boolean isComplement(DLElement other) {
+		if (!(other instanceof NotConcept))
+			return false;
+		NotConcept c = (NotConcept) other;
+		return this.equals(c.getConceptA());				
+	}
+	
 }

@@ -76,4 +76,9 @@ public class AtLeastConcept implements Concept {
 	public boolean isAtomic() {
 		return false;
 	}
+
+	@Override
+	public boolean isComplement(DLElement other) {
+		return false;
+	}
 }

@@ -12,40 +12,43 @@ import org.slf4j.LoggerFactory;
 
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
+import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.TreeVisualizer;
 
-public class TableauxAlgorithm {
-	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithm.class);
+public class TableauxAlgorithmWithAssertions {
+	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
 	
-	public static boolean runTableauxForConcept(Concept concept) {
-		List<TTree<Concept>> frontier = new ArrayList<>();
-		TTree<Concept> tree = new TTree<Concept>(concept);
+	public static boolean runTableauxForConcept(ConceptAssertion conceptAssertion) {
+		List<TTree<ConceptAssertion>> frontier = new ArrayList<>();
+		TTree<ConceptAssertion> tree = new TTree<ConceptAssertion>(conceptAssertion);
 		frontier.add(tree);
 		while (!frontier.isEmpty()) {
-			TTree<Concept> current = frontier.remove(0);
+			TTree<ConceptAssertion> current = frontier.remove(0);
 			//An atomic concept cannot be expanded. Add
 			if (!current.getValue().isAtomic()) {
 				//execute intersection rule
-				Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue());
+				Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(current.getValue().getConcept());
+				Set<ConceptAssertion> assertions = ConceptFactory.createAssertions(concepts, conceptAssertion.getIndividual());
 				if (concepts.size() > 1) {
-					current.append(new ArrayList<>(concepts), TTree.ADD_IN_SEQUENCE);
+					current.append(new ArrayList<>(assertions), TTree.ADD_IN_SEQUENCE);
 				}
 				//execute union rule
-				concepts = ConceptFactory.getUnionConcepts(current.getValue());
+				concepts = ConceptFactory.getUnionConcepts(current.getValue().getConcept());
+				assertions = ConceptFactory.createAssertions(concepts, conceptAssertion.getIndividual());
 				if (concepts.size() > 1) {
-					current.append(new ArrayList<>(concepts), TTree.ADD_IN_PARALLEL);
+					current.append(new ArrayList<>(assertions), TTree.ADD_IN_PARALLEL);
 				}
 				//check if a model exists
 				if (!current.modelExists()) {
-					log.info("No model exists. Concept is unsatisfiable: " + concept);
+					log.info("No model exists. Concept is unsatisfiable: " + conceptAssertion);
 					System.out.println("Whole Model:");
 					System.out.println(tree.print());
 					System.out.println("--------------------");
-					TreeVisualizer<Concept> visual = new TreeVisualizer<Concept>(tree);
+					TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(tree);
 					System.out.println(visual.toDotFormat());
 					visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));					
 					visual.showGraph();
@@ -64,7 +67,7 @@ public class TableauxAlgorithm {
 		System.out.println("The Model:");
 		System.out.println(tree.print());
 		System.out.println("--------------------");
-		TreeVisualizer<Concept> visual = new TreeVisualizer<Concept>(tree);
+		TreeVisualizer<ConceptAssertion> visual = new TreeVisualizer<ConceptAssertion>(tree);
 		System.out.println(visual.toDotFormat());
 		visual.saveGraph(Paths.get("/home/konstantine/Desktop/graph1.dot"));
 		visual.showGraph();
@@ -76,22 +79,24 @@ public class TableauxAlgorithm {
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept C = new AtomicConcept("C");
-		//AtomicConcept D = new AtomicConcept("D");
+		AtomicConcept D = new AtomicConcept("D");
 		//HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
 		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(
 				(Concept)new IntersectionConcept(A, B), 
 				new UnionConcept(new NotConcept(A), C), 
 				new UnionConcept(new NotConcept(C), new NotConcept(B))
 			));
-		/*
+		
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(D, A), 
 				new UnionConcept(
 						new IntersectionConcept(A, B),
 						new UnionConcept(D, A)) 
 			));
-		*/
-		TableauxAlgorithm.runTableauxForConcept(ConceptFactory.intersectionOfConcepts(conSet));
+		
+		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
+		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
+		TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);
 	}
 	
 	

@@ -72,6 +72,9 @@ public class ForAllConcept implements Concept {
 		return false;
 	}
 	
-	
+	@Override
+	public boolean isComplement(DLElement other) {
+		return false;
+	}
 
 }

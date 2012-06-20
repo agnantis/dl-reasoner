@@ -71,4 +71,9 @@ public class ExistsConcept implements Concept {
 		return false;
 	}
 
+	@Override
+	public boolean isComplement(DLElement other) {
+		return false;
+	}
+	
 }

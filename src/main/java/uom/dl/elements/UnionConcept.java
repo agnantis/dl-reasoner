@@ -20,13 +20,11 @@ public class UnionConcept implements BinaryConcept {
 
 	@Override
 	public Concept getConceptB() {
-		// TODO Auto-generated method stub
 		return this.concept2;
 	}
 	
 	@Override
 	public String toString() {
-		//return "(" + this.concept1 + Constants.UNION_CHAR + this.concept2 + ")";
 		StringBuffer sb = new StringBuffer();
 		if (this.concept1 instanceof BinaryConcept)
 			sb.append("(" + this.concept1 + ")");
@@ -73,6 +71,12 @@ public class UnionConcept implements BinaryConcept {
 
 	@Override
 	public boolean isAtomic() {
+		return false;
+	}
+
+
+	@Override
+	public boolean isComplement(DLElement other) {
 		return false;
 	}
 

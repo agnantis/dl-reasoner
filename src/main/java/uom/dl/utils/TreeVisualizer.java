@@ -1,10 +1,8 @@
 package uom.dl.utils;
 
 import java.awt.Desktop;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,16 +11,16 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uom.dl.elements.NotConcept;
+import uom.dl.elements.DLElement;
 import uom.dl.reasoner.TTree;
 
-public class TreeVisualizer {
+public class TreeVisualizer<T extends DLElement> {
 	private static final Logger log = LoggerFactory
 			.getLogger(TreeVisualizer.class);
 
-	private TTree tree;
+	private TTree<T> tree;
 
-	public TreeVisualizer(TTree tree) {
+	public TreeVisualizer(TTree<T> tree) {
 		this.tree = tree;
 	}
 
@@ -48,11 +46,11 @@ public class TreeVisualizer {
 		}
 		if (!tree.getChildren().isEmpty()) {
 			int counter = 0;
-			for (TTree child : tree.getChildren()) {
+			for (TTree<T> child : tree.getChildren()) {
 				s.append("\t \"" + prefix + ":" + tree.getValue() + "\" -> ");
 				String pref = prefix + "." + counter;
 				s.append("\"" + pref + ":" + child.getValue() + "\"\n");
-				s.append(new TreeVisualizer(child).toDotFormat(pref));
+				s.append(new TreeVisualizer<T>(child).toDotFormat(pref));
 				++counter;
 			}
 		}
@@ -86,7 +84,8 @@ public class TreeVisualizer {
 				}
 			} catch (Exception exc) {
 				log.error("Exception: " + exc);
-				log.error("Please install 'dot' program in order to be able to view or save the graph");
+				log.error("Please install 'graphviz' program in order to be able to view or save the graph");
+				log.error("Download 'graphviz' from here: http://www.graphviz.org/Download..php");
 			}
 		}
 		return true;
