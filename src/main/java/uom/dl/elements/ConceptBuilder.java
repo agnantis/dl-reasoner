@@ -114,7 +114,7 @@ public class ConceptBuilder {
 	
 	public static void main(String[] args) {
 		ConceptBuilder cf1 = new ConceptBuilder();
-		ConceptBuilder cf2 = new ConceptBuilder();
+		//ConceptBuilder cf2 = new ConceptBuilder();
 		
 		Concept A = new AtomicConcept("A");
 		Concept B = new AtomicConcept("B");

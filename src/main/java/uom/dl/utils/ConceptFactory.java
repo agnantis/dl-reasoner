@@ -7,9 +7,7 @@ import java.util.Set;
 
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
-import uom.dl.elements.ConceptBuilder;
 import uom.dl.elements.Constants;
-import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
@@ -132,7 +130,6 @@ public class ConceptFactory {
 	
 	
 	public static void main(String[] main) {
-		ConceptBuilder factory = new ConceptBuilder();
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
 		Concept concept;//= factory.c(A).union().c(B).intersection().c(A).union().c(B).build();

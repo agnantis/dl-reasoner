@@ -3,9 +3,7 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
-import uom.dl.utils.ConceptFactory;
 
 public class TTree<T extends DLElement> {
 	public static final boolean ADD_IN_PARALLEL = true;
@@ -184,9 +182,5 @@ public class TTree<T extends DLElement> {
 		
 		System.out.println(nodeA);
 		*/
-		
-		
-		
-		
 	}
 }

@@ -36,7 +36,6 @@ public class ConceptAssertion implements Assertion, DLElement {
 	
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
 		if (this.getConcept().isAtomic()) {
 			return this.getConcept() + "(" + this.getIndividual() + ")";	
 		}
