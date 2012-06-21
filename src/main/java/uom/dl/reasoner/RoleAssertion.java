@@ -38,8 +38,13 @@ public class RoleAssertion implements BinaryAssertion {
 
 	@Override
 	public boolean isComplement(DLElement other) {
-		// TODO Auto-generated method stub
-		return false;
+		if (!(other instanceof RoleAssertion))
+			return false;
+		
+		RoleAssertion ass = (RoleAssertion) other;
+		return ass.getIndividualA().equals(getIndividualA())
+				&& ass.getIndividualB().equals(getIndividualB())
+				&& ass.getElement().isComplement(getElement());
 	}
 
 	@Override

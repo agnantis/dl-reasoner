@@ -2,6 +2,7 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import uom.dl.elements.Concept;
@@ -39,11 +40,12 @@ public class ConceptAssertion implements Assertion {
 	}
 
 	@Override
-	public boolean isComplement(DLElement other) {
-		if (other instanceof ConceptAssertion)
-			return ((ConceptAssertion)other).getElement().isComplement(this.getElement());
-		
-		return false;
+	public boolean isComplement(DLElement obj) {
+		if (!(obj instanceof ConceptAssertion))
+			return false;
+		Assertion other = (Assertion) obj;
+		return other.getIndividualA().equals(getIndividualA())
+				&& other.getElement().isComplement(getElement());
 	}
 	
 	@Override
@@ -81,13 +83,17 @@ public class ConceptAssertion implements Assertion {
 			ForAllConcept ec = (ForAllConcept) concept;
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
-			List<Individual> indToBeAdded = model.getUnspecifiedFiller(role, c, getIndividualA());
-			List<Assertion> toBeAdded = new ArrayList<>(indToBeAdded.size());
-			for (Individual i : indToBeAdded) {
-				//add C(i), 
-				toBeAdded.add(new ConceptAssertion(c, i));
+			Map<TTree<Assertion>, List<Individual>> casesBeAdded = model.getUnspecifiedFiller(role, c, getIndividualA());
+			for (TTree<Assertion> tree : casesBeAdded.keySet()) {
+				List<Individual> theList = casesBeAdded.get(tree);
+				List<Assertion> toBeAdded = new ArrayList<>(theList.size());
+				for (Individual i : theList) {
+					//add C(i), 
+					toBeAdded.add(new ConceptAssertion(c, i));
+				}			
+				tree.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
 			}
-			model.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
+			
 			return true;
 		}
 		if (concept instanceof ExistsConcept) {

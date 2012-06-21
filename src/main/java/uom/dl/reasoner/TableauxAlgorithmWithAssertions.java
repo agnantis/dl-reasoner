@@ -75,28 +75,29 @@ public class TableauxAlgorithmWithAssertions {
 				new UnionConcept(new NotConcept(C), new NotConcept(B)),
 				new ExistsConcept(new AtomicRole("V"), new ExistsConcept(new AtomicRole("R"), C))
 			));
-		/*
+		
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(D, A), 
 				new UnionConcept(
 						new IntersectionConcept(A, B),
 						new UnionConcept(D, A)) 
 			));
-		*/
 		
+		/*
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(D, A), 
 				new UnionConcept(
 						new IntersectionConcept(A, B),
-						new ExistsConcept(new AtomicRole("V"), new ExistsConcept(new AtomicRole("R"), C)))
+						new ExistsConcept(new AtomicRole("R"), new ExistsConcept(new AtomicRole("R"), C)))
 			));
-		/*
+		*/
 		conSet = new HashSet<>(Arrays.asList(
 				new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
 				new ForAllConcept(R, 
 						new UnionConcept(new NotConcept(A), new NotConcept(B)))
-			));*/
+			));
+			
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);

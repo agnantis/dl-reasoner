@@ -1,7 +1,10 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.management.relation.RoleStatus;
 
@@ -93,7 +96,7 @@ public class TTree<T extends Assertion> {
 			}
 		}
 	}
-
+	
 	public boolean add(TTree<T> node) {
 		T c = node.getValue();
 		if (c == null)
@@ -170,11 +173,12 @@ public class TTree<T extends Assertion> {
 		return false;
 	}
 	
-	public List<Individual> getUnspecifiedFiller(Role role, Concept concept, Individual ind) {
+	public Map<TTree<T>, List<Individual>> getUnspecifiedFiller(Role role, Concept concept, Individual ind) {
+		Map<TTree<T>, List<Individual>> allCases = new HashMap<TTree<T>, List<Individual>>();
 		TTree<T> current = this;
 		List<Individual> candidateRoles = new ArrayList<>();
 		List<Individual> existingInds = new ArrayList<>();
-		//search down
+		//search up
 		while (current != null) {
 			T aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
@@ -182,15 +186,38 @@ public class TTree<T extends Assertion> {
 				DLElement el = ra.getElement();
 				if (role.equals(el) && ind.equals(ra.getIndividualA()))
 					candidateRoles.add(ra.getIndividualB());
-			} else if (aValue instanceof ConceptAssertion) {
+			} 
+			/*else if (aValue instanceof ConceptAssertion) {
 				if (concept.equals(aValue.getElement()))
 					existingInds.add(aValue.getIndividualA());
-			}
+			}*/
 			current = current.getParent();
 		}
 		//find individuals
-		candidateRoles.removeAll(candidateRoles);
-		return candidateRoles;
+		//candidateRoles.removeAll(candidateRoles);
+		allCases.put(this, candidateRoles);
+		//search down
+		List<TTree<T>> frontier = new ArrayList<>();
+		List<TTree<T>> childs = this.getChildren();
+		frontier.addAll(childs);
+		while (!frontier.isEmpty()) {
+			current = frontier.remove(0);
+			T aValue = current.getValue();
+			if (aValue instanceof RoleAssertion) {
+				RoleAssertion ra = (RoleAssertion) aValue;
+				DLElement el = ra.getElement();
+				if (role.equals(el) && ind.equals(ra.getIndividualA())) {
+					List<Individual> theList = allCases.get(current);
+					if (theList == null)
+						theList = new ArrayList<>();
+					theList.add(ra.getIndividualB());	
+					allCases.put(current, theList);
+				}
+			} 
+			frontier.addAll(current.getChildren());
+			
+		}
+		return allCases;
 	}
 	
 	public String toString(){
