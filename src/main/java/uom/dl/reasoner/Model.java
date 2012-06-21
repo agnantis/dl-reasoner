@@ -63,7 +63,7 @@ public class Model {
 			System.out.println("There is a model for concept: " + this.initialConcept());
 		}
 		System.out.println("Tableaux Extension:");
-		System.out.println(getExtension().print());
+		System.out.println(getExtension().repr());
 		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(getExtension());
 		if (showImage)
 			visual.showGraph();

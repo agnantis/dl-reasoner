@@ -35,7 +35,6 @@ public class TableauxAlgorithmWithAssertions {
 		while (!frontier.isEmpty()) {
 			TTree<Assertion> current = frontier.remove(0);
 			if (current.getParent() != parent) {
-				TTree<Assertion> newTree = new TTree<>(tree);
 				return new Model(tree, true);
 			}
 			parent = current;
@@ -107,12 +106,24 @@ public class TableauxAlgorithmWithAssertions {
 			
 		//////////////
 		TTree<Assertion> tree1 = new TTree<Assertion>(new ConceptAssertion(A, new Individual("a")));
+		TTree<Assertion> tree2 = new TTree<Assertion>(new ConceptAssertion(B, new Individual("a")));
+		TTree<Assertion> tree3 = new TTree<Assertion>(new ConceptAssertion(C, new Individual("a")));
+		TTree<Assertion> tree4 = new TTree<Assertion>(new ConceptAssertion(D, new Individual("a")));
+		tree3.add(tree4);
+		tree1.add(tree2);
+		tree1.add(tree3);
+		System.out.println(tree3.repr());
+		
+		TTree<Assertion> treeCP1 = new TTree<>(tree3, false);
+		TTree<Assertion> treeCP2 = new TTree<>(tree3, true);
+		System.out.println(treeCP1.getRoot().repr());
+		System.out.println(treeCP2.getRoot().repr());
 		System.out.println("Original: " + tree1);
-		TTree<Assertion> tree2 = new TTree<>(tree1);
-		System.out.println("Copy: " + tree2);
+		TTree<Assertion> tcpTee = new TTree<>(tree1, true);
+		System.out.println("Copy: " + tcpTee);
 		tree1.getValue().setIndividualA(new Individual("b"));
 		System.out.println("Original(2): " + tree1);
-		System.out.println("Copy(2): " + tree2);
+		System.out.println("Copy(2): " + tcpTee);
 		//////////////
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));

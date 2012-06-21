@@ -14,22 +14,37 @@ public class TTree<T extends Assertion> {
 	public static final boolean ADD_IN_PARALLEL = true;
 	public static final boolean ADD_IN_SEQUENCE = !ADD_IN_PARALLEL;
 	
-	private T value;
+	private Assertion value;
 	private List<TTree<T>> children = new ArrayList<>();
 	private TTree<T> parent = null;
 	private boolean isExpandable = true;
 	
 	//A copy constructor;
-	@SuppressWarnings("unchecked")
-	public TTree(TTree<T> tree) {
+	
+	public TTree(TTree<T> tree, boolean bothDirections) {
 		//this(tree.getValue());
 		///*TTree<T> newTree*/ this = new TTree<>(value);
-		this.value = (T) tree.getValue().getACopy();
-		for (TTree<T> child : children) {
-			TTree<T> newChild = new TTree<>(child);
+		this.value = tree.getValue().getACopy();
+		for (TTree<T> child : tree.getChildren()) {
+			TTree<T> newChild = new TTree<>(child, false);
 			this.add(newChild);
 		}
-		this.isExpandable = tree.isExpandable;		
+		this.isExpandable = tree.isExpandable;	
+		if (bothDirections) {
+			TTree<T> parent = tree.getParent();
+			TTree<T> current = this; 
+			while (parent != null) {
+				TTree<T> newParent = new TTree<T>();
+				newParent.value = parent.getValue().getACopy();
+				newParent.add(current);
+				current = parent;
+				parent = parent.getParent();
+			}
+		}
+	}
+	
+	private TTree() {
+		this((T)null);
 	}
 
 	public TTree(T c) {
@@ -44,7 +59,7 @@ public class TTree<T extends Assertion> {
 		return this.children;
 	}
 	
-	public T getValue() {
+	public Assertion getValue() {
 		return this.value;
 	}
 	
@@ -107,7 +122,7 @@ public class TTree<T extends Assertion> {
 	}
 	
 	public boolean add(TTree<T> node) {
-		T c = node.getValue();
+		Assertion c = node.getValue();
 		if (c == null)
 			throw new NullPointerException("Concept cannot be null");
 		
@@ -136,7 +151,7 @@ public class TTree<T extends Assertion> {
 		List<Individual> candidateRoles = new ArrayList<>();
 		List<Individual> candidateInds = new ArrayList<>();
 		while (current != null) {
-			T aValue = current.getValue();
+			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
@@ -158,7 +173,7 @@ public class TTree<T extends Assertion> {
 		List<Individual> candidateRoles = new ArrayList<>();
 		List<Individual> candidateInds = new ArrayList<>();
 		while (current != null) {
-			T aValue = current.getValue();
+			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
@@ -189,7 +204,7 @@ public class TTree<T extends Assertion> {
 		List<Individual> candidateRoles = new ArrayList<>();
 		//search up
 		while (current != null) {
-			T aValue = current.getValue();
+			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
@@ -211,7 +226,7 @@ public class TTree<T extends Assertion> {
 		frontier.addAll(childs);
 		while (!frontier.isEmpty()) {
 			current = frontier.remove(0);
-			T aValue = current.getValue();
+			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
@@ -229,18 +244,27 @@ public class TTree<T extends Assertion> {
 		return allCases;
 	}
 	
+	public TTree<T> getRoot() {
+		TTree<T> current = this;
+
+		while (current.getParent() != null) {
+			current = current.getParent();	
+		}
+		return current;
+	}
+	
 	public String toString(){
 		return "N(" + this.getValue() + ")";
 	}
 	
 	
-	public String print(){
-		return this.print("");
+	public String repr(){
+		return this.repr("");
 	}
 		
 	
 	//└──├──│
-	private String print(String prefix) {
+	private String repr(String prefix) {
 		StringBuffer s = new StringBuffer();
 		//s.append(prefix);
 		if (!this.isExpandable())
@@ -252,13 +276,13 @@ public class TTree<T extends Assertion> {
 			TTree<T> child = this.getChildren().get(i);
 			s.append(prefix);
 			s.append("├── ");
-			s.append(child.print(prefix+"|   ")); 
+			s.append(child.repr(prefix+"|   ")); 
 		}
 		if (!this.getChildren().isEmpty()) {
 			TTree<T> child = this.getChildren().get(this.getChildren().size()-1);
 			s.append(prefix);
 			s.append("└── ");
-			s.append(child.print(prefix+"    "));
+			s.append(child.repr(prefix+"    "));
 		}
 		return s.toString();
 	}
