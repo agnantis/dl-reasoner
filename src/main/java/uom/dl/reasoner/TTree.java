@@ -173,11 +173,11 @@ public class TTree<T extends Assertion> {
 		return false;
 	}
 	
+	
 	public Map<TTree<T>, List<Individual>> getUnspecifiedFiller(Role role, Concept concept, Individual ind) {
-		Map<TTree<T>, List<Individual>> allCases = new HashMap<TTree<T>, List<Individual>>();
+		Map<TTree<T>, List<Individual>> allCases = new HashMap<>();
 		TTree<T> current = this;
 		List<Individual> candidateRoles = new ArrayList<>();
-		List<Individual> existingInds = new ArrayList<>();
 		//search up
 		while (current != null) {
 			T aValue = current.getValue();

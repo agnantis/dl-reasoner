@@ -97,6 +97,13 @@ public class TableauxAlgorithmWithAssertions {
 				new ForAllConcept(R, 
 						new UnionConcept(new NotConcept(A), new NotConcept(B)))
 			));
+		
+		conSet = new HashSet<>(Arrays.asList(
+				new ExistsConcept(R, A),
+				new ExistsConcept(R, B),
+				new ForAllConcept(R, 
+						new UnionConcept(new NotConcept(A), new NotConcept(B)))
+			));
 			
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
@@ -119,7 +126,6 @@ public class TableauxAlgorithmWithAssertions {
 			return 0;
 			
 		}
-		
 	};
 	
 	
