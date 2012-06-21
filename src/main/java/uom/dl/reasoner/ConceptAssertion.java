@@ -17,7 +17,7 @@ import uom.dl.utils.ConceptFactory;
 
 public class ConceptAssertion implements Assertion {
 	private final Concept concept;
-	private final Individual ind;
+	private Individual ind;
 	
 	public ConceptAssertion(Concept concept, Individual ind) {
 		this.concept = concept;
@@ -114,6 +114,17 @@ public class ConceptAssertion implements Assertion {
 		}
 		
 		return false;
+	}
+
+	@Override
+	public void setIndividualA(Individual ind) {
+		this.ind = ind;
+	}
+
+	@Override
+	public Assertion getACopy() {
+		ConceptAssertion ass = new ConceptAssertion(this.concept, new Individual(this.ind.getName()));
+		return ass;
 	}
 
 }

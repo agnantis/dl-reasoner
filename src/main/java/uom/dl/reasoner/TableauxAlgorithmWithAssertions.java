@@ -35,6 +35,7 @@ public class TableauxAlgorithmWithAssertions {
 		while (!frontier.isEmpty()) {
 			TTree<Assertion> current = frontier.remove(0);
 			if (current.getParent() != parent) {
+				TTree<Assertion> newTree = new TTree<>(tree);
 				return new Model(tree, true);
 			}
 			parent = current;
@@ -47,8 +48,6 @@ public class TableauxAlgorithmWithAssertions {
 					return new Model(tree, false);
 				}			
 			}
-			//System.out.println(">>>> " + current);
-			//new Model(tree, true).printModel(true);
 			//add its children
 			if (!current.getChildren().isEmpty()) {
 				//sort children: union/intersection proceeds
@@ -58,6 +57,7 @@ public class TableauxAlgorithmWithAssertions {
 			}
 			
 		}	
+		
 		//printModel(tree, true);
 		return new Model(tree, true);
 	}
@@ -105,6 +105,15 @@ public class TableauxAlgorithmWithAssertions {
 						new UnionConcept(new NotConcept(A), new NotConcept(B)))
 			));
 			
+		//////////////
+		TTree<Assertion> tree1 = new TTree<Assertion>(new ConceptAssertion(A, new Individual("a")));
+		System.out.println("Original: " + tree1);
+		TTree<Assertion> tree2 = new TTree<>(tree1);
+		System.out.println("Copy: " + tree2);
+		tree1.getValue().setIndividualA(new Individual("b"));
+		System.out.println("Original(2): " + tree1);
+		System.out.println("Copy(2): " + tree2);
+		//////////////
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);

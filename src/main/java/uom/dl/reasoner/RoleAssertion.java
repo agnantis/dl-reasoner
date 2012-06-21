@@ -6,8 +6,8 @@ import uom.dl.elements.Role;
 
 public class RoleAssertion implements BinaryAssertion {
 	private final Role role;
-	private final Individual indA;
-	private final Individual indB;
+	private Individual indA;
+	private Individual indB;
 
 	public RoleAssertion(Role role, Individual indA, Individual indB) {
 		this.role = role;
@@ -66,6 +66,19 @@ public class RoleAssertion implements BinaryAssertion {
 				&& getIndividualB().equals(other.getIndividualB())
 				&& getElement().equals(other);
 		
+	}
+	
+	@Override
+	public void setIndividualA(Individual ind) {
+		this.indA = ind;
+	}
+	
+	@Override
+	public Assertion getACopy() {
+		Individual ind1 = new Individual(this.indA.getName());
+		Individual ind2 = new Individual(this.indB.getName());
+		RoleAssertion ass = new RoleAssertion(this.role, ind1, ind2);
+		return ass;
 	}
 
 }

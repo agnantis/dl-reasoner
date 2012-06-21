@@ -1,18 +1,14 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.management.relation.RoleStatus;
 
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
-import uom.dl.reasoner.Interpretation.RoleCouple;
 
 public class TTree<T extends Assertion> {
 	public static final boolean ADD_IN_PARALLEL = true;
@@ -22,6 +18,19 @@ public class TTree<T extends Assertion> {
 	private List<TTree<T>> children = new ArrayList<>();
 	private TTree<T> parent = null;
 	private boolean isExpandable = true;
+	
+	//A copy constructor;
+	@SuppressWarnings("unchecked")
+	public TTree(TTree<T> tree) {
+		//this(tree.getValue());
+		///*TTree<T> newTree*/ this = new TTree<>(value);
+		this.value = (T) tree.getValue().getACopy();
+		for (TTree<T> child : children) {
+			TTree<T> newChild = new TTree<>(child);
+			this.add(newChild);
+		}
+		this.isExpandable = tree.isExpandable;		
+	}
 
 	public TTree(T c) {
 		this.value = c;
