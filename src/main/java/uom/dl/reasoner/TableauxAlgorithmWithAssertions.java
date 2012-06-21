@@ -2,6 +2,8 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
+import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
@@ -27,8 +31,13 @@ public class TableauxAlgorithmWithAssertions {
 		List<TTree<Assertion>> frontier = new ArrayList<>();
 		TTree<Assertion> tree = new TTree<Assertion>(assertion);
 		frontier.add(tree);
+		TTree<Assertion> parent = null;
 		while (!frontier.isEmpty()) {
 			TTree<Assertion> current = frontier.remove(0);
+			if (current.getParent() != parent) {
+				return new Model(tree, true);
+			}
+			parent = current;
 			Assertion value = current.getValue();
 			if (!value.isAtomic()) {
 				value.executeRule(current);
@@ -42,6 +51,8 @@ public class TableauxAlgorithmWithAssertions {
 			//new Model(tree, true).printModel(true);
 			//add its children
 			if (!current.getChildren().isEmpty()) {
+				//sort children: union/intersection proceeds
+				Collections.sort(current.getChildren(), comparator);
 				//depth first search
 				frontier.addAll(0, current.getChildren());
 			}
@@ -94,6 +105,21 @@ public class TableauxAlgorithmWithAssertions {
 			System.out.println(model.getInterpretation());
 	}
 	
+	private final static Comparator<TTree<Assertion>> comparator = new Comparator<TTree<Assertion>>() {
+
+		@Override
+		public int compare(TTree<Assertion> o1, TTree<Assertion> o2) {
+			DLElement e1 = o1.getValue().getElement();
+			DLElement e2 = o2.getValue().getElement();
+			if (e1 instanceof BinaryConcept)
+				return -1;
+			if (e2 instanceof BinaryConcept)
+				return 1;
+			return 0;
+			
+		}
+		
+	};
 	
 	
 }
