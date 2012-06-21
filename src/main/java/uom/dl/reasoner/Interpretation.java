@@ -80,12 +80,11 @@ public class Interpretation {
 				Set<RoleCouple> couple = roleAssertions.get(c);
 				sb.append("  " + c + " = {");
 				for (RoleCouple ind : couple) {
-					sb.append(ind + ", ");
+					sb.append(ind + ",");
 				}
 				sb.deleteCharAt(sb.length()-1);
 				sb.append("}\n");
 			}
-			sb.append("}\n");
 		}
 		if (!conceptAssertions.keySet().isEmpty()) {
 			for (Concept c : conceptAssertions.keySet()) {

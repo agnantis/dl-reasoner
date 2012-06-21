@@ -7,6 +7,7 @@ import java.util.Set;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
+import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.Role;
@@ -74,6 +75,19 @@ public class ConceptAssertion implements Assertion {
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
 			model.append(new ArrayList<>(assertions), TTree.ADD_IN_PARALLEL);
+			return true;
+		}
+		if (concept instanceof ForAllConcept) {
+			ForAllConcept ec = (ForAllConcept) concept;
+			Concept c = ec.getConceptA();
+			Role role = ec.getRole();
+			List<Individual> indToBeAdded = model.getUnspecifiedFiller(role, c, getIndividualA());
+			List<Assertion> toBeAdded = new ArrayList<>(indToBeAdded.size());
+			for (Individual i : indToBeAdded) {
+				//add C(i), 
+				toBeAdded.add(new ConceptAssertion(c, i));
+			}
+			model.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
 			return true;
 		}
 		if (concept instanceof ExistsConcept) {

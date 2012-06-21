@@ -170,6 +170,29 @@ public class TTree<T extends Assertion> {
 		return false;
 	}
 	
+	public List<Individual> getUnspecifiedFiller(Role role, Concept concept, Individual ind) {
+		TTree<T> current = this;
+		List<Individual> candidateRoles = new ArrayList<>();
+		List<Individual> existingInds = new ArrayList<>();
+		//search down
+		while (current != null) {
+			T aValue = current.getValue();
+			if (aValue instanceof RoleAssertion) {
+				RoleAssertion ra = (RoleAssertion) aValue;
+				DLElement el = ra.getElement();
+				if (role.equals(el) && ind.equals(ra.getIndividualA()))
+					candidateRoles.add(ra.getIndividualB());
+			} else if (aValue instanceof ConceptAssertion) {
+				if (concept.equals(aValue.getElement()))
+					existingInds.add(aValue.getIndividualA());
+			}
+			current = current.getParent();
+		}
+		//find individuals
+		candidateRoles.removeAll(candidateRoles);
+		return candidateRoles;
+	}
+	
 	public String toString(){
 		return "N(" + this.getValue() + ")";
 	}
