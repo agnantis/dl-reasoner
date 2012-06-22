@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
@@ -83,7 +84,7 @@ public class ConceptAssertion implements Assertion {
 			ForAllConcept ec = (ForAllConcept) concept;
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
-			Map<TTree<Assertion>, List<Individual>> casesBeAdded = model.getUnspecifiedFiller(role, c, getIndividualA());
+			Map<TTree<Assertion>, List<Individual>> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
 			for (TTree<Assertion> tree : casesBeAdded.keySet()) {
 				List<Individual> theList = casesBeAdded.get(tree);
 				List<Assertion> toBeAdded = new ArrayList<>(theList.size());
@@ -111,6 +112,13 @@ public class ConceptAssertion implements Assertion {
 				model.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
 				return true;
 			}
+		}
+		if (concept instanceof AtMostConcept) {
+			AtMostConcept amc = (AtMostConcept) concept;
+			Concept c = amc.getConceptA();
+			Role role = amc.getRole();
+			int card = amc.getCardinality();
+			//model.getFiller(role, c, ind);
 		}
 		
 		return false;

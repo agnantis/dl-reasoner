@@ -26,7 +26,7 @@ public class TTree<T extends Assertion> {
 		///*TTree<T> newTree*/ this = new TTree<>(value);
 		this.value = tree.getValue().getACopy();
 		for (TTree<T> child : tree.getChildren()) {
-			TTree<T> newChild = new TTree<>(child, false);
+			TTree<T> newChild = new TTree<T>(child, false);
 			this.add(newChild);
 		}
 		this.isExpandable = tree.isExpandable;	
@@ -146,6 +146,14 @@ public class TTree<T extends Assertion> {
 		return true;
 	}
 	
+	/**
+	 * Returns all individuals x, such that:
+	 * R(ind, x) AND C(x)
+	 * @param role
+	 * @param concept
+	 * @param ind
+	 * @return Returns all individuals x, such that R(ind, x) AND C(x)
+	 */
 	public List<Individual> getFiller(Role role, Concept concept, Individual ind) {
 		TTree<T> current = this;
 		List<Individual> candidateRoles = new ArrayList<>();
@@ -168,6 +176,14 @@ public class TTree<T extends Assertion> {
 		return candidateInds;
 	}
 	
+	/**
+	 * Checks if there is an individual x, such that:
+	 * R(ind, x) AND C(x)
+	 * @param role
+	 * @param concept
+	 * @param ind
+	 * @return true if exits, otherwise false
+	 */
 	public boolean containsFiller(Role role, Concept concept, Individual ind) {
 		TTree<T> current = this;
 		List<Individual> candidateRoles = new ArrayList<>();
@@ -197,8 +213,14 @@ public class TTree<T extends Assertion> {
 		return false;
 	}
 	
-	
-	public Map<TTree<T>, List<Individual>> getUnspecifiedFiller(Role role, Concept concept, Individual ind) {
+	/**
+	 * Returns a map with key a TTree object and its corresponding value
+	 * a list of all individuals x which belong to the TTree and R(ind,x)
+	 * @param role
+	 * @param ind
+	 * @return
+	 */
+	public Map<TTree<T>, List<Individual>> getUnspecifiedFiller(Role role, Individual ind) {
 		Map<TTree<T>, List<Individual>> allCases = new HashMap<>();
 		TTree<T> current = this;
 		List<Individual> candidateRoles = new ArrayList<>();

@@ -27,9 +27,13 @@ import uom.dl.utils.ConceptFactory;
 public class TableauxAlgorithmWithAssertions {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
 	
-	public static Model runTableauxForConcept(Assertion assertion) {
-		List<TTree<Assertion>> frontier = new ArrayList<>();
+	public static Model findModel(Assertion assertion) {
 		TTree<Assertion> tree = new TTree<Assertion>(assertion);
+		return runTableauxForConcept(tree);
+	}
+	
+	public static Model runTableauxForConcept(TTree<Assertion> tree) {
+		List<TTree<Assertion>> frontier = new ArrayList<>();
 		frontier.add(tree);
 		TTree<Assertion> parent = null;
 		while (!frontier.isEmpty()) {
@@ -127,7 +131,7 @@ public class TableauxAlgorithmWithAssertions {
 		//////////////
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
-		Model model = TableauxAlgorithmWithAssertions.runTableauxForConcept(ca);
+		Model model = TableauxAlgorithmWithAssertions.findModel(ca);
 		model.printModel(true);
 		if (model.isSatisfiable())
 			System.out.println(model.getInterpretation());
