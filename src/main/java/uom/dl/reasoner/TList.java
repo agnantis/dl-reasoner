@@ -229,6 +229,36 @@ public class TList<T extends Assertion> {
 		return current;
 	}
 	
+	public static <T extends Assertion> boolean revalidateModel(TList<T> model) {
+		TList<T> current = model.getRoot();
+		List<DLElement> atomicConcepts = new ArrayList<>();
+		while (current != null) {
+			current.isExpandable = true; //by default
+			Assertion nodeValue = current.getValue();
+			if (nodeValue.isAtomic()) {
+				//check for clash
+				boolean clashFound = false;
+				for (DLElement c : atomicConcepts) {
+					if (nodeValue.isComplement(c)) {
+						clashFound = true;
+						break;
+					}						
+				}
+				if (clashFound) {
+					//remove next assertions
+					//TODO: should I really remove others?
+					current.next = null;
+					current.isExpandable = false;
+					return false;
+				} else { //add it to existing atomic concepts
+					atomicConcepts.add(nodeValue);
+				}
+			}
+			current = current.getNext();
+		}
+		return true;
+	}
+	
 	public String toString(){
 		return "N(" + this.getValue() + ")";
 	}
