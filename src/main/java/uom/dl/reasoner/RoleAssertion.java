@@ -77,6 +77,11 @@ public class RoleAssertion implements BinaryAssertion {
 	}
 	
 	@Override
+	public void setIndividualB(Individual ind) {
+		this.indB = ind;
+	}
+	
+	@Override
 	public Assertion getACopy() {
 		Individual ind1 = new Individual(this.indA.getName());
 		Individual ind2 = new Individual(this.indB.getName());

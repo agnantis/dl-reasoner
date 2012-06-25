@@ -14,6 +14,7 @@ import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
+import uom.dl.elements.Individual.IndividualPair;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
@@ -128,7 +129,17 @@ public class ConceptAssertion implements Assertion {
 			Concept c = amc.getConceptA();
 			Role role = amc.getRole();
 			int card = amc.getCardinality();
-			//model.getFiller(role, c, ind);
+			List<Individual> allFillers = model.getFillers(role, ind);
+			List<TList<Assertion>> newModels = new ArrayList<>(allFillers.size());
+			if (allFillers.size() < card) {
+				//find all possible couples
+				List<IndividualPair> subPairs = Individual.getPairs(allFillers);
+				//create models for each substitution
+				TList<Assertion> newModel = TList.duplicate(model, true);
+				boolean containsClash = !TList.revalidateModel(newModel);
+				if (!containsClash)
+				
+			}
 		}
 		
 		return new ArrayList<>(0);

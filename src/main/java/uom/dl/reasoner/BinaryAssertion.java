@@ -4,5 +4,5 @@ import uom.dl.elements.Individual;
 
 public interface BinaryAssertion extends Assertion {
 	public Individual getIndividualB();
-
+	public void setIndividualB(Individual ind);
 }

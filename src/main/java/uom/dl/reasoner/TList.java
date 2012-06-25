@@ -10,8 +10,6 @@ import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
 
 public class TList<T extends Assertion> {
-	public static final boolean ADD_IN_PARALLEL = true;
-	public static final boolean ADD_IN_SEQUENCE = !ADD_IN_PARALLEL;
 	
 	private Assertion value;
 	private TList<T> next = null;
@@ -193,6 +191,29 @@ public class TList<T extends Assertion> {
 	}
 	
 	/**
+	 * Returns all individuals x, such that:
+	 * R(ind, x)
+	 * @param role
+	 * @param ind
+	 * @return Returns all individuals x, such that R(ind, x)
+	 */
+	public List<Individual> getFillers(Role role, Individual ind) {
+		TList<T> current = this.getRoot();
+		List<Individual> roleFillers = new ArrayList<>();
+		while (current != null) {
+			Assertion aValue = current.getValue();
+			if (aValue instanceof RoleAssertion) {
+				RoleAssertion ra = (RoleAssertion) aValue;
+				DLElement el = ra.getElement();
+				if (role.equals(el) && ind.equals(ra.getIndividualA()))
+					roleFillers.add(ra.getIndividualB());
+			} 
+			current = current.getNext();
+		}
+		return roleFillers;
+	}
+	
+	/**
 	 * Checks if there is an individual x, such that:
 	 * R(ind, x) AND C(x)
 	 * @param role
@@ -263,6 +284,27 @@ public class TList<T extends Assertion> {
 		return current;
 	}
 	
+	public void substituteAssertions(Individual from, Individual to) {
+		TList<T> current = this.getRoot();
+		while (current != null){
+			Assertion assertion = current.getValue();
+			if (assertion.getIndividualA().equals(from)) {
+				assertion.setIndividualA(to);
+			} else if (assertion instanceof BinaryAssertion) {
+				BinaryAssertion ra = (BinaryAssertion) assertion;
+				if (ra.getIndividualB().equals(from))
+					ra.setIndividualB(to);
+			}
+			current = current.getNext();
+		}
+	}
+	
+	/**
+	 * Checks if a model is still valid (does not contain any clash). This method should be called
+	 * each time an individual substitution is happening.  
+	 * @param model
+	 * @return
+	 */
 	public static <T extends Assertion> boolean revalidateModel(TList<T> model) {
 		TList<T> current = model.getRoot();
 		List<DLElement> atomicConcepts = new ArrayList<>();
@@ -283,6 +325,10 @@ public class TList<T extends Assertion> {
 					//TODO: should I really remove others?
 					current.next = null;
 					current.isExpandable = false;
+					//to avoid memory leaks, like: 
+					//model=(AUB)(b)->A(b)->(-A(b))->*B(b)->C(a) then 
+					//model=(AUB)(b)->A(b)->*(-A(b)), otherwise its behavior is nondeterministic
+					model = current;
 					return false;
 				} else { //add it to existing atomic concepts
 					atomicConcepts.add(nodeValue);
