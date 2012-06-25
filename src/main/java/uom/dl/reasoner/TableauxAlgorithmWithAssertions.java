@@ -64,6 +64,32 @@ public class TableauxAlgorithmWithAssertions {
 		//printModel(tree, true);
 		return new Model(tree, true);
 	}
+	
+	public static Model runTableauxForConcept(TList<Assertion> model) {
+		TList<Assertion> current = model;
+		while (current != null) {
+			Assertion value = current.getValue();
+			if (!value.isAtomic()) {
+				List<TList<Assertion>> newModels = value.executeRule(current);
+				//check if a model exists
+				if (!current.modelExists()) {
+					//printModel(tree, true);
+					return new Model(list, false);
+				}			
+			}
+			//add its children
+			if (!current.getChildren().isEmpty()) {
+				//sort children: union/intersection proceeds
+				Collections.sort(current.getChildren(), comparator);
+				//depth first search
+				frontier.addAll(0, current.getChildren());
+			}
+			
+		}	
+		
+		//printModel(tree, true);
+		return new Model(list, true);
+	}
 
 	public static void main(String[] args) {
 		AtomicConcept A = new AtomicConcept("A");

@@ -3,6 +3,7 @@ package uom.dl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
+import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
@@ -17,23 +18,46 @@ public class TList<T extends Assertion> {
 	private TList<T> previous = null;
 	private boolean isExpandable = true;
 	
-	public static <T extends Assertion> TList<T> duplicate(TList<T> original) {
+	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
 		if (original == null)
 			return null;
 		
-		original = original.getRoot();
-		TList<T> copyList = new TList<>();
-		while (original != null) {
-			copyList.value = original.getValue().getACopy();
-			copyList.next = new TList<>();
-			copyList = copyList.next;
-			original = original.next;
+		//original = original.getRoot();
+		TList<T> newCopy = new TList<>();
+		TList<T> current = original;
+		TList<T> newCurrent = newCopy;
+		//copy down
+		while (current != null) {
+			if (deepCopy)
+				newCurrent.value = current.getValue().getACopy();
+			else
+				newCurrent.value = current.getValue();
+			newCurrent.isExpandable = current.isExpandable;
+			TList<T> next = new TList<>();
+			newCurrent.addChild(next, true);
+			newCurrent = newCurrent.getNext();
+			current = current.getNext();
 		}
 		//remove last empty child
-		copyList = copyList.getPrevious();
-		copyList.next = null;
+		newCurrent = newCurrent.getPrevious();
+		newCurrent.next = null;
+		//copy up
+		current = original;
+		newCurrent = newCopy;
+		while (current.previous != null) {
+			current = current.previous;
+			TList<T> tmp = new TList<>();
+			if (deepCopy)
+				tmp.value = current.getValue().getACopy();
+			else
+				tmp.value = current.getValue();
+			tmp.isExpandable = current.isExpandable;
+			tmp.addChild(newCurrent, newCurrent.isExpandable);
+			newCurrent = newCurrent.previous;
+		}
 		
-		return copyList;
+		
+		return newCopy;
 	}
 		
 		
@@ -279,17 +303,31 @@ public class TList<T extends Assertion> {
 		s.append("\n");
 		if (this.hasNext()) {
 			TList<T> child = this.getNext();
-			s.append("    |");
+			s.append("  |\n");
 			s.append(child.repr());
 		}
 		return s.toString();
 	}
 	
 	public static void main(String[] args) {
-		/*
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept B1 = new AtomicConcept("B1");
+		Individual a = new Individual("a");
+		Assertion a1 = new ConceptAssertion(A, a);
+		Assertion a2 = new ConceptAssertion(B, a);
+		Assertion a3 = new ConceptAssertion(B1, a);
+		TList<Assertion> orig1 = new TList<>(a1);
+		TList<Assertion> orig2 = new TList<>(a2);
+		TList<Assertion> orig3 = new TList<>(a3);
+		orig1.setNext(orig2);
+		orig2.setNext(orig3);
+		
+		
+		System.out.println(orig2.repr());
+		TList<Assertion> copy1 = TList.duplicate(orig3, false);
+		System.out.println(copy1.repr());
+		/*
 		AtomicConcept B2 = new AtomicConcept("B2");
 		AtomicConcept B3 = new AtomicConcept("B3");
 		AtomicConcept C = new AtomicConcept("C");
