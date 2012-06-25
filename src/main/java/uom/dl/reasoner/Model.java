@@ -3,19 +3,17 @@ package uom.dl.reasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
-import uom.dl.elements.Role;
-import uom.dl.utils.TreeVisualizer;
+import uom.dl.utils.TListVisualizer;
 
 
 public class Model {
 	private static final Logger log = LoggerFactory.getLogger(Model.class);
 	private final boolean isSatisfiable;
-	private final TTree<Assertion> extension;
+	private final TList<Assertion> extension;
 	private Interpretation interpretation;
 	
-	public Model(TTree<Assertion> extension, boolean isSatisfiable) {
+	public Model(TList<Assertion> extension, boolean isSatisfiable) {
 		this.extension = extension;
 		this.isSatisfiable = isSatisfiable;
 	}
@@ -24,7 +22,7 @@ public class Model {
 		return isSatisfiable;
 	}
 
-	public TTree<Assertion> getExtension() {
+	public TList<Assertion> getExtension() {
 		return extension;
 	}
 	
@@ -38,18 +36,12 @@ public class Model {
 		
 		if (this.interpretation == null) {
 			this.interpretation = new Interpretation();
-			TTree<Assertion> curNode = this.extension; 
+			TList<Assertion> curNode = this.extension.getRoot(); 
 			while (curNode != null) {
 				Assertion assertion = curNode.getValue();
 				this.interpretation.addAssertion(assertion);
-				TTree<Assertion> tempNode = curNode;
-				curNode = null;
-				for (TTree<Assertion> a : tempNode.getChildren()) {
-					if (a.isExpandable()) {
-						curNode = a;
-						break;
-					}
-				}
+				TList<Assertion> tempNode = curNode;
+				curNode = tempNode.getNext();
 			}			
 		}
 		
@@ -58,13 +50,13 @@ public class Model {
 	
 	public void printModel(boolean showImage) {
 		if (this.isSatisfiable()) {
-			System.out.println("There is no model for concept: " + this.initialConcept());
-		} else {
 			System.out.println("There is a model for concept: " + this.initialConcept());
+		} else {
+			System.out.println("There is no model for concept: " + this.initialConcept());
 		}
 		System.out.println("Tableaux Extension:");
-		System.out.println(getExtension().repr());
-		TreeVisualizer<Assertion> visual = new TreeVisualizer<Assertion>(getExtension());
+		System.out.println(getExtension().getRoot().repr());
+		TListVisualizer<Assertion> visual = new TListVisualizer<Assertion>(getExtension().getRoot());
 		if (showImage)
 			visual.showGraph();
 	}

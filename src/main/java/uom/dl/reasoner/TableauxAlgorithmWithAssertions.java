@@ -2,10 +2,9 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,9 +27,12 @@ public class TableauxAlgorithmWithAssertions {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
 	
 	public static Model findModel(Assertion assertion) {
-		TTree<Assertion> tree = new TTree<Assertion>(assertion);
-		return runTableauxForConcept(tree);
+		//TTree<Assertion> tree = new TTree<Assertion>(assertion);
+		//return runTableauxForConcept(tree);
+		TList<Assertion> list = new TList<Assertion>(assertion);
+		return runTableauxForConcept(list);
 	}
+	/*
 	
 	public static Model runTableauxForConcept(TTree<Assertion> tree) {
 		List<TTree<Assertion>> frontier = new ArrayList<>();
@@ -64,31 +66,52 @@ public class TableauxAlgorithmWithAssertions {
 		//printModel(tree, true);
 		return new Model(tree, true);
 	}
+	*/
 	
 	public static Model runTableauxForConcept(TList<Assertion> model) {
 		TList<Assertion> current = model;
-		while (current != null) {
+		List<TList<Assertion>> newModels = new ArrayList<>();
+		
+		while (true) {
 			Assertion value = current.getValue();
 			if (!value.isAtomic()) {
-				List<TList<Assertion>> newModels = value.executeRule(current);
+				newModels = value.executeRule(current);
 				//check if a model exists
-				if (!current.modelExists()) {
-					//printModel(tree, true);
-					return new Model(list, false);
-				}			
-			}
-			//add its children
-			if (!current.getChildren().isEmpty()) {
-				//sort children: union/intersection proceeds
-				Collections.sort(current.getChildren(), comparator);
-				//depth first search
-				frontier.addAll(0, current.getChildren());
-			}
-			
-		}	
-		
-		//printModel(tree, true);
-		return new Model(list, true);
+				for (Iterator<TList<Assertion>> it = newModels.iterator(); it.hasNext();) {
+					TList<Assertion> newModel = it.next();
+					//check for a clash
+					if (!newModel.modelExists()) {
+						//discard model
+						it.remove();
+					} else { //check for model
+						if (!newModel.canBeFurtherExpanded()) {
+							//model found
+							return new Model(newModel, true);
+						}
+					}
+				}
+				//add new models
+				if (!newModels.isEmpty()) {
+					for (TList<Assertion> list : newModels){
+						Model aModel = runTableauxForConcept(list);
+						if (aModel.isSatisfiable()) {
+							//model found
+							return aModel;
+						} 
+					}
+					return new Model(model, false);
+				} else {
+					return new Model(model, false);
+				}
+			} else {
+				//value is atomic, so move to the next
+				if (current.getNext() == null)
+					return new Model(current, true);
+				current = current.getNext();
+			}			
+		}
+		//no model found
+		//return new Model(model, false);
 	}
 
 	public static void main(String[] args) {
@@ -133,28 +156,12 @@ public class TableauxAlgorithmWithAssertions {
 				new ForAllConcept(R, 
 						new UnionConcept(new NotConcept(A), new NotConcept(B)))
 			));
-			
-		//////////////
-		TTree<Assertion> tree1 = new TTree<Assertion>(new ConceptAssertion(A, new Individual("a")));
-		TTree<Assertion> tree2 = new TTree<Assertion>(new ConceptAssertion(B, new Individual("a")));
-		TTree<Assertion> tree3 = new TTree<Assertion>(new ConceptAssertion(C, new Individual("a")));
-		TTree<Assertion> tree4 = new TTree<Assertion>(new ConceptAssertion(D, new Individual("a")));
-		tree3.add(tree4);
-		tree1.add(tree2);
-		tree1.add(tree3);
-		System.out.println(tree3.repr());
-		
-		TTree<Assertion> treeCP1 = new TTree<>(tree3, false);
-		TTree<Assertion> treeCP2 = new TTree<>(tree3, true);
-		System.out.println(treeCP1.getRoot().repr());
-		System.out.println(treeCP2.getRoot().repr());
-		System.out.println("Original: " + tree1);
-		TTree<Assertion> tcpTee = new TTree<>(tree1, true);
-		System.out.println("Copy: " + tcpTee);
-		tree1.getValue().setIndividualA(new Individual("b"));
-		System.out.println("Original(2): " + tree1);
-		System.out.println("Copy(2): " + tcpTee);
-		//////////////
+		/*
+		conSet = new HashSet<>(Arrays.asList(
+				(Concept)new UnionConcept(A, B),
+				new ExistsConcept(R, A),
+				new NotConcept(A)
+			));*/
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithmWithAssertions.findModel(ca);

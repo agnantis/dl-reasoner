@@ -1,19 +1,25 @@
 package uom.dl.utils;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import uom.dl.elements.AtomicConcept;
+import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.Constants;
+import uom.dl.elements.DLElement;
+import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.ConceptAssertion;
+import uom.dl.reasoner.TList;
+import uom.dl.reasoner.TTree;
 
 public class ConceptFactory {
 	
@@ -165,5 +171,24 @@ public class ConceptFactory {
 		
 		return assertions;
 	}
+	
+	public final static Comparator<Assertion> ASSERTION_COMPARATOR = new Comparator<Assertion>() {
+
+		@Override
+		public int compare(Assertion o1, Assertion o2) {
+			DLElement e1 = o1.getElement();
+			DLElement e2 = o2.getElement();
+			if (e1 instanceof BinaryConcept)
+				return -1;
+			if (e2 instanceof BinaryConcept)
+				return 1;
+			if (e1 instanceof ExistsConcept)
+				return -1;
+			if (e2 instanceof ExistsConcept)
+				return 1;
+			return 0;
+			
+		}
+	};
 
 }

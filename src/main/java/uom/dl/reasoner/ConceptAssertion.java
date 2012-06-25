@@ -1,6 +1,9 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,40 +65,46 @@ public class ConceptAssertion implements Assertion {
 		if (!(obj instanceof ConceptAssertion))
 			return false;
 		ConceptAssertion other = (ConceptAssertion) obj;
-		return getIndividualA().equals(other.getIndividualA()) && getElement().equals(other);
+		return getIndividualA().equals(other.getIndividualA()) && getElement().equals(other.getElement());
 		
 	}
 
 	@Override
-	public boolean executeRule(TTree<Assertion> model) {
+	public List<TList<Assertion>> executeRule(TList<Assertion> model) {
 		if (concept instanceof IntersectionConcept) {
 			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
-			model.append(new ArrayList<>(assertions), TTree.ADD_IN_SEQUENCE);
-			return true;
+			List<Assertion> assList = new ArrayList<>(assertions);
+			Collections.sort(assList, ConceptFactory.ASSERTION_COMPARATOR);
+			model.append(assList);
+			model = model.getNext();
+			return Arrays.asList(model);
 		}
 		if (concept instanceof UnionConcept) {
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
-			model.append(new ArrayList<>(assertions), TTree.ADD_IN_PARALLEL);
-			return true;
+			List<TList<Assertion>> newModels = new ArrayList<>(assertions.size());
+			for (Assertion a : assertions) {
+				TList<Assertion> newModel = TList.duplicate(model, false);
+				newModel.append(Arrays.asList(a));
+				newModel = newModel.getNext();
+				newModels.add(newModel);
+			}
+			return newModels;
 		}
 		if (concept instanceof ForAllConcept) {
 			ForAllConcept ec = (ForAllConcept) concept;
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
-			Map<TTree<Assertion>, List<Individual>> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
-			for (TTree<Assertion> tree : casesBeAdded.keySet()) {
-				List<Individual> theList = casesBeAdded.get(tree);
-				List<Assertion> toBeAdded = new ArrayList<>(theList.size());
-				for (Individual i : theList) {
-					//add C(i), 
-					toBeAdded.add(new ConceptAssertion(c, i));
-				}			
-				tree.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
+			List<Individual> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
+			List<Assertion> toBeAdded = new ArrayList<>(casesBeAdded.size());
+			for (Individual i : casesBeAdded) {
+				//add C(i), 
+				toBeAdded.add(new ConceptAssertion(c, i));
 			}
-			
-			return true;
+			model.append(toBeAdded);
+			model = model.getNext();
+			return Arrays.asList(model);
 		}
 		if (concept instanceof ExistsConcept) {
 			ExistsConcept ec = (ExistsConcept) concept;
@@ -109,8 +118,9 @@ public class ConceptAssertion implements Assertion {
 				List<Assertion> toBeAdded = new ArrayList<>(2);
 				toBeAdded.add(new ConceptAssertion(c, newInd));
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
-				model.append(toBeAdded, TTree.ADD_IN_SEQUENCE);
-				return true;
+				model.append(toBeAdded);
+				model = model.getNext();
+				return Arrays.asList(model);
 			}
 		}
 		if (concept instanceof AtMostConcept) {
@@ -121,7 +131,7 @@ public class ConceptAssertion implements Assertion {
 			//model.getFiller(role, c, ind);
 		}
 		
-		return false;
+		return new ArrayList<>(0);
 	}
 
 	@Override

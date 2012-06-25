@@ -1,5 +1,8 @@
 package uom.dl.reasoner;
 
+import java.util.Arrays;
+import java.util.List;
+
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
@@ -33,7 +36,7 @@ public class RoleAssertion implements BinaryAssertion {
 	@Override
 	public boolean isAtomic() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -48,8 +51,8 @@ public class RoleAssertion implements BinaryAssertion {
 	}
 
 	@Override
-	public boolean executeRule(TTree<Assertion> model) {
-		return true;
+	public List<TList<Assertion>> executeRule(TList<Assertion> model) {
+		return Arrays.asList(model);
 	}
 	
 	@Override

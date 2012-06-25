@@ -91,17 +91,25 @@ public class TList<T extends Assertion> {
 		this.next = child;
 	}
 	
-	public boolean isExpandable() {
+	public boolean isCurrentExpandable() {
 		return this.isExpandable;
 	}
 	
 	public boolean modelExists() {
 		if (isLeaf()) {
 			//this node causes a clash
-			return isExpandable();
+			return isCurrentExpandable();
 		}
 		//check its next
 		return getNext().modelExists();
+	}
+	
+	public boolean canBeFurtherExpanded() {
+		if (isLeaf())
+			return false;
+		if (!this.getValue().isAtomic())
+			return true;
+		return this.getNext().canBeFurtherExpanded();
 	}
 	
 	public TList<T> getPrevious() {
@@ -110,12 +118,12 @@ public class TList<T extends Assertion> {
 	
 	public void append(List<T> children){
 		TList<T> current = this;
-		if (!current.isExpandable())
+		if (!current.isCurrentExpandable())
 			return;
 		
 		while (!current.isLeaf()) {
 			current = current.getNext();
-			if (!current.isExpandable())
+			if (!current.isCurrentExpandable())
 				return;
 		}
 		
@@ -137,11 +145,13 @@ public class TList<T extends Assertion> {
 		if (c.isAtomic()) {
 			TList<T> current = this;
 			while (current != null) {
-				if (c.isComplement(current.getValue())) {
+				Assertion ass = current.getValue();
+				if (c.isComplement(ass)) {
 					clashFound = true;
+					break;
 				}
 				//if it already exists, do not add it
-				if (current.getValue().equals(c))
+				if (ass.equals(c))
 					return false;
 				
 				//check parent
@@ -284,7 +294,20 @@ public class TList<T extends Assertion> {
 	}
 	
 	public String toString(){
-		return "N(" + this.getValue() + ")";
+		//return "N(" + this.getValue() + ")";
+		StringBuffer sb = new StringBuffer();
+		TList<T> root = this.getRoot();
+		if (root == this) 
+			sb.append("*");
+		sb.append(root.getValue());
+		while (root.hasNext()) {
+			sb.append(" -> ");
+			root = root.getNext();
+			if (root == this) 
+				sb.append("*");
+			sb.append(root.getValue());
+		}
+		return sb.toString();
 	}
 	
 	/*
@@ -294,10 +317,10 @@ public class TList<T extends Assertion> {
 		
 	
 	//└──├──│
-	private String repr() {
+	public String repr() {
 		StringBuffer s = new StringBuffer();
 		//s.append(prefix);
-		if (!this.isExpandable())
+		if (!this.isCurrentExpandable())
 			s.append("*");
 		s.append(this.getValue().toString());
 		s.append("\n");
