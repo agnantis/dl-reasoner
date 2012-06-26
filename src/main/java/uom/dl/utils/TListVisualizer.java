@@ -31,6 +31,7 @@ public class TListVisualizer {
 	public static <T extends Assertion> String toDotFormat(TList<T> list) {
 		StringBuffer s = new StringBuffer();
 		s.append("digraph G {\n");
+		s.append("\tlabelloc = t;\n");
 		s.append("\tlabel=\"The concept IS satisfiable\";\n");
 		s.append(toDotFormatInner(list));
 		s.append("}\n");
@@ -166,7 +167,8 @@ public class TListVisualizer {
 		Set<String> uniqueLines = new HashSet<>(Arrays.asList(lines));
 		s = new StringBuffer();
 		s.append("digraph G_all {\n");
-		s.append("\tlabel=\"The concept IS NOT satisfiable\";\n");
+		s.append("\tlabelloc = t;\n");
+		s.append("\tlabel=\"The concept IS NOT satisfiable\\n\\n\";\n");
 		for (String line : uniqueLines)
 			s.append(line + "\n");
 		

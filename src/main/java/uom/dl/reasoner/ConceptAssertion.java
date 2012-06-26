@@ -2,12 +2,11 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
@@ -79,7 +78,11 @@ public class ConceptAssertion implements Assertion {
 			Collections.sort(assList, ConceptFactory.ASSERTION_COMPARATOR);
 			model.append(assList);
 			model = model.getNext();
-			return Arrays.asList(model);
+			if (model != null) {
+				List<TList<Assertion>> list = new ArrayList<>();
+				list.add(model);
+				return list;
+			}
 		}
 		if (concept instanceof UnionConcept) {
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
@@ -105,7 +108,11 @@ public class ConceptAssertion implements Assertion {
 			}
 			model.append(toBeAdded);
 			model = model.getNext();
-			return Arrays.asList(model);
+			if (model != null) {
+				List<TList<Assertion>> list = new ArrayList<>();
+				list.add(model);
+				return list;
+			}
 		}
 		if (concept instanceof ExistsConcept) {
 			ExistsConcept ec = (ExistsConcept) concept;
@@ -121,7 +128,9 @@ public class ConceptAssertion implements Assertion {
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
 				model.append(toBeAdded);
 				model = model.getNext();
-				return Arrays.asList(model);
+				List<TList<Assertion>> list = new ArrayList<>();
+				list.add(model);
+				return list;
 			}
 		}
 		if (concept instanceof AtMostConcept) {
@@ -147,10 +156,38 @@ public class ConceptAssertion implements Assertion {
 			} else {
 				//move forward
 				model = model.getNext();
-				return Arrays.asList(model);
+				if (model != null) {
+					List<TList<Assertion>> list = new ArrayList<>();
+					list.add(model);
+					return list;
+				}
 			}
 			//do not move forward
-		}		
+		}	
+		if (concept instanceof AtLeastConcept) {
+			AtLeastConcept amc = (AtLeastConcept) concept;
+			Role role = amc.getRole();
+			Concept c = amc.getConceptA();
+			int card = amc.getCardinality();
+			Set<Individual> allFillers = model.getFillers(role, ind);
+			//List<TList<Assertion>> newModels = new ArrayList<>(allFillers.size());
+			List<Assertion> toBeAdded = new ArrayList<>(card);
+			for (int i = allFillers.size(); i < card; ++i) {
+				//create a random individual
+				Individual newInd = new Individual();
+				//add C(x), R(b,x)
+				toBeAdded.add(new ConceptAssertion(c, newInd));
+				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
+			} 
+			if (toBeAdded.size() > 0)
+				model.append(toBeAdded);
+			model = model.getNext();
+			if (model != null) {
+				List<TList<Assertion>> list = new ArrayList<>();
+				list.add(model);
+				return list;
+			}
+		}	
 		return new ArrayList<>(0);
 	}
 

@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
@@ -156,9 +157,14 @@ public class TableauxAlgorithmWithAssertions {
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
-				new ExistsConcept(R, C),
-				new ForAllConcept(R, new UnionConcept(new NotConcept(A), new NotConcept(B))),
-				new AtMostConcept(2, R)
+				//new ExistsConcept(R, C),
+				new ForAllConcept(R, new UnionConcept(new NotConcept(C), new UnionConcept(new NotConcept(A), new NotConcept(B)))),
+				//new AtMostConcept(1, R),
+				new AtLeastConcept(3, R)
+			));
+		conSet = new HashSet<>(Arrays.asList(
+				(Concept)new NotConcept(A),
+				A
 			));
 		/*
 		conSet = new HashSet<>(Arrays.asList(

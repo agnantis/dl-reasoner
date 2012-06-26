@@ -117,6 +117,8 @@ public class TList<T extends Assertion> {
 	}
 	
 	public void append(List<T> children){
+		if (children.isEmpty())
+			return;
 		TList<T> current = this;
 		if (!current.isCurrentExpandable())
 			return;
@@ -126,12 +128,13 @@ public class TList<T extends Assertion> {
 			if (!current.isCurrentExpandable())
 				return;
 		}
+		T child = children.remove(0);
+		TList<T> n = new TList<T>(child);
+		current.setNext(n);
+		current.append(children);
 		
-		for (T c : children){
-			TList<T> n = new TList<T>(c);
-			current.setNext(n);
-			current = n;
-		}
+		//for (T c : children){
+		//}
 		
 	}
 	
