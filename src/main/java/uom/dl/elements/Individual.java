@@ -75,7 +75,7 @@ public class Individual {
 		}
 		
 		public Individual getSecond() {
-			return indA;
+			return indB;
 		}
 		
 		@Override

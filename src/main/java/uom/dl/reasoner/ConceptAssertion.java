@@ -97,7 +97,7 @@ public class ConceptAssertion implements Assertion {
 			ForAllConcept ec = (ForAllConcept) concept;
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
-			List<Individual> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
+			Set<Individual> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
 			List<Assertion> toBeAdded = new ArrayList<>(casesBeAdded.size());
 			for (Individual i : casesBeAdded) {
 				//add C(i), 
@@ -126,22 +126,31 @@ public class ConceptAssertion implements Assertion {
 		}
 		if (concept instanceof AtMostConcept) {
 			AtMostConcept amc = (AtMostConcept) concept;
-			Concept c = amc.getConceptA();
 			Role role = amc.getRole();
 			int card = amc.getCardinality();
-			List<Individual> allFillers = model.getFillers(role, ind);
+			Set<Individual> allFillers = model.getFillers(role, ind);
 			List<TList<Assertion>> newModels = new ArrayList<>(allFillers.size());
-			if (allFillers.size() < card) {
+			if (allFillers.size() > card) {
 				//find all possible couples
-				List<IndividualPair> subPairs = Individual.getPairs(allFillers);
+				List<IndividualPair> subPairs = Individual.getPairs(new ArrayList<>(allFillers));
 				//create models for each substitution
-				TList<Assertion> newModel = TList.duplicate(model, true);
-				boolean containsClash = !TList.revalidateModel(newModel);
-				if (!containsClash)
-				
+				for (IndividualPair pair : subPairs) {
+					TList<Assertion> newModel = TList.duplicate(model, true);
+					newModel.substituteAssertions(pair.getFirst(), pair.getSecond());
+					boolean validModel = TList.revalidateModel(newModel);
+					if (validModel) {
+						newModels.add(newModel);
+					}					
+				}	
+				//do not move forward
+				return newModels;
+			} else {
+				//move forward
+				model = model.getNext();
+				return Arrays.asList(model);
 			}
-		}
-		
+			//do not move forward
+		}		
 		return new ArrayList<>(0);
 	}
 

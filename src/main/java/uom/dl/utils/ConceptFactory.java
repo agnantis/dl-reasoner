@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
@@ -185,6 +186,10 @@ public class ConceptFactory {
 			if (e1 instanceof ExistsConcept)
 				return -1;
 			if (e2 instanceof ExistsConcept)
+				return 1;
+			if (e1 instanceof AtMostConcept)
+				return -1;
+			if (e2 instanceof AtMostConcept)
 				return 1;
 			return 0;
 			

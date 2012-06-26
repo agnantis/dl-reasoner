@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
 import uom.dl.elements.BinaryConcept;
@@ -25,6 +26,7 @@ import uom.dl.utils.ConceptFactory;
 
 public class TableauxAlgorithmWithAssertions {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithmWithAssertions.class);
+	private static List<Model> invalidModels = new ArrayList<>(); 
 	
 	public static Model findModel(Assertion assertion) {
 		//TTree<Assertion> tree = new TTree<Assertion>(assertion);
@@ -81,6 +83,7 @@ public class TableauxAlgorithmWithAssertions {
 					TList<Assertion> newModel = it.next();
 					//check for a clash
 					if (!newModel.modelExists()) {
+						invalidModels.add(new Model(newModel, false));
 						//discard model
 						it.remove();
 					} else { //check for model
@@ -151,10 +154,11 @@ public class TableauxAlgorithmWithAssertions {
 			));
 		
 		conSet = new HashSet<>(Arrays.asList(
-				new ExistsConcept(R, A),
+				(Concept)new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
-				new ForAllConcept(R, 
-						new UnionConcept(new NotConcept(A), new NotConcept(B)))
+				new ExistsConcept(R, C),
+				new ForAllConcept(R, new UnionConcept(new NotConcept(A), new NotConcept(B))),
+				new AtMostConcept(2, R)
 			));
 		/*
 		conSet = new HashSet<>(Arrays.asList(
@@ -165,11 +169,16 @@ public class TableauxAlgorithmWithAssertions {
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithmWithAssertions.findModel(ca);
-		model.printModel(true);
-		if (model.isSatisfiable())
+		if (model.isSatisfiable()) {
 			System.out.println(model.getInterpretation());
+			model.printModel(true);
+		} else {
+			System.out.println("No Valid Interpretation");
+			Model.printModel(invalidModels, true);
+		}
 	}
 	
+	/*
 	private final static Comparator<TTree<Assertion>> comparator = new Comparator<TTree<Assertion>>() {
 
 		@Override
@@ -183,7 +192,7 @@ public class TableauxAlgorithmWithAssertions {
 			return 0;
 			
 		}
-	};
+	};*/
 	
 	
 }

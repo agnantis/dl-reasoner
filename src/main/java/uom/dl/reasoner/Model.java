@@ -1,5 +1,8 @@
 package uom.dl.reasoner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,7 @@ public class Model {
 	}
 	
 	public DLElement initialConcept() {
-		return this.extension.getValue().getElement();
+		return this.extension.getRoot().getValue().getElement();
 	}
 	
 	public Interpretation getInterpretation(){
@@ -56,9 +59,19 @@ public class Model {
 		}
 		System.out.println("Tableaux Extension:");
 		System.out.println(getExtension().getRoot().repr());
-		TListVisualizer<Assertion> visual = new TListVisualizer<Assertion>(getExtension().getRoot());
-		if (showImage)
-			visual.showGraph();
+		//TListVisualizer<Assertion> visual = new TListVisualizer<Assertion>(getExtension().getRoot());
+		if (showImage) {
+			TListVisualizer.showGraph(getExtension().getRoot());
+			//visual.showGraph();
+		}
 	}
-
+	
+	public static void printModel(List<Model> models, boolean showImage) {
+		List<TList<Assertion>> lists = new ArrayList<>(models.size());
+		for (Model m : models)
+			lists.add(m.getExtension().getRoot());
+		
+		if (showImage)
+			TListVisualizer.showGraph(lists);
+	}
 }

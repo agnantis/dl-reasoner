@@ -1,7 +1,9 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
@@ -103,10 +105,10 @@ public class TList<T extends Assertion> {
 	}
 	
 	public boolean canBeFurtherExpanded() {
-		if (isLeaf())
-			return false;
 		if (!this.getValue().isAtomic())
 			return true;
+		if (isLeaf())
+			return false;
 		return this.getNext().canBeFurtherExpanded();
 	}
 	
@@ -168,10 +170,10 @@ public class TList<T extends Assertion> {
 	 * @param ind
 	 * @return Returns all individuals x, such that R(ind, x) AND C(x)
 	 */
-	public List<Individual> getFiller(Role role, Concept concept, Individual ind) {
+	public Set<Individual> getFiller(Role role, Concept concept, Individual ind) {
 		TList<T> current = this.getRoot();
-		List<Individual> candidateRoles = new ArrayList<>();
-		List<Individual> candidateInds = new ArrayList<>();
+		Set<Individual> candidateRoles = new HashSet<>();
+		Set<Individual> candidateInds = new HashSet<>();
 		while (current != null) {
 			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
@@ -197,9 +199,9 @@ public class TList<T extends Assertion> {
 	 * @param ind
 	 * @return Returns all individuals x, such that R(ind, x)
 	 */
-	public List<Individual> getFillers(Role role, Individual ind) {
+	public Set<Individual> getFillers(Role role, Individual ind) {
 		TList<T> current = this.getRoot();
-		List<Individual> roleFillers = new ArrayList<>();
+		Set<Individual> roleFillers = new HashSet<>();
 		while (current != null) {
 			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
@@ -257,10 +259,10 @@ public class TList<T extends Assertion> {
 	 * @param ind
 	 * @return
 	 */
-	public List<Individual> getUnspecifiedFiller(Role role, Individual ind) {
+	public Set<Individual> getUnspecifiedFiller(Role role, Individual ind) {
 		TList<T> current = this.getRoot();
 		//Map<TList<T>, List<Individual>> allCases = new HashMap<>();
-		List<Individual> candidateRoles = new ArrayList<>();
+		Set<Individual> candidateRoles = new HashSet<>();
 		//search up
 		while (current != null) {
 			Assertion aValue = current.getValue();
@@ -290,7 +292,8 @@ public class TList<T extends Assertion> {
 			Assertion assertion = current.getValue();
 			if (assertion.getIndividualA().equals(from)) {
 				assertion.setIndividualA(to);
-			} else if (assertion instanceof BinaryAssertion) {
+			} 
+			if (assertion instanceof BinaryAssertion) {
 				BinaryAssertion ra = (BinaryAssertion) assertion;
 				if (ra.getIndividualB().equals(from))
 					ra.setIndividualB(to);
