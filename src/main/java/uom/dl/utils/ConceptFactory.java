@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.BinaryConcept;
@@ -121,10 +122,23 @@ public class ConceptFactory {
 	
 	public final static Comparator<Assertion> ASSERTION_COMPARATOR = new Comparator<Assertion>() {
 
+		/**
+		 * operation priorities for optimal size tableaux lists:
+		 * [⊓,⊔] > [∃, ⩾] -> ⩽
+		 * @param o1
+		 * @param o2
+		 * @return
+		 */
 		@Override
 		public int compare(Assertion o1, Assertion o2) {
 			DLElement e1 = o1.getElement();
 			DLElement e2 = o2.getElement();
+			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
+			if (e1 instanceof AtMostConcept)
+				return -1;
+			if (e2 instanceof AtMostConcept)
+				return 1;
+			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
 			if (e1 instanceof BinaryConcept)
 				return -1;
 			if (e2 instanceof BinaryConcept)
@@ -133,9 +147,9 @@ public class ConceptFactory {
 				return -1;
 			if (e2 instanceof ExistsConcept)
 				return 1;
-			if (e1 instanceof AtMostConcept)
+			if (e1 instanceof AtLeastConcept)
 				return -1;
-			if (e2 instanceof AtMostConcept)
+			if (e2 instanceof AtLeastConcept)
 				return 1;
 			return 0;
 			

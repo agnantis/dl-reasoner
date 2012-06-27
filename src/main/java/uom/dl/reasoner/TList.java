@@ -5,20 +5,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
+import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
 
 public class TList<T extends Assertion> {
+	public static int NO_OF_DUPLICATES = 0;
 	
 	private Assertion value;
 	private TList<T> next = null;
 	private TList<T> previous = null;
 	private boolean isExpandable = true;
+	private TriggerRules triggerRules;
 	
 	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
+		++NO_OF_DUPLICATES;
 		if (original == null)
 			return null;
 		
@@ -85,10 +90,32 @@ public class TList<T extends Assertion> {
 		return this.value;
 	}
 	
+	public TriggerRules getTrigerRules() {
+		if (this.getPrevious() != null)
+			return this.getPrevious().getTrigerRules();
+		if (this.triggerRules == null)
+			this.triggerRules = new TriggerRules((TList<Assertion>) this);
+		return this.triggerRules;
+	}
+	
 	private void addChild(TList<T> child, boolean isExpandable){
 		child.previous = this;
 		child.isExpandable = isExpandable;
 		this.next = child;
+		//trigger?
+		Assertion a = child.getValue();
+		//there is a case of a null assertion, when we duplicate a TList
+		//in this case there is no need to check for trigger rules
+		if (a == null)
+			return;
+		/*if (a.getElement() instanceof ForAllConcept) {
+			this.getTrigerRules().addRule((ForAllConcept) a.getElement(), a.getIndividualA());
+		} else if (a.getElement() instanceof AtMostConcept) {
+			this.getTrigerRules().addRule((AtMostConcept) a.getElement(), a.getIndividualA());
+		} else*/ 
+		if (a instanceof RoleAssertion){
+			this.getTrigerRules().assertionAdded((RoleAssertion) a);
+		}
 	}
 	
 	public boolean isCurrentExpandable() {
@@ -117,12 +144,21 @@ public class TList<T extends Assertion> {
 	}
 	
 	public void append(T child) {
+		append(child, false);
+	}
+	
+	public void append(T child, boolean doNotCheckForDuplicate) {
 		List<T> children = new ArrayList<>(1);
 		children.add(child);
-		append(children);
+		append(children, doNotCheckForDuplicate);
+		
 	}
 	
 	public void append(List<T> children){
+		append(children, false);
+	}
+	
+	public void append(List<T> children, boolean doNotCheckForDuplicate){
 		if (children.isEmpty())
 			return;
 		TList<T> current = this;
@@ -136,15 +172,12 @@ public class TList<T extends Assertion> {
 		}
 		T child = children.remove(0);
 		TList<T> n = new TList<T>(child);
-		current.setNext(n);
+		current.setNext(n, doNotCheckForDuplicate);
 		current.append(children);
-		
-		//for (T c : children){
-		//}
 		
 	}
 	
-	public boolean setNext(TList<T> node) {
+	private boolean setNext(TList<T> node, boolean doNotCheckForDuplicate) {
 		Assertion c = node.getValue();
 		if (c == null)
 			throw new NullPointerException("Concept cannot be null");
@@ -160,7 +193,7 @@ public class TList<T extends Assertion> {
 					break;
 				}
 				//if it already exists, do not add it
-				if (ass.equals(c))
+				if (!doNotCheckForDuplicate && ass.equals(c))
 					return false;
 				
 				//check parent
@@ -295,6 +328,15 @@ public class TList<T extends Assertion> {
 		return current;
 	}
 	
+	public TList<T> getLeaf() {
+		TList<T> current = this;
+
+		while (current.hasNext()) {
+			current = current.getNext();	
+		}
+		return current;
+	}
+	
 	public void substituteAssertions(Individual from, Individual to) {
 		TList<T> current = this.getRoot();
 		while (current != null){
@@ -311,7 +353,7 @@ public class TList<T extends Assertion> {
 		}
 	}
 	
-	public static <T extends Assertion> boolean removeDuplicates(TList<T> model) {
+	public static <T extends Assertion> boolean removeDuplicatesTopDown(TList<T> model) {
 		boolean duplicateExists = false;
 		TList<T> current = model.getRoot();
 		TList<T> previous = current;
@@ -339,6 +381,37 @@ public class TList<T extends Assertion> {
 				duplicateExists = true;
 			}
 			current = current.getNext();			
+		}
+		return duplicateExists;
+	}
+	
+	public static <T extends Assertion> boolean removeDuplicates(TList<T> model) {
+		boolean duplicateExists = false;
+		TList<T> current = model.getLeaf();
+		TList<T> lastUnique = current;
+		Set<Assertion> existing = new HashSet<>();
+		boolean duplicateStatus = false;
+		while (current != null) {
+			Assertion nodeValue = current.getValue();
+			boolean notExists = existing.add(nodeValue);
+			if (notExists) {
+				if (duplicateStatus) {
+					//previous.setNext(current);
+					current.addChild(lastUnique, lastUnique.isExpandable);
+					duplicateStatus = false;
+				}
+				lastUnique = current;
+			} else {
+				//check if *this* is a duplicate
+				if (current == model) {
+					model = lastUnique;
+				}
+				//duplicate found
+				//previous.setLeaf();
+				duplicateStatus = true;
+				duplicateExists = true;
+			}
+			current = current.getPrevious();			
 		}
 		return duplicateExists;
 	}
@@ -438,8 +511,8 @@ public class TList<T extends Assertion> {
 		TList<Assertion> orig1 = new TList<>(a1);
 		TList<Assertion> orig2 = new TList<>(a2);
 		TList<Assertion> orig3 = new TList<>(a3);
-		orig1.setNext(orig2);
-		orig2.setNext(orig3);
+		orig1.setNext(orig2, false);
+		orig2.setNext(orig3, false);
 		
 		
 		System.out.println(orig2.repr());

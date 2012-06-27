@@ -100,9 +100,9 @@ public class ConceptAssertion implements Assertion {
 			List<TList<Assertion>> newModels = new ArrayList<>(assertions.size());
 			for (Assertion a : assertions) {
 				TList<Assertion> newModel = TList.duplicate(model, false);
-				List<Assertion> list = new ArrayList<>();
-				list.add(a);
-				newModel.append(list);
+				//List<Assertion> list = new ArrayList<>();
+				//list.add(a);
+				newModel.append(a);
 				newModel = newModel.getNext();
 				newModels.add(newModel);
 			}
@@ -121,6 +121,9 @@ public class ConceptAssertion implements Assertion {
 			model.append(toBeAdded);
 			model = model.getNext();
 			if (model != null) {
+				//add to trigger list
+				model.getTrigerRules().addRule(ec, getIndividualA());
+				//return new status
 				List<TList<Assertion>> list = new ArrayList<>();
 				list.add(model);
 				return list;
@@ -172,6 +175,9 @@ public class ConceptAssertion implements Assertion {
 				//move forward
 				model = model.getNext();
 				if (model != null) {
+					//add to trigger list
+					model.getTrigerRules().addRule(amc, getIndividualA());
+					//return new status
 					List<TList<Assertion>> list = new ArrayList<>();
 					list.add(model);
 					return list;

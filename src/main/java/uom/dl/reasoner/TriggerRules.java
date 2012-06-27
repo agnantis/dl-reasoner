@@ -11,12 +11,14 @@ import uom.dl.elements.Role;
 public class TriggerRules {
 	Set<ConceptAssertion> forAllRules = new HashSet<>();
 	Set<ConceptAssertion> atMostRules = new HashSet<>();
-	private TList<Assertion> list;
+	private TList<Assertion> list; 
 	
-	public TriggerRules(TList<Assertion> list) {
-		this.list = list.getRoot(); 
+	
+	
+	public TriggerRules(TList<Assertion> tList) {
+		this.list = tList;
 	}
-	
+
 	public boolean addRule(ForAllConcept c, Individual i) {
 		return forAllRules.add(new ConceptAssertion(c, i));
 	}
@@ -55,10 +57,12 @@ public class TriggerRules {
 		
 		for (ConceptAssertion ca : atMostRules) {
 			Individual i = ca.getIndividualA();
-			ForAllConcept c = (ForAllConcept) ca.getElement();
+			AtMostConcept c = (AtMostConcept) ca.getElement();
 			Role r = c.getRole();
 			if (role.equals(r) && indA.equals(i)) {
-				//trigger rule
+				//re-enter the rule
+				list.append(ca, true);
+				System.out.println(">>>> Re-enter concept!!!");
 			}			
 		}
 			
