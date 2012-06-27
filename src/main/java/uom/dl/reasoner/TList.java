@@ -420,6 +420,15 @@ public class TList<T extends Assertion> {
 		this.next = null;		
 	}
 
+	public boolean containsClash() {
+		TList<T> current = this.getRoot();
+		while (current != null) {
+			if (!current.isCurrentExpandable())
+				return true;
+			current = current.getNext();
+		}
+		return false;
+	}
 
 	/**
 	 * Checks if a model is still valid (does not contain any clash). This method should be called

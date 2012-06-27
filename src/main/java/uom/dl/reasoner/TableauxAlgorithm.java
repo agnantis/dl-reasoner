@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,22 +13,42 @@ import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
 import uom.dl.elements.Concept;
+import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
-import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
+import uom.dl.utils.NNFFactory;
 
 public class TableauxAlgorithm {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithm.class);
 	private static List<Model> invalidModels = new ArrayList<>(); 
 	
 	public static Model findModel(Assertion assertion) {
+		DLElement element = assertion.getElement();
+		if (element instanceof Concept) {
+			Concept c = (Concept) element;
+			assertion = new ConceptAssertion(NNFFactory.getNNF(c), assertion.getIndividualA());
+		}
 		TList<Assertion> list = new TList<Assertion>(assertion);
 		return runTableauxForConcept(list);
+	}
+	
+	//subsumee <= subsumer --> subsumee and not subsumer = 0
+	public static boolean subsumes(Concept subsumer, Concept subsumee) {
+		Concept negC2 = new NotConcept(subsumer);
+		negC2 = NNFFactory.getNNF(negC2);
+		Concept nnfC1 = NNFFactory.getNNF(subsumee);
+		Concept whole = new IntersectionConcept(nnfC1, negC2);
+		Assertion assertion = new ConceptAssertion(whole, new Individual("b"));
+		Model model = findModel(assertion);
+		//System.out.println(model.getInterpretation());
+		//model.printModel(true);
+		return !model.isSatisfiable();
+		
 	}
 		
 	private static Model runTableauxForConcept(TList<Assertion> model) {
@@ -40,6 +59,11 @@ public class TableauxAlgorithm {
 			Assertion value = current.getValue();
 			if (!value.isAtomic()) {
 				newModels = value.executeRule(current);
+				//if the model is empty, it means that we reach the end
+				//no clash found, so the model is satisfiable!
+				if (newModels.isEmpty()) {
+					return new Model(current, true);
+				}
 				//check if a model exists
 				for (Iterator<TList<Assertion>> it = newModels.iterator(); it.hasNext();) {
 					TList<Assertion> newModel = it.next();
@@ -162,7 +186,7 @@ public class TableauxAlgorithm {
 				(Concept)new UnionConcept(A, B),
 				new ExistsConcept(R, A),
 				new NotConcept(A)
-			));*/
+			));
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithm.findModel(ca);
@@ -173,7 +197,14 @@ public class TableauxAlgorithm {
 		} else {
 			System.out.println("No Valid Interpretation");
 			Model.printModel(invalidModels, true);
-		}
+		}*/
+		//subclassing test
+		Concept c1 = new AtMostConcept(1, R);
+		Concept c2 = new AtMostConcept(3, R);
+		
+		System.out.println("C1 subsumes C2: " + TableauxAlgorithm.subsumes(c1, c2));
+		System.out.println("C2 subsumes C1: " + TableauxAlgorithm.subsumes(c2, c1));
+		
 	}	
 	
 }
