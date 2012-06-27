@@ -1,6 +1,6 @@
 package uom.dl.reasoner;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import uom.dl.elements.DLElement;
@@ -57,7 +57,9 @@ public class RoleAssertion implements BinaryAssertion {
 
 	@Override
 	public List<TList<Assertion>> executeRule(TList<Assertion> model) {
-		return Arrays.asList(model);
+		List<TList<Assertion>> list = new ArrayList<>(1);
+		list.add(model);
+		return list;
 	}
 	
 	@Override

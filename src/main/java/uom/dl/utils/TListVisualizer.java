@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.TList;
-import uom.dl.reasoner.TTree;
 
 public class TListVisualizer {
 	private static final Logger log = LoggerFactory

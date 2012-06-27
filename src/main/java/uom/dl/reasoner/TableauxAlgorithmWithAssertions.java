@@ -2,7 +2,6 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -14,9 +13,7 @@ import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
-import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
-import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
@@ -30,48 +27,11 @@ public class TableauxAlgorithmWithAssertions {
 	private static List<Model> invalidModels = new ArrayList<>(); 
 	
 	public static Model findModel(Assertion assertion) {
-		//TTree<Assertion> tree = new TTree<Assertion>(assertion);
-		//return runTableauxForConcept(tree);
 		TList<Assertion> list = new TList<Assertion>(assertion);
 		return runTableauxForConcept(list);
 	}
-	/*
-	
-	public static Model runTableauxForConcept(TTree<Assertion> tree) {
-		List<TTree<Assertion>> frontier = new ArrayList<>();
-		frontier.add(tree);
-		TTree<Assertion> parent = null;
-		while (!frontier.isEmpty()) {
-			TTree<Assertion> current = frontier.remove(0);
-			if (current.getParent() != parent) {
-				return new Model(tree, true);
-			}
-			parent = current;
-			Assertion value = current.getValue();
-			if (!value.isAtomic()) {
-				value.executeRule(current);
-				//check if a model exists
-				if (!current.modelExists()) {
-					//printModel(tree, true);
-					return new Model(tree, false);
-				}			
-			}
-			//add its children
-			if (!current.getChildren().isEmpty()) {
-				//sort children: union/intersection proceeds
-				Collections.sort(current.getChildren(), comparator);
-				//depth first search
-				frontier.addAll(0, current.getChildren());
-			}
-			
-		}	
 		
-		//printModel(tree, true);
-		return new Model(tree, true);
-	}
-	*/
-	
-	public static Model runTableauxForConcept(TList<Assertion> model) {
+	private static Model runTableauxForConcept(TList<Assertion> model) {
 		TList<Assertion> current = model;
 		List<TList<Assertion>> newModels = new ArrayList<>();
 		
@@ -94,7 +54,7 @@ public class TableauxAlgorithmWithAssertions {
 						}
 					}
 				}
-				//add new models
+				//run tableaux to each new model
 				if (!newModels.isEmpty()) {
 					for (TList<Assertion> list : newModels){
 						Model aModel = runTableauxForConcept(list);
@@ -103,10 +63,9 @@ public class TableauxAlgorithmWithAssertions {
 							return aModel;
 						} 
 					}
-					return new Model(model, false);
-				} else {
-					return new Model(model, false);
 				}
+				//no model found
+				return new Model(model, false);
 			} else {
 				//value is atomic, so move to the next
 				if (current.getNext() == null)
@@ -114,8 +73,6 @@ public class TableauxAlgorithmWithAssertions {
 				current = current.getNext();
 			}			
 		}
-		//no model found
-		//return new Model(model, false);
 	}
 
 	public static void main(String[] args) {
@@ -158,9 +115,9 @@ public class TableauxAlgorithmWithAssertions {
 				(Concept)new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
 				//new ExistsConcept(R, C),
-				//new ForAllConcept(R, new UnionConcept(new NotConcept(C), new UnionConcept(new NotConcept(A), new NotConcept(B)))),
-				new AtMostConcept(1, R),
-				new AtLeastConcept(3, R)
+				new ForAllConcept(R, new UnionConcept(new NotConcept(A), new NotConcept(B))),
+				new AtMostConcept(1, R)
+				//new AtLeastConcept(3, R)
 			));
 		/*
 		conSet = new HashSet<>(Arrays.asList(
@@ -182,23 +139,6 @@ public class TableauxAlgorithmWithAssertions {
 			System.out.println("No Valid Interpretation");
 			Model.printModel(invalidModels, true);
 		}
-	}
-	
-	/*
-	private final static Comparator<TTree<Assertion>> comparator = new Comparator<TTree<Assertion>>() {
-
-		@Override
-		public int compare(TTree<Assertion> o1, TTree<Assertion> o2) {
-			DLElement e1 = o1.getValue().getElement();
-			DLElement e2 = o2.getValue().getElement();
-			if (e1 instanceof BinaryConcept)
-				return -1;
-			if (e2 instanceof BinaryConcept)
-				return 1;
-			return 0;
-			
-		}
-	};*/
-	
+	}	
 	
 }

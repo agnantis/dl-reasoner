@@ -50,6 +50,8 @@ public class AtLeastConcept implements Concept {
 
 	@Override
 	public String toString() {
+		if (this.concept == Constants.TOP_CONCEPT)
+			return "" + Constants.ATLEAST_CHAR + this.number + this.role;
 		if (this.concept instanceof BinaryConcept)
 			return "" + Constants.ATLEAST_CHAR + this.number + this.role + ".(" + this.concept + ")";
 		return "" + Constants.ATLEAST_CHAR + this.number + this.role + "." + this.concept;

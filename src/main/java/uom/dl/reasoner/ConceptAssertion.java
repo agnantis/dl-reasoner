@@ -95,7 +95,9 @@ public class ConceptAssertion implements Assertion {
 			List<TList<Assertion>> newModels = new ArrayList<>(assertions.size());
 			for (Assertion a : assertions) {
 				TList<Assertion> newModel = TList.duplicate(model, false);
-				newModel.append(Arrays.asList(a));
+				List<Assertion> list = new ArrayList<>();
+				list.add(a);
+				newModel.append(list);
 				newModel = newModel.getNext();
 				newModels.add(newModel);
 			}

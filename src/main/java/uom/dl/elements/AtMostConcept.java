@@ -35,6 +35,8 @@ public class AtMostConcept implements Concept {
 	@Override
 	public String toString() {
 		//return "" + Constants.ATMOST_CHAR + this.number + this.role + "." + this.concept;
+		if (this.concept == Constants.TOP_CONCEPT)
+			return "" + Constants.ATMOST_CHAR + this.number + this.role;
 		if (this.concept instanceof BinaryConcept)
 			return "" + Constants.ATMOST_CHAR + this.number + this.role + ".(" + this.concept + ")";
 		return "" + Constants.ATMOST_CHAR + this.number + this.role + "." + this.concept;

@@ -19,8 +19,6 @@ import uom.dl.elements.NotConcept;
 import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.ConceptAssertion;
-import uom.dl.reasoner.TList;
-import uom.dl.reasoner.TTree;
 
 public class ConceptFactory {
 	
