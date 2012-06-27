@@ -49,6 +49,11 @@ public class RoleAssertion implements BinaryAssertion {
 				&& ass.getIndividualB().equals(getIndividualB())
 				&& ass.getElement().isComplement(getElement());
 	}
+	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
 
 	@Override
 	public List<TList<Assertion>> executeRule(TList<Assertion> model) {

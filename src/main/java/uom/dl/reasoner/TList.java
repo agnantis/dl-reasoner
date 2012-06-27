@@ -145,7 +145,7 @@ public class TList<T extends Assertion> {
 		
 		//check if already exists or there is a clash
 		boolean clashFound = false;
-		if (c.isAtomic()) {
+		if (c.canHaveComplement()) {
 			TList<T> current = this;
 			while (current != null) {
 				Assertion ass = current.getValue();

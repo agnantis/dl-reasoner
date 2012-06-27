@@ -158,15 +158,15 @@ public class TableauxAlgorithmWithAssertions {
 				(Concept)new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
 				//new ExistsConcept(R, C),
-				new ForAllConcept(R, new UnionConcept(new NotConcept(C), new UnionConcept(new NotConcept(A), new NotConcept(B)))),
-				//new AtMostConcept(1, R),
+				//new ForAllConcept(R, new UnionConcept(new NotConcept(C), new UnionConcept(new NotConcept(A), new NotConcept(B)))),
+				new AtMostConcept(1, R),
 				new AtLeastConcept(3, R)
 			));
+		/*
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new NotConcept(A),
 				A
 			));
-		/*
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(A, B),
 				new ExistsConcept(R, A),

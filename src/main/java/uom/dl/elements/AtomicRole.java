@@ -43,4 +43,9 @@ public class AtomicRole implements Role {
 		return false;
 	}
 	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
+	
 }

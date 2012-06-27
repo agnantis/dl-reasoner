@@ -67,4 +67,9 @@ public class AtomicConcept implements Concept {
 		return this.equals(c.getConceptA());				
 	}
 	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
+	
 }

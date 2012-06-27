@@ -80,4 +80,9 @@ public class IntersectionConcept implements BinaryConcept {
 		return false;
 	}
 	
+	@Override
+	public boolean canHaveComplement() {
+		return false;
+	}
+	
 }

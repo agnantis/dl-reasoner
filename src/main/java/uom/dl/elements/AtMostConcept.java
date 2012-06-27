@@ -77,9 +77,22 @@ public class AtMostConcept implements Concept {
 	public boolean isAtomic() {
 		return false;
 	}
+	
+	//<=1RT complement to >=xRT. x>1  
 	@Override
 	public boolean isComplement(DLElement other) {
+		if (!(other instanceof AtLeastConcept))
+			return false;
+		AtLeastConcept that = (AtLeastConcept) other;
+		if (this.getRole().equals(that.getRole()) && this.getConceptA().equals(that.getConceptA())) {
+			return this.getCardinality() < that.getCardinality();
+		}
 		return false;
+	}
+	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
 	}
 	
 }

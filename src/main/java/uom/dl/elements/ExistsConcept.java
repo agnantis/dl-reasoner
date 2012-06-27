@@ -76,4 +76,9 @@ public class ExistsConcept implements Concept {
 		return false;
 	}
 	
+	@Override
+	public boolean canHaveComplement() {
+		return false;
+	}
+	
 }

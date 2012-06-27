@@ -72,4 +72,9 @@ public class NotConcept implements Concept {
 		return this.getConceptA().equals(c);				
 	}
 	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
+	
 }

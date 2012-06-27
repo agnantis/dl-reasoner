@@ -74,9 +74,13 @@ public class UnionConcept implements BinaryConcept {
 		return false;
 	}
 
-
 	@Override
 	public boolean isComplement(DLElement other) {
+		return false;
+	}
+	
+	@Override
+	public boolean canHaveComplement() {
 		return false;
 	}
 

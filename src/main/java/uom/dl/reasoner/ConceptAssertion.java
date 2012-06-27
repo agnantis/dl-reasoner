@@ -53,6 +53,11 @@ public class ConceptAssertion implements Assertion {
 	}
 	
 	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
+	
+	@Override
 	public String toString() {
 		if (this.getElement().isAtomic()) {
 			return this.getElement() + "(" + this.getIndividualA() + ")";	
