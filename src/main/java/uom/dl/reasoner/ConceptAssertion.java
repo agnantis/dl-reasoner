@@ -29,7 +29,7 @@ public class ConceptAssertion implements Assertion {
 	}
 
 	@Override
-	public DLElement getElement() {
+	public Concept getElement() {
 		return concept;
 	}
 

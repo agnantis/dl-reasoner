@@ -19,7 +19,7 @@ public class RoleAssertion implements BinaryAssertion {
 	}
 
 	@Override
-	public DLElement getElement() {
+	public Role getElement() {
 		return role;
 	}
 

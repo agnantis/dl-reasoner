@@ -133,14 +133,10 @@ public class ConceptFactory {
 				return -1;
 			if (e2 instanceof ExistsConcept)
 				return 1;
-			if (e1 instanceof ForAllConcept)
-				return -1;
-			if (e2 instanceof ForAllConcept)
-				return 1;
-			/*if (e1 instanceof AtMostConcept)
+			if (e1 instanceof AtMostConcept)
 				return -1;
 			if (e2 instanceof AtMostConcept)
-				return 1;*/
+				return 1;
 			return 0;
 			
 		}

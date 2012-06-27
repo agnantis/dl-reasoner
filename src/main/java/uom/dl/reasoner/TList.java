@@ -116,6 +116,12 @@ public class TList<T extends Assertion> {
 		return this.previous;
 	}
 	
+	public void append(T child) {
+		List<T> children = new ArrayList<>(1);
+		children.add(child);
+		append(children);
+	}
+	
 	public void append(List<T> children){
 		if (children.isEmpty())
 			return;
