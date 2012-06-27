@@ -13,6 +13,7 @@ import uom.dl.elements.Concept;
 import uom.dl.elements.Constants;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
+import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
@@ -65,28 +66,6 @@ public class ConceptFactory {
 		return conceptList;
 	}
 	
-	/*
-	public static Set<Concept> getIntersectionConcepts(ConceptAssertion conceptAssertion) {
-		Concept concept = conceptAssertion.getConcept();
-		if (!(concept instanceof IntersectionConcept)) {
-			Set<Concept> set = new HashSet<>(1);
-			set.add(concept);
-			return set;
-		}
-
-		Set<Concept> conceptList = new HashSet<>();
-		Concept conceptA = concept.getConceptA();
-		conceptList.addAll(getIntersectionConcepts(conceptA));
-		
-		Concept conceptB = ((IntersectionConcept)concept).getConceptB();
-		conceptList.addAll(getIntersectionConcepts(conceptB));
-		
-		return conceptList;
-	}
-	
-	public static Set<DLElement> getIntersectionConcepts(DLElement concept) {
-		
-	}*/
 	
 	public static Set<Concept> getUnionConcepts(Concept concept) {
 		if (!(concept instanceof UnionConcept)) {
@@ -103,38 +82,7 @@ public class ConceptFactory {
 		
 		return conceptList;
 	}
-	
-	/*
-	public static Set<ConceptAssertion> getUnionConcepts(ConceptAssertion conceptAssertion) {
-		Concept concept = conceptAssertion.getConcept();
-		if (!(concept instanceof UnionConcept)) {
-			Set<ConceptAssertion> set = new HashSet<>(1);
-			set.add(conceptAssertion);
-			return set;
-		}
 		
-		Set<ConceptAssertion> conceptList = new HashSet<>();
-		Concept conceptA = concept.getConceptA();
-		conceptList.addAll(getUnionConcepts(conceptA));
-		Concept conceptB = ((UnionConcept)concept).getConceptB();
-		conceptList.addAll(getUnionConcepts(conceptB));
-		
-		return conceptList;
-	}*/
-	
-	/*
-	public static boolean isComplement(Concept A, Concept B) {
-		if (A.isAtomic() && B.isAtomic()) {
-			if (A.isNegation())
-				return A.getConceptA().equals(B);
-			if (B.isNegation())
-				return B.getConceptA().equals(A);
-		}
-
-		return false;
-	}*/
-	
-	
 	public static void main(String[] main) {
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
@@ -185,10 +133,14 @@ public class ConceptFactory {
 				return -1;
 			if (e2 instanceof ExistsConcept)
 				return 1;
-			if (e1 instanceof AtMostConcept)
+			if (e1 instanceof ForAllConcept)
+				return -1;
+			if (e2 instanceof ForAllConcept)
+				return 1;
+			/*if (e1 instanceof AtMostConcept)
 				return -1;
 			if (e2 instanceof AtMostConcept)
-				return 1;
+				return 1;*/
 			return 0;
 			
 		}

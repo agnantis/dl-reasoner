@@ -73,6 +73,11 @@ public class ConceptAssertion implements Assertion {
 		return getIndividualA().equals(other.getIndividualA()) && getElement().equals(other.getElement());
 		
 	}
+	
+	@Override
+	public int hashCode() {
+		return getIndividualA().hashCode() + getElement().hashCode();
+	}
 
 	@Override
 	public List<TList<Assertion>> executeRule(TList<Assertion> model) {
@@ -153,10 +158,13 @@ public class ConceptAssertion implements Assertion {
 				for (IndividualPair pair : subPairs) {
 					TList<Assertion> newModel = TList.duplicate(model, true);
 					newModel.substituteAssertions(pair.getFirst(), pair.getSecond());
-					boolean validModel = TList.revalidateModel(newModel);
-					if (validModel) {
-						newModels.add(newModel);
-					}					
+					TList.removeDuplicates(newModel);
+					if (newModel != null) {
+						boolean validModel = TList.revalidateModel(newModel);
+						if (validModel) {
+							newModels.add(newModel);
+						}					
+					}
 				}	
 				//do not move forward
 				return newModels;

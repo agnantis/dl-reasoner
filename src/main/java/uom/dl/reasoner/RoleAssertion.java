@@ -74,8 +74,13 @@ public class RoleAssertion implements BinaryAssertion {
 		RoleAssertion other = (RoleAssertion) obj;
 		return getIndividualA().equals(other.getIndividualA()) 
 				&& getIndividualB().equals(other.getIndividualB())
-				&& getElement().equals(other);
+				&& getElement().equals(other.getElement());
 		
+	}
+	
+	@Override
+	public int hashCode() {
+		return getIndividualA().hashCode() + getIndividualB().hashCode() + getElement().hashCode();
 	}
 	
 	@Override

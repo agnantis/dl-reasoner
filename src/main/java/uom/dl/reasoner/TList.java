@@ -305,6 +305,43 @@ public class TList<T extends Assertion> {
 		}
 	}
 	
+	public static <T extends Assertion> boolean removeDuplicates(TList<T> model) {
+		boolean duplicateExists = false;
+		TList<T> current = model.getRoot();
+		TList<T> previous = current;
+		Set<Assertion> existing = new HashSet<>();
+		boolean duplicateStatus = false;
+		while (current != null) {
+			Assertion nodeValue = current.getValue();
+			boolean notExists = existing.add(nodeValue);
+			if (notExists) {
+				if (duplicateStatus) {
+					//previous.setNext(current);
+					previous.addChild(current, current.isExpandable);
+					duplicateStatus = false;
+				}
+				previous = current;
+			} else {
+				//check if *this* is a duplicate
+				if (current == model) {
+					if (current.getNext() != null)
+						model = current.getNext();
+				}
+				//duplicate found
+				previous.setLeaf();
+				duplicateStatus = true;
+				duplicateExists = true;
+			}
+			current = current.getNext();			
+		}
+		return duplicateExists;
+	}
+	
+	private void setLeaf() {
+		this.next = null;		
+	}
+
+
 	/**
 	 * Checks if a model is still valid (does not contain any clash). This method should be called
 	 * each time an individual substitution is happening.  
@@ -402,37 +439,5 @@ public class TList<T extends Assertion> {
 		System.out.println(orig2.repr());
 		TList<Assertion> copy1 = TList.duplicate(orig3, false);
 		System.out.println(copy1.repr());
-		/*
-		AtomicConcept B2 = new AtomicConcept("B2");
-		AtomicConcept B3 = new AtomicConcept("B3");
-		AtomicConcept C = new AtomicConcept("C");
-		AtomicConcept D = new AtomicConcept("D");
-		AtomicConcept D1 = new AtomicConcept("D1");
-		AtomicConcept D2 = new AtomicConcept("D2");
-		AtomicConcept D3 = new AtomicConcept("D3");
-		
-		TTree nodeA = new TTree(A);
-		TTree nodeB = new TTree(B);
-		TTree nodeB1 = new TTree(B1);
-		TTree nodeB2 = new TTree(B2);
-		TTree nodeB3 = new TTree(B3);
-		TTree nodeC = new TTree(C);
-		TTree nodeD = new TTree(D);
-		TTree nodeD1 = new TTree(D1);
-		TTree nodeD2 = new TTree(D2);
-		TTree nodeD3 = new TTree(D3);
-		
-		nodeA.add(nodeB);
-		nodeB.add(nodeB1);
-		nodeB.add(nodeB2);
-		nodeB.add(nodeB3);
-		nodeA.add(nodeC);
-		nodeC.add(nodeD);
-		nodeD.add(nodeD1);
-		nodeD.add(nodeD2);
-		nodeD.add(nodeD3);
-		
-		System.out.println(nodeA);
-		*/
 	}
 }
