@@ -14,9 +14,12 @@ import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 
 public class NNFFactory {
+	//private static final Logger log = LoggerFactory.getLogger(NNFFactory.class);
+	
 	public static Concept getNNF(Concept c) {
-		if (c.isNNF())
+		if (c.isNNF()) {
 			return c;
+		}
 		
 		if (c instanceof BinaryConcept)
 			return getNNF((BinaryConcept)c);
@@ -79,7 +82,6 @@ public class NNFFactory {
 				return getNNF(child.getConceptA()); 
 			}
 		}
-			
 		return c;
 	}
 	

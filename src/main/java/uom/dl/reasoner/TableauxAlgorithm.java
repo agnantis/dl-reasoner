@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
+import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.NNFFactory;
@@ -33,7 +35,7 @@ public class TableauxAlgorithm {
 			Concept c = (Concept) element;
 			assertion = new ConceptAssertion(NNFFactory.getNNF(c), assertion.getIndividualA());
 		}
-		TList<Assertion> list = new TList<Assertion>(assertion);
+		TListHead<Assertion> list = new TListHead<Assertion>(assertion);
 		return runTableauxForConcept(list);
 	}
 	
@@ -45,15 +47,29 @@ public class TableauxAlgorithm {
 	 * @return true if the subsumer is a superset of subsumee
 	 */
 	public static boolean subsumes(Concept subsumer, Concept subsumee) {
+		log.info("Check if: " + subsumee + " ⊑ " + subsumer);
 		Concept negC2 = new NotConcept(subsumer);
+		log.debug("Convert subsumer to negative: " + negC2);
 		negC2 = NNFFactory.getNNF(negC2);
+		log.debug("Convert subsumer to NNF: " + negC2);
 		Concept nnfC1 = NNFFactory.getNNF(subsumee);
+		log.debug("Convert subsumee to NNF: " + nnfC1);
 		Concept whole = new IntersectionConcept(nnfC1, negC2);
 		Assertion assertion = new ConceptAssertion(whole, new Individual("b"));
+		log.debug("Find Model for: " + assertion);
 		Model model = findModel(assertion);
 		//System.out.println(model.getInterpretation());
 		//model.printModel(true);
-		return !model.isSatisfiable();
+		boolean modelFound = model.isSatisfiable();
+		if (modelFound) {
+			log.debug("Model found for: " + assertion);
+			log.info("No subsumption: " + subsumee + " ⋢ " + subsumer);
+		} else {			
+			log.debug("No model found for: " + assertion);
+			log.info("No subsumption: " + subsumee + " ⊑ " + subsumer);
+		}
+				
+		return !modelFound;
 		
 	}
 		
@@ -119,12 +135,12 @@ public class TableauxAlgorithm {
 				new UnionConcept(new NotConcept(C), new NotConcept(B)),
 				new ExistsConcept(new AtomicRole("V"), new ExistsConcept(new AtomicRole("R"), C))
 			));
-		
+	
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new UnionConcept(D, A), 
 				new UnionConcept(
 						new IntersectionConcept(A, B),
-						new UnionConcept(D, A)) 
+						new UnionConcept(D, A))
 			));
 		
 		/*
@@ -135,13 +151,15 @@ public class TableauxAlgorithm {
 						new ExistsConcept(new AtomicRole("R"), new ExistsConcept(new AtomicRole("R"), C)))
 			));
 		*/
+		
 		conSet = new HashSet<>(Arrays.asList(
 				new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
 				new ForAllConcept(R, 
-						new UnionConcept(new NotConcept(A), new NotConcept(B)))
+						new UnionConcept(new NotConcept(A), new NotConcept(B))),
+				new AtMostConcept(1, R)
 			));
-		
+		/*
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
@@ -150,7 +168,7 @@ public class TableauxAlgorithm {
 				new AtMostConcept(1, R)
 				//new AtLeastConcept(3, R)
 			));
-		/*
+		
 		Role p1 = new AtomicRole("P1");
 		Role p2 = new AtomicRole("P2");
 		Role p3 = new AtomicRole("P3");
@@ -182,7 +200,7 @@ public class TableauxAlgorithm {
 				new ExistsConcept(p1, new ForAllConcept(p2, new ForAllConcept(p3, c12))),
 				new ForAllConcept(p1, con321),
 				new AtMostConcept(1, p1) 
-			));
+			));*/
 		/*
 		conSet = new HashSet<>(Arrays.asList(
 				(Concept)new NotConcept(A),
@@ -192,7 +210,7 @@ public class TableauxAlgorithm {
 				(Concept)new UnionConcept(A, B),
 				new ExistsConcept(R, A),
 				new NotConcept(A)
-			));
+			));*/
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithm.findModel(ca);
@@ -203,14 +221,15 @@ public class TableauxAlgorithm {
 		} else {
 			System.out.println("No Valid Interpretation");
 			Model.printModel(invalidModels, true);
-		}*/
+		}
 		//subclassing test
+		/*
 		Concept c1 = new AtMostConcept(1, R);
 		Concept c2 = new AtMostConcept(3, R);
 		
-		System.out.println("C1 subsumes C2: " + TableauxAlgorithm.subsumes(c1, c2));
-		System.out.println("C2 subsumes C1: " + TableauxAlgorithm.subsumes(c2, c1));
-		
+		log.info("C1 subsumes C2: " + TableauxAlgorithm.subsumes(c1, c2));
+		log.info("C2 subsumes C1: " + TableauxAlgorithm.subsumes(c2, c1));
+		*/
 	}	
 	
 }

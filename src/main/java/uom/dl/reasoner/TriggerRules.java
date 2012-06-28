@@ -3,22 +3,24 @@ package uom.dl.reasoner;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
 
 public class TriggerRules {
+	private static final Logger log = LoggerFactory.getLogger(TriggerRules.class);
 	Set<ConceptAssertion> forAllRules = new HashSet<>();
 	Set<ConceptAssertion> atMostRules = new HashSet<>();
-	private TList<Assertion> list; 
+	private TListHead<Assertion> list; 
 	
 	
-	public TriggerRules() {
-	}
-	
-	public void setReceiver(TList<Assertion> tList) {
-		this.list = tList;
+	@SuppressWarnings("unchecked")
+	public void setReceiver(TListHead<? extends Assertion> tList) {
+		this.list = (TListHead<Assertion>) tList;
 	}
 
 	public boolean addRule(ForAllConcept c, Individual i) {
@@ -42,7 +44,7 @@ public class TriggerRules {
 		}
 	}
 	
-	public void assertionAdded(RoleAssertion a) {
+	public <T extends Assertion> void assertionAdded(RoleAssertion a) {
 		Role role = a.getElement();
 		Individual indA = a.getIndividualA();
 		Individual indB = a.getIndividualB();
@@ -53,8 +55,10 @@ public class TriggerRules {
 			if (role.equals(r) && indA.equals(i)) {
 				//trigger rule
 				Assertion newAss = new ConceptAssertion(c.getConceptA(), indB);
-				if (list != null)
+				if (list != null) {
+					log.debug("Rule triggered. Append to the model: " + newAss);
 					list.append(newAss);
+				}
 			}			
 		}
 		
@@ -64,9 +68,10 @@ public class TriggerRules {
 			Role r = c.getRole();
 			if (role.equals(r) && indA.equals(i)) {
 				//re-enter the rule
-				if (list != null)
+				if (list != null) {
+					log.debug("Rule triggered. Append to the model: " + ca);
 					list.append(ca, true);
-				System.out.println(">>>> Re-enter concept!!!");
+				}
 			}			
 		}
 			

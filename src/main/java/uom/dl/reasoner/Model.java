@@ -34,10 +34,13 @@ public class Model {
 	}
 	
 	public Interpretation getInterpretation(){
-		if (!isSatisfiable())
+		if (!isSatisfiable()){
+			log.warn("The model is unsatisfiable, so the interpretation is null");
 			return null;
+		}
 		
 		if (this.interpretation == null) {
+			log.debug("Creating the model interpretation");
 			this.interpretation = new Interpretation();
 			TList<Assertion> curNode = this.extension.getRoot(); 
 			while (curNode != null) {

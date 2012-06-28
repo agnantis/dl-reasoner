@@ -14,7 +14,6 @@ import uom.dl.elements.Concept;
 import uom.dl.elements.Constants;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
-import uom.dl.elements.ForAllConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;

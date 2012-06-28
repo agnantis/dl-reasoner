@@ -121,7 +121,7 @@ public class ConceptAssertion implements Assertion {
 			model = model.getNext();
 			if (model != null) {
 				//add to trigger list
-				model.getTriggerRules().addRule(ec, getIndividualA());
+				model.getRoot().getTriggerRules().addRule(ec, getIndividualA());
 				//return new status
 				List<TList<Assertion>> list = new ArrayList<>();
 				list.add(model);
@@ -175,7 +175,7 @@ public class ConceptAssertion implements Assertion {
 				model = model.getNext();
 				if (model != null) {
 					//add to trigger list
-					model.getTriggerRules().addRule(amc, getIndividualA());
+					model.getRoot().getTriggerRules().addRule(amc, getIndividualA());
 					//return new status
 					List<TList<Assertion>> list = new ArrayList<>();
 					list.add(model);

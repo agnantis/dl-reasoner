@@ -18,61 +18,8 @@ public class TList<T extends Assertion> {
 	private TList<T> next = null;
 	private TList<T> previous = null;
 	private boolean isExpandable = true;
-	private TriggerRules triggerRules;
-	
-	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
-		++NO_OF_DUPLICATES;
-		if (original == null)
-			return null;
+	private TListHead<T> root;
 		
-		//original = original.getRoot();
-		TList<T> newCopy = new TList<>();
-		TList<T> current = original;
-		TList<T> newCurrent = newCopy;
-		//copy down
-		while (current != null) {
-			if (deepCopy)
-				newCurrent.value = current.getValue().getACopy();
-			else
-				newCurrent.value = current.getValue();
-			newCurrent.isExpandable = current.isExpandable;
-			TList<T> next = new TList<>();
-			newCurrent.addChild(next, true);
-			newCurrent = newCurrent.getNext();
-			current = current.getNext();
-		}
-		//remove last empty child
-		newCurrent = newCurrent.getPrevious();
-		newCurrent.next = null;
-		//copy up
-		current = original;
-		newCurrent = newCopy;
-		while (current.previous != null) {
-			current = current.previous;
-			TList<T> tmp = new TList<>();
-			if (deepCopy)
-				tmp.value = current.getValue().getACopy();
-			else
-				tmp.value = current.getValue();
-			tmp.isExpandable = current.isExpandable;
-			tmp.addChild(newCurrent, newCurrent.isExpandable);
-			newCurrent = newCurrent.previous;
-		}
-		
-		//copy trigger rules
-		TList<T> root = original.getRoot();
-		TList<T> copyRoot = newCopy.getRoot();
-		TriggerRules tr = root.getTriggerRules().duplicate();
-		copyRoot.triggerRules = tr;
-		tr.setReceiver((TList<Assertion>) copyRoot);		
-		return newCopy;
-	}
-		
-		
-	private TList() {
-		this(null);
-	}
-
 	public TList(T c) {
 		this.value = c;
 	}	
@@ -93,19 +40,10 @@ public class TList<T extends Assertion> {
 		return this.value;
 	}
 	
-	public TriggerRules getTriggerRules() {
-		if (this.getPrevious() != null)
-			return this.getPrevious().getTriggerRules();
-		if (this.triggerRules == null) {
-			this.triggerRules = new TriggerRules();
-			this.triggerRules.setReceiver((TList<Assertion>) this);
-		}
-		return this.triggerRules;
-	}
-	
 	private void addChild(TList<T> child, boolean isExpandable){
 		child.previous = this;
 		child.isExpandable = isExpandable;
+		child.root = this.getRoot();
 		this.next = child;
 		//trigger?
 		Assertion a = child.getValue();
@@ -114,7 +52,7 @@ public class TList<T extends Assertion> {
 		if (a == null)
 			return;
 		if (a instanceof RoleAssertion){
-			this.getTriggerRules().assertionAdded((RoleAssertion) a);
+			this.getRoot().getTriggerRules().assertionAdded((RoleAssertion) a);
 		}
 	}
 	
@@ -319,13 +257,8 @@ public class TList<T extends Assertion> {
 		return candidateRoles;
 	}
 	
-	public TList<T> getRoot() {
-		TList<T> current = this;
-
-		while (current.getPrevious() != null) {
-			current = current.getPrevious();	
-		}
-		return current;
+	public TListHead<T> getRoot() {
+		return this.root;
 	}
 	
 	public TList<T> getLeaf() {
@@ -428,6 +361,45 @@ public class TList<T extends Assertion> {
 			current = current.getNext();
 		}
 		return false;
+	}
+	
+	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
+		++NO_OF_DUPLICATES;
+		if (original == null)
+			return null;
+		
+		TListHead<T> orig = original.getRoot();
+		//original = original.getRoot();
+		TList<T> newCopy = new TListHead<>(null);
+		TList<T> current = orig;
+		TList<T> newCurrent = newCopy;
+		//copy down
+		while (current != null) {
+			if (deepCopy)
+				newCurrent.value = current.getValue().getACopy();
+			else
+				newCurrent.value = current.getValue();
+			
+			newCurrent.isExpandable = current.isExpandable;
+			TList<T> next = new TList<>(null);
+			newCurrent.addChild(next, true);
+			if (current == original)
+				newCopy = newCurrent;
+			
+			newCurrent = newCurrent.getNext();
+			current = current.getNext();
+		}
+		//remove last empty child
+		newCurrent = newCurrent.getPrevious();
+		newCurrent.next = null;
+				
+		//copy trigger rules
+		TListHead<T> root = original.getRoot();
+		TListHead<T> copyRoot = newCopy.getRoot();
+		TriggerRules tr = root.getTriggerRules().duplicate();
+		copyRoot.triggerRules = tr;
+		tr.setReceiver(copyRoot);		
+		return newCopy;
 	}
 
 	/**
