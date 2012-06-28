@@ -1,20 +1,100 @@
 package uom.dl.elements;
 
-public class AtMostConcept implements Concept {
-	private int number;
-	private Concept concept;
+import uom.dl.utils.NNFFactory;
 
-	public AtMostConcept(int number, Concept concept) {
+public class AtMostConcept implements Concept {
+	private final int number;
+	private final Concept concept;
+	private final Role role;
+	private boolean isNNF;
+
+	public AtMostConcept(int number, Role role, Concept concept) {
 		this.number = number;
 		this.concept = concept;
+		this.role = role;
+		this.isNNF = concept.isNNF();
 	}
 	
-	public AtMostConcept(int number) {
-		this(number, Constants.TOP_CONCEPT);
+	public AtMostConcept(int number, Role role) {
+		this(number, role, Constants.TOP_CONCEPT);
+	}
+	
+	public Role getRole() {
+		return this.role;
+	}
+	
+	public int getCardinality() {
+		return this.number;
 	}
 	
 	@Override
-	public String toString() {
-		return "≤" + this.number + this.concept;
+	public Concept getConceptA() {
+		return this.concept;
 	}
+
+	@Override
+	public String toString() {
+		//return "" + Constants.ATMOST_CHAR + this.number + this.role + "." + this.concept;
+		if (this.concept == Constants.TOP_CONCEPT)
+			return "" + Constants.ATMOST_CHAR + this.number + this.role;
+		if (this.concept instanceof BinaryConcept)
+			return "" + Constants.ATMOST_CHAR + this.number + this.role + ".(" + this.concept + ")";
+		return "" + Constants.ATMOST_CHAR + this.number + this.role + "." + this.concept;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof AtMostConcept))
+			return false;
+		
+		AtMostConcept other = (AtMostConcept) obj;
+		return (this.getCardinality() == other.getCardinality())
+				&& this.getRole().equals(other.getRole())
+				&& this.getConceptA().equals(other.getConceptA());
+	}
+	
+	@Override
+	public int hashCode() {
+		return number + role.hashCode() + concept.hashCode();
+	}
+
+	@Override
+	public boolean isNNF() {
+		return this.isNNF;
+	}
+
+	@Override
+	public Concept toNNF() {
+		if (isNNF())
+			return this;
+		return NNFFactory.getNNF(this);				
+	}
+
+	@Override
+	public boolean isNegation() {
+		return false;
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return false;
+	}
+	
+	//<=1RT complement to >=xRT. x>1  
+	@Override
+	public boolean isComplement(DLElement other) {
+		if (!(other instanceof AtLeastConcept))
+			return false;
+		AtLeastConcept that = (AtLeastConcept) other;
+		if (this.getRole().equals(that.getRole()) && this.getConceptA().equals(that.getConceptA())) {
+			return this.getCardinality() < that.getCardinality();
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean canHaveComplement() {
+		return true;
+	}
+	
 }
