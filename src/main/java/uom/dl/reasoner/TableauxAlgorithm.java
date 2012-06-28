@@ -38,6 +38,12 @@ public class TableauxAlgorithm {
 	}
 	
 	//subsumee <= subsumer --> subsumee and not subsumer = 0
+	/**
+	 * 
+	 * @param subsumer the candidate subsumer
+	 * @param subsumee the candidate subsumee
+	 * @return true if the subsumer is a superset of subsumee
+	 */
 	public static boolean subsumes(Concept subsumer, Concept subsumee) {
 		Concept negC2 = new NotConcept(subsumer);
 		negC2 = NNFFactory.getNNF(negC2);

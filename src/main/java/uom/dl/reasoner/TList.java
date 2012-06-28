@@ -61,7 +61,12 @@ public class TList<T extends Assertion> {
 			newCurrent = newCurrent.previous;
 		}
 		
-		
+		//copy trigger rules
+		TList<T> root = original.getRoot();
+		TList<T> copyRoot = newCopy.getRoot();
+		TriggerRules tr = root.getTriggerRules().duplicate();
+		copyRoot.triggerRules = tr;
+		tr.setReceiver((TList<Assertion>) copyRoot);		
 		return newCopy;
 	}
 		
@@ -90,11 +95,13 @@ public class TList<T extends Assertion> {
 		return this.value;
 	}
 	
-	public TriggerRules getTrigerRules() {
+	public TriggerRules getTriggerRules() {
 		if (this.getPrevious() != null)
-			return this.getPrevious().getTrigerRules();
-		if (this.triggerRules == null)
-			this.triggerRules = new TriggerRules((TList<Assertion>) this);
+			return this.getPrevious().getTriggerRules();
+		if (this.triggerRules == null) {
+			this.triggerRules = new TriggerRules();
+			this.triggerRules.setReceiver((TList<Assertion>) this);
+		}
 		return this.triggerRules;
 	}
 	
@@ -108,13 +115,8 @@ public class TList<T extends Assertion> {
 		//in this case there is no need to check for trigger rules
 		if (a == null)
 			return;
-		/*if (a.getElement() instanceof ForAllConcept) {
-			this.getTrigerRules().addRule((ForAllConcept) a.getElement(), a.getIndividualA());
-		} else if (a.getElement() instanceof AtMostConcept) {
-			this.getTrigerRules().addRule((AtMostConcept) a.getElement(), a.getIndividualA());
-		} else*/ 
 		if (a instanceof RoleAssertion){
-			this.getTrigerRules().assertionAdded((RoleAssertion) a);
+			this.getTriggerRules().assertionAdded((RoleAssertion) a);
 		}
 	}
 	

@@ -14,8 +14,10 @@ public class TriggerRules {
 	private TList<Assertion> list; 
 	
 	
+	public TriggerRules() {
+	}
 	
-	public TriggerRules(TList<Assertion> tList) {
+	public void setReceiver(TList<Assertion> tList) {
 		this.list = tList;
 	}
 
@@ -51,7 +53,8 @@ public class TriggerRules {
 			if (role.equals(r) && indA.equals(i)) {
 				//trigger rule
 				Assertion newAss = new ConceptAssertion(c.getConceptA(), indB);
-				list.append(newAss);
+				if (list != null)
+					list.append(newAss);
 			}			
 		}
 		
@@ -61,11 +64,23 @@ public class TriggerRules {
 			Role r = c.getRole();
 			if (role.equals(r) && indA.equals(i)) {
 				//re-enter the rule
-				list.append(ca, true);
+				if (list != null)
+					list.append(ca, true);
 				System.out.println(">>>> Re-enter concept!!!");
 			}			
 		}
 			
+	}
+
+	public TriggerRules duplicate() {
+		TriggerRules copy = new TriggerRules();
+		for (ConceptAssertion ca : forAllRules) {
+			copy.addRule((ForAllConcept)ca.getElement(), new Individual(ca.getIndividualA().getName()));
+		}
+		for (ConceptAssertion ca : atMostRules) {
+			copy.addRule((AtMostConcept)ca.getElement(), new Individual(ca.getIndividualA().getName()));
+		}
+		return copy;
 	}
 
 }
