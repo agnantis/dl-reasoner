@@ -8,24 +8,34 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-public class DLEditor extends JFrame implements ActionListener {
+public class DLEditor extends JFrame implements ActionListener, DocumentListener {
 	private static final long serialVersionUID = -6701509284138703800L;
 	private JTextPane textPane;
 	private JButton existsBtn;
@@ -44,10 +54,26 @@ public class DLEditor extends JFrame implements ActionListener {
 	private JButton bottomConceptBtn;
 	private JButton equivalentBtn;
 	private StyledDocument doc;
+	private List<String> existingConcepts;
+	private static enum Mode { INSERT, COMPLETION };
+    private Mode mode = Mode.INSERT;
+    private static final String COMMIT_ACTION = "commit";
 
 	public DLEditor() {
 		super("A Simple DL Editor");
 		initComponents();
+		InputMap im = textPane.getInputMap();
+        ActionMap am = textPane.getActionMap();
+        im.put(KeyStroke.getKeyStroke("ENTER"), COMMIT_ACTION);
+        am.put(COMMIT_ACTION, new CommitAction());
+         
+        existingConcepts = new ArrayList<String>(5);
+        existingConcepts.add("Child".toLowerCase());
+        existingConcepts.add("Female".toLowerCase());
+        existingConcepts.add("Human".toLowerCase());
+        existingConcepts.add("Male".toLowerCase());
+        existingConcepts.add("Parent".toLowerCase());
+        Collections.sort(existingConcepts);
 	}
 
 	// ⌐≥≤∀∃⊓⊔⊑⊒≡⊤⊥
@@ -158,6 +184,7 @@ public class DLEditor extends JFrame implements ActionListener {
 		pack();
 		//styles
 		doc = textPane.getStyledDocument();
+		doc.addDocumentListener(this);
 		Style def = StyleContext.getDefaultStyleContext().
                 getStyle(StyleContext.DEFAULT_STYLE);
 
@@ -233,6 +260,107 @@ public class DLEditor extends JFrame implements ActionListener {
 			Dimension d = new Dimension(50, 40);
 			this.setMinimumSize(d);
 			this.setPreferredSize(d);
+		}
+		
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		boolean wordAdded = false;
+		
+		if (e.getLength() != 1)
+			return;
+		int pos = e.getOffset();
+		//check if it is a new work
+		/*
+		try {
+			char inChar = textPane.getText(pos, 1).charAt(0);
+			if (!Character.isAlphabetic(inChar)) {
+				wordAdded = true;
+			}
+		} catch (BadLocationException e2) {
+			e2.printStackTrace();
+			return;
+		}*/
+		
+		String content = null;
+		try {
+			content = textPane.getText(0, pos+1);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return;
+		}
+		int w;
+		for (w = pos; w >= 0; w--) {
+			if (! Character.isLetter(content.charAt(w)))
+				break;
+		}
+		
+		if (pos - w < 2) {
+            // Too few chars
+            return;
+        }
+		
+		String prefix = content.substring(w+1).toLowerCase();
+		if (wordAdded)
+			System.out.println("Word to add: " + prefix);
+		int n = Collections.binarySearch(existingConcepts, prefix);
+		if (n < 0 && -n <= existingConcepts.size()) {
+			String match = existingConcepts.get(-n-1);
+			if (match.startsWith(prefix.toLowerCase())){
+				//a completion is found
+				String completion = match.substring(pos - w);
+				SwingUtilities.invokeLater(new CompletionTask(completion, pos+1));
+			}
+		}
+		
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {}
+	@Override
+	public void changedUpdate(DocumentEvent e) {}
+	
+	private class CompletionTask implements Runnable {
+		private String completion;
+		private int position;
+		
+		CompletionTask(String completion, int position) {
+			this.completion = completion;
+			this.position = position;
+		}
+		public void run() {
+			try {
+				doc.insertString(position, completion, null);
+				textPane.setCaretPosition(position + completion.length());
+				textPane.moveCaretPosition(position);
+				mode = Mode.COMPLETION;
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private class CommitAction extends AbstractAction {
+		private static final long serialVersionUID = -7018591303504409583L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (mode == Mode.COMPLETION) {
+				int pos = textPane.getSelectionEnd();
+				try {
+					doc.insertString(pos, " ", null);
+					textPane.setCaretPosition(pos+1);
+					mode = Mode.INSERT;
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} else {
+				textPane.replaceSelection("\n");
+			}
 		}
 		
 	}
