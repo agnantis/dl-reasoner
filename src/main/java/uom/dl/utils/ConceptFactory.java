@@ -82,6 +82,53 @@ public class ConceptFactory {
 		
 		return conceptList;
 	}
+	
+	/**
+	 * Checks if a Concept c contains the AtomicConcept d in its declaration
+	 * @param c a concept
+	 * @param d an atomic concept
+	 * @return true if the atomic concept d is contained in the concept c
+	 */
+	public static boolean contains(Concept c, AtomicConcept d) {
+		return getAllAtomicConcepts(c).contains(d);
+	}
+	
+	/**
+	 * Replaces all the occurrences of the AtomicConcept d in the concept c with the Concept newD
+	 * @param c a concept
+	 * @param d the atomic concept to be replaced
+	 * @param newD the new atomic concept 
+	 * @return a new concept obtained by replaces all occurrences of d with newD 
+	 */
+	public static Concept replace(Concept c, AtomicConcept d, Concept newD) {
+		if (c.equals(d))
+			return newD;
+		
+		return null;
+	}
+	
+	/**
+	 * Traverses recursively the complex concepts and returns a set of all 
+	 * atomic concepts that exist in Concept c.
+	 * @param c a concept
+	 * @return a Set<AtomicConcept> of atomic concepts
+	 */
+	public static Set<AtomicConcept> getAllAtomicConcepts(Concept c) {
+		Set<AtomicConcept> setOfConcepts;
+		if (c instanceof AtomicConcept) {
+			setOfConcepts = new HashSet<>(1);
+			setOfConcepts.add((AtomicConcept) c);
+			return setOfConcepts;
+		}
+		//get first concept
+		Concept c1 = c.getConceptA();
+		setOfConcepts = getAllAtomicConcepts(c1);
+		if (c instanceof BinaryConcept) {
+			Concept c2 = ((BinaryConcept) c).getConceptB();
+			setOfConcepts.addAll(getAllAtomicConcepts(c2));
+		}
+		return setOfConcepts;
+	}
 		
 	public static void main(String[] main) {
 		AtomicConcept A = new AtomicConcept("A");
@@ -133,10 +180,10 @@ public class ConceptFactory {
 			DLElement e1 = o1.getElement();
 			DLElement e2 = o2.getElement();
 			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
-			if (e1 instanceof AtMostConcept)
-				return -1;
-			if (e2 instanceof AtMostConcept)
-				return 1;
+			//if (e1 instanceof AtMostConcept)
+			//	return -1;
+			//if (e2 instanceof AtMostConcept)
+			//	return 1;
 			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
 			if (e1 instanceof BinaryConcept)
 				return -1;

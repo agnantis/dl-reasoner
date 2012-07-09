@@ -156,7 +156,7 @@ public class TableauxAlgorithm {
 				new ExistsConcept(R, A),
 				new ExistsConcept(R, B),
 				new ForAllConcept(R, 
-						new UnionConcept(new NotConcept(A), new NotConcept(B))),
+						new UnionConcept(new NotConcept(A), new NotConcept(C))),
 				new AtMostConcept(1, R)
 			));
 		/*
@@ -211,7 +211,16 @@ public class TableauxAlgorithm {
 				new ExistsConcept(R, A),
 				new NotConcept(A)
 			));*/
+		//Check concept containment
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
+		System.out.println(wholeConcept);
+		boolean containConcept = ConceptFactory.contains(wholeConcept, D);
+		System.out.println("Contains D: " + containConcept);
+		containConcept = ConceptFactory.contains(wholeConcept, C);
+		System.out.println("Contains C: " + containConcept);
+		System.out.println(ConceptFactory.getAllAtomicConcepts(wholeConcept));
+		
+		
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		Model model = TableauxAlgorithm.findModel(ca);
 		if (model.isSatisfiable()) {
