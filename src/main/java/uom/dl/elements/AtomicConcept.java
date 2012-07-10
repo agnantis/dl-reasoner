@@ -20,6 +20,16 @@ public class AtomicConcept implements Concept {
 	public Concept getConceptA() {
 		return this;
 	}
+	
+	@Override
+	public void setConceptA(Concept c) {
+		if (c instanceof AtomicConcept) {
+			this.name = ((AtomicConcept)c).getName();
+			return;
+		} 
+		
+		throw new UnsupportedOperationException("You cannot change the concept of an AtomicConcept with a non-AtomicConcept: " + c.getClass().toString());
+	}
 
 	@Override
 	public String toString(){
@@ -70,6 +80,15 @@ public class AtomicConcept implements Concept {
 	@Override
 	public boolean canHaveComplement() {
 		return true;
+	}
+	
+	public static void main(String[] str) {
+		AtomicConcept a = new AtomicConcept("A");
+		System.out.println(a);
+		a.setConceptA(new AtomicConcept("B"));
+		System.out.println(a);
+		a.setConceptA(new NotConcept(new AtomicConcept("B")));
+		System.out.println(a);
 	}
 	
 }

@@ -9,8 +9,7 @@ public class ExistsConcept implements Concept {
 
 	public ExistsConcept(Role role, Concept concept) {
 		this.role = role;
-		this.concept = concept;
-		this.isNNF = concept.isNNF();
+		setConceptA(concept);
 	}
 	
 	public ExistsConcept(Role role) {
@@ -24,6 +23,12 @@ public class ExistsConcept implements Concept {
 	@Override
 	public Concept getConceptA() {
 		return this.concept;
+	}
+	
+	@Override
+	public void setConceptA(Concept c) {
+		this.concept = c;
+		this.isNNF = concept.isNNF();
 	}
 	
 	@Override

@@ -4,15 +4,14 @@ import uom.dl.utils.NNFFactory;
 
 public class AtLeastConcept implements Concept {
 	private final int number;
-	private final Concept concept;
+	private Concept concept;
 	private final Role role;
 	private boolean isNNF;
 
 	public AtLeastConcept(int number, Role role, Concept concept) {
 		this.number = number;
 		this.role = role;
-		this.concept = concept;
-		this.isNNF = concept.isNNF();
+		setConceptA(concept);
 	}
 	
 	public AtLeastConcept(int number, Role role) {
@@ -30,6 +29,12 @@ public class AtLeastConcept implements Concept {
 	@Override
 	public Concept getConceptA() {
 		return this.concept;
+	}
+	
+	@Override
+	public void setConceptA(Concept c) {
+		this.concept = c;
+		this.isNNF = concept.isNNF();
 	}
 	
 	@Override

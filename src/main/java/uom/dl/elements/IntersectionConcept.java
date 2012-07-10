@@ -17,10 +17,22 @@ public class IntersectionConcept implements BinaryConcept {
 	public Concept getConceptA() {
 		return this.concept1;
 	}
+	
+	@Override
+	public void setConceptA(Concept c) {
+		this.concept1 = c;
+		this.isNNF = this.concept1.isNNF() && this.concept2.isNNF();
+	}
 
 	@Override
 	public Concept getConceptB() {
 		return this.concept2;
+	}
+	
+	@Override
+	public void setConceptB(Concept c) {
+		this.concept2 = c;
+		this.isNNF = this.concept1.isNNF() && this.concept2.isNNF();
 	}
 	
 	@Override

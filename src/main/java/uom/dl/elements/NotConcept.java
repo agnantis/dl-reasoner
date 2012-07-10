@@ -4,20 +4,22 @@ import uom.dl.utils.NNFFactory;
 
 
 public class NotConcept implements Concept {
-	private final Concept concept;
-	private final boolean isNNF;
+	private Concept concept;
+	private boolean isNNF;
 	
 	public NotConcept(Concept concept){
-		this.concept = concept;
-		if (concept instanceof AtomicConcept)
-			this.isNNF = true;
-		else
-			this.isNNF = false;
+		setConceptA(concept);
 	}
 	
 	@Override
 	public Concept getConceptA() {
 		return this.concept;
+	}
+	
+	@Override
+	public void setConceptA(Concept c) {
+		this.concept = c;
+		this.isNNF = (concept instanceof AtomicConcept);
 	}
 	
 	@Override

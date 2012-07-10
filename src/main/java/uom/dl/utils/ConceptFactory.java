@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import uom.dl.elements.AtLeastConcept;
-import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
