@@ -16,6 +16,7 @@ import uom.dl.elements.Individual.IndividualPair;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
+import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
 
 public class ConceptAssertion implements Assertion {
@@ -84,7 +85,7 @@ public class ConceptAssertion implements Assertion {
 			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
 			List<Assertion> assList = new ArrayList<>(assertions);
-			Collections.sort(assList, ConceptFactory.ASSERTION_COMPARATOR);
+			Collections.sort(assList, AssertionComparator.getComparator());
 			model.append(assList);
 			model = model.getNext();
 			if (model != null) {

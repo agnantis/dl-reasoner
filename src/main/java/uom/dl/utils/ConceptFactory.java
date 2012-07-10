@@ -100,10 +100,23 @@ public class ConceptFactory {
 	 * @return a new concept obtained by replaces all occurrences of d with newD 
 	 */
 	public static Concept replace(Concept c, AtomicConcept d, Concept newD) {
-		if (c.equals(d))
-			return newD;
+		if (c instanceof AtomicConcept) {
+			if (c.equals(d))
+				return newD;
+			else
+				return c;
+		}
+		//get first concept
+		Concept c1 = c.getConceptA();
+		c.setConceptA(replace(c1, d, newD));
+		//get second concept
+		if (c instanceof BinaryConcept) {
+			BinaryConcept bc = ((BinaryConcept) c);
+			Concept c2 = bc.getConceptB();
+			bc.setConceptB(replace(c2, d, newD));			
+		}
 		
-		return null;
+		return c;
 	}
 	
 	/**
@@ -122,6 +135,7 @@ public class ConceptFactory {
 		//get first concept
 		Concept c1 = c.getConceptA();
 		setOfConcepts = getAllAtomicConcepts(c1);
+		//get second concept
 		if (c instanceof BinaryConcept) {
 			Concept c2 = ((BinaryConcept) c).getConceptB();
 			setOfConcepts.addAll(getAllAtomicConcepts(c2));
@@ -132,6 +146,7 @@ public class ConceptFactory {
 	public static void main(String[] main) {
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
+		Concept DE = new UnionConcept(new AtomicConcept("D"), new AtomicConcept("E"));
 		Concept concept;//= factory.c(A).union().c(B).intersection().c(A).union().c(B).build();
 		Set<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new IntersectionConcept(A, B)));
 		for (Concept c : conSet) {
@@ -142,6 +157,10 @@ public class ConceptFactory {
 		System.out.println(concept.toString());
 		for (Concept c : unionConcepts)
 			System.out.println("\t" + c);
+		
+		concept = replace(concept, A, DE);
+		System.out.println("Replacing: " + A + " -> " + DE);
+		System.out.println(concept);
 		
 		conSet = new HashSet<>(Arrays.asList(A, B, new IntersectionConcept(A, B)));
 		concept = intersectionOfConcepts(conSet);
@@ -164,41 +183,4 @@ public class ConceptFactory {
 		
 		return assertions;
 	}
-	
-	public final static Comparator<Assertion> ASSERTION_COMPARATOR = new Comparator<Assertion>() {
-
-		/**
-		 * operation priorities for optimal size tableaux lists:
-		 * [⊓,⊔] > [∃, ⩾] -> ⩽
-		 * @param o1
-		 * @param o2
-		 * @return
-		 */
-		@Override
-		public int compare(Assertion o1, Assertion o2) {
-			DLElement e1 = o1.getElement();
-			DLElement e2 = o2.getElement();
-			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
-			//if (e1 instanceof AtMostConcept)
-			//	return -1;
-			//if (e2 instanceof AtMostConcept)
-			//	return 1;
-			//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
-			if (e1 instanceof BinaryConcept)
-				return -1;
-			if (e2 instanceof BinaryConcept)
-				return 1;
-			if (e1 instanceof ExistsConcept)
-				return -1;
-			if (e2 instanceof ExistsConcept)
-				return 1;
-			if (e1 instanceof AtLeastConcept)
-				return -1;
-			if (e2 instanceof AtLeastConcept)
-				return 1;
-			return 0;
-			
-		}
-	};
-
 }
