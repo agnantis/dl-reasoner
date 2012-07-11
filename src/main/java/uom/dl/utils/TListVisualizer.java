@@ -27,11 +27,11 @@ public class TListVisualizer {
 		this.list = tree;
 	}*/
 
-	public static <T extends Assertion> String toDotFormat(TList<T> list) {
+	public static <T extends Assertion> String toDotFormat(TList<T> list, boolean isSatisfiable) {
 		StringBuffer s = new StringBuffer();
 		s.append("digraph G {\n");
 		s.append("\tlabelloc = t;\n");
-		s.append("\tlabel=\"The concept IS" + (list.containsClash() ? " NOT" : "") + " satisfiable\";\n");
+		s.append("\tlabel=\"The concept IS" + (isSatisfiable ? " NOT" : "") + " satisfiable\";\n");
 		s.append(toDotFormatInner(list));
 		s.append("}\n");
 		System.out.println(s);
@@ -67,13 +67,13 @@ public class TListVisualizer {
 		return s.toString();
 	}
 
-	public static <T extends Assertion> boolean showGraph(TList<T> list) {
+	public static <T extends Assertion> boolean showGraph(TList<T> list, boolean isSatisfiable) {
 		String tmpFolder = System.getProperty("java.io.tmpdir");
 		String dotFile = "graph.dot";
 		String pngFile = "graph.png";
 		Path inputPath = Paths.get(tmpFolder, dotFile);
 		Path outputPath = Paths.get(tmpFolder, pngFile);
-		boolean fileCreated = saveGraph(list, inputPath);
+		boolean fileCreated = saveGraph(list, inputPath, isSatisfiable);
 		if (fileCreated) {
 			try {
 				Runtime rt = Runtime.getRuntime();
@@ -98,13 +98,13 @@ public class TListVisualizer {
 		return true;
 	}
 	
-	public static <T extends Assertion> boolean showGraph(List<TList<T>> list) {
+	public static <T extends Assertion> boolean showGraph(List<TList<T>> list, boolean isSatisfiable) {
 		String tmpFolder = System.getProperty("java.io.tmpdir");
 		String dotFile = "graph.dot";
 		String pngFile = "graph.png";
 		Path inputPath = Paths.get(tmpFolder, dotFile);
 		Path outputPath = Paths.get(tmpFolder, pngFile);
-		boolean fileCreated = saveGraph(list, inputPath);
+		boolean fileCreated = saveGraph(list, inputPath, isSatisfiable);
 		if (fileCreated) {
 			try {
 				Runtime rt = Runtime.getRuntime();
@@ -129,8 +129,8 @@ public class TListVisualizer {
 		return true;
 	}
 
-	public static <T extends Assertion> boolean saveGraph(TList<T> list, Path path) {
-		String graph = toDotFormat(list);
+	public static <T extends Assertion> boolean saveGraph(TList<T> list, Path path, boolean isSatisfiable) {
+		String graph = toDotFormat(list, isSatisfiable);
 		// cat tableaux.dot | dot -Tpng > graph.png
 		try (BufferedWriter writer = Files.newBufferedWriter(path,
 				Charset.defaultCharset())) {
@@ -143,8 +143,8 @@ public class TListVisualizer {
 		return true;
 	}
 	
-	public static <T extends Assertion> boolean saveGraph(List<TList<T>> lists, Path path) {
-		String graph = toDotFormat(lists);
+	public static <T extends Assertion> boolean saveGraph(List<TList<T>> lists, Path path, boolean isSatisfiable) {
+		String graph = toDotFormat(lists, isSatisfiable);
 		// cat tableaux.dot | dot -Tpng > graph.png
 		try (BufferedWriter writer = Files.newBufferedWriter(path,
 				Charset.defaultCharset())) {
@@ -157,17 +157,18 @@ public class TListVisualizer {
 		return true;
 	}
 	
-	public static <T extends Assertion> String toDotFormat(List<TList<T>> models) {
+	public static <T extends Assertion> String toDotFormat(List<TList<T>> models, boolean isSatisfiable) {
 		StringBuffer s = new StringBuffer();
 		for (TList<T> model : models)
 			s.append(toDotFormatInner(model));			
 		
+		String satLabel = isSatisfiable ? "IS" : "IS NOT";
 		String[] lines = s.toString().split("\n");
 		Set<String> uniqueLines = new HashSet<>(Arrays.asList(lines));
 		s = new StringBuffer();
 		s.append("digraph G_all {\n");
 		s.append("\tlabelloc = t;\n");
-		s.append("\tlabel=\"The concept IS NOT satisfiable\\n\\n\";\n");
+		s.append("\tlabel=\"The concept " + satLabel  + " satisfiable\\n\\n\";\n");
 		for (String line : uniqueLines)
 			s.append(line + "\n");
 		

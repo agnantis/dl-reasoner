@@ -68,7 +68,7 @@ public class TableauxAlgorithm {
 		
 		while (true) {
 			Assertion value = current.getValue();
-			if (!value.isAtomic()) {
+			if (!current.visited() && !value.isAtomic()) {
 				newModels = value.executeRule(current);
 				//if the model is empty, it means that we reach the end
 				//no clash found, so the model is satisfiable!

@@ -19,6 +19,7 @@ public class TList<T extends Assertion> {
 	private TList<T> previous = null;
 	private boolean isExpandable = true;
 	private TListHead<T> root;
+	private boolean visited = false;
 		
 	public TList(T c) {
 		this.value = c;
@@ -38,6 +39,14 @@ public class TList<T extends Assertion> {
 	
 	public Assertion getValue() {
 		return this.value;
+	}
+	
+	public boolean visited() {
+		return this.visited;
+	}
+	
+	public void visited(boolean visited) {
+		this.visited = visited;
 	}
 	
 	private void addChild(TList<T> child, boolean isExpandable){
@@ -381,6 +390,7 @@ public class TList<T extends Assertion> {
 				newCurrent.value = current.getValue();
 			
 			newCurrent.isExpandable = current.isExpandable;
+			newCurrent.visited = current.visited;
 			TList<T> next = new TList<>(null);
 			newCurrent.addChild(next, true);
 			if (current == original)
@@ -448,15 +458,38 @@ public class TList<T extends Assertion> {
 		TList<T> root = this.getRoot();
 		if (root == this) 
 			sb.append("*");
+		if (root.visited())
+			sb.append("-");
 		sb.append(root.getValue());
 		while (root.hasNext()) {
 			sb.append(" -> ");
 			root = root.getNext();
 			if (root == this) 
 				sb.append("*");
+			if (root.visited())
+				sb.append("-");
 			sb.append(root.getValue());
 		}
 		return sb.toString();
+	}
+	
+	/**
+	 * Search its children for the assertion a, and marks it as true
+	 * in case it finds it.
+	 * @param a an assertion
+	 * @return true if the assertion a exists, otherwise false.
+	 */
+	public boolean setChildVisited(Assertion a) {
+		TList<T> modelPnt = this;
+
+		while (modelPnt != null) {
+			if (modelPnt.getValue().equals(a)) {
+				modelPnt.visited(true);
+				return true;
+			}
+			modelPnt = modelPnt.getNext();
+		}	
+		return false;
 	}
 	
 	/*
@@ -500,4 +533,6 @@ public class TList<T extends Assertion> {
 		TList<Assertion> copy1 = TList.duplicate(orig3, false);
 		System.out.println(copy1.repr());
 	}
+
+	
 }

@@ -125,16 +125,16 @@ public class ReasonerTester {
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		TableauxAlgorithm tableaux = new TableauxAlgorithm();
 		Model model = tableaux.findModel(ca);
+		tableaux.getClashes().add(model);
 		if (model.isSatisfiable()) {
 			System.out.println(model.getInterpretation());
 			//model.printModel(true);
 			System.out.println("No of models: " + (TList.NO_OF_DUPLICATES+1));
 			System.out.println("No of clashes: " + tableaux.getClashes().size());
-			Model.printModel(tableaux.getClashes(), true);
 		} else {
 			System.out.println("No Valid Interpretation");
-			Model.printModel(tableaux.getClashes(), true);
 		}
+		Model.printModel(tableaux.getClashes(), true);
 		//subclassing test
 		/*
 		Concept c1 = new AtMostConcept(1, R);

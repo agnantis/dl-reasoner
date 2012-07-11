@@ -51,6 +51,8 @@ public class UnionConcept implements BinaryConcept {
 	}
 	
 	@Override
+	//TODO: change it so that it recognizes 
+	// ((A | B) | C) == (A | (B | C)) 
 	public boolean equals(Object obj) {
 		if (!(obj instanceof UnionConcept))
 			return false;

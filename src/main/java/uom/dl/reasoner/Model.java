@@ -64,17 +64,21 @@ public class Model {
 		System.out.println(getExtension().getRoot().repr());
 		//TListVisualizer<Assertion> visual = new TListVisualizer<Assertion>(getExtension().getRoot());
 		if (showImage) {
-			TListVisualizer.showGraph(getExtension().getRoot());
+			TListVisualizer.showGraph(getExtension().getRoot(), this.isSatisfiable());
 			//visual.showGraph();
 		}
 	}
 	
 	public static void printModel(List<Model> models, boolean showImage) {
 		List<TList<Assertion>> lists = new ArrayList<>(models.size());
-		for (Model m : models)
+		boolean isSatisfiable = false;
+		for (Model m : models) {
 			lists.add(m.getExtension().getRoot());
+			if (m.isSatisfiable())
+				isSatisfiable = true;
+		}
 		
 		if (showImage)
-			TListVisualizer.showGraph(lists);
+			TListVisualizer.showGraph(lists, isSatisfiable);
 	}
 }

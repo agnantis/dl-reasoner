@@ -5,6 +5,7 @@ import java.util.List;
 
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
+import uom.dl.elements.NotConcept;
 import uom.dl.elements.Role;
 
 public class RoleAssertion implements BinaryAssertion {
@@ -99,6 +100,11 @@ public class RoleAssertion implements BinaryAssertion {
 		Individual ind2 = new Individual(this.indB.getName());
 		RoleAssertion ass = new RoleAssertion(this.role, ind1, ind2);
 		return ass;
+	}
+
+	@Override
+	public Assertion getNegation() {
+		throw new UnsupportedOperationException("Role negation is not supported: " + this);
 	}
 
 }
