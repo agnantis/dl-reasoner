@@ -93,6 +93,7 @@ public class ConceptAssertion implements Assertion {
 			List<Assertion> assList = new ArrayList<>(assertions);
 			Collections.sort(assList, AssertionComparator.getComparator());
 			model.append(assList);
+			model.visited(true);
 			model = model.getNext();
 			if (model != null) {
 				List<TList<Assertion>> list = new ArrayList<>();
@@ -120,6 +121,7 @@ public class ConceptAssertion implements Assertion {
 				toBeAdded.add(new ConceptAssertion(c, i));
 			}
 			model.append(toBeAdded);
+			model.visited(true);
 			model = model.getNext();
 			if (model != null) {
 				//add to trigger list
@@ -135,6 +137,7 @@ public class ConceptAssertion implements Assertion {
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
 			boolean containsInd = model.containsFiller(role, c, getIndividualA());
+			//model.visited(true);
 			if (!containsInd) {
 				//create a random individual
 				Individual newInd = new Individual();
@@ -144,6 +147,7 @@ public class ConceptAssertion implements Assertion {
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
 				model.append(toBeAdded);
 			}
+			model.visited(true);
 			model = model.getNext();
 			List<TList<Assertion>> list = new ArrayList<>();
 			list.add(model);
@@ -182,6 +186,7 @@ public class ConceptAssertion implements Assertion {
 				return newModels;
 			} else {
 				//move forward
+				model.visited(true);
 				model = model.getNext();
 				if (model != null) {
 					//add to trigger list
@@ -192,7 +197,6 @@ public class ConceptAssertion implements Assertion {
 					return list;
 				}
 			}
-			//do not move forward
 		}	
 		if (concept instanceof AtLeastConcept) {
 			AtLeastConcept amc = (AtLeastConcept) concept;
@@ -211,6 +215,7 @@ public class ConceptAssertion implements Assertion {
 			} 
 			if (toBeAdded.size() > 0)
 				model.append(toBeAdded);
+			model.visited(true);
 			model = model.getNext();
 			if (model != null) {
 				List<TList<Assertion>> list = new ArrayList<>();
@@ -227,6 +232,7 @@ public class ConceptAssertion implements Assertion {
 		int noOfNewModels = assertions.size();
 		List<TList<Assertion>> newModels = new ArrayList<>(noOfNewModels);
 		int counter = 0;
+		model.visited(true);
 		for (Assertion a : assertions) {
 			TList<Assertion> newModel;
 			//use the existing model, avoiding one unnecessary duplication 

@@ -113,7 +113,7 @@ public class ReasonerTester {
 		conSet = new HashSet<>(Arrays.asList(
 				new NotConcept(A),
 				new UnionConcept(A, B),
-				new ExistsConcept(R, C)
+				new UnionConcept(A, C)
 			));
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		System.out.println(wholeConcept);
