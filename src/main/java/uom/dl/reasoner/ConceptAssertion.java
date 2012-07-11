@@ -1,13 +1,13 @@
 package uom.dl.reasoner;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import static org.junit.Assert.assertTrue; 
 
 import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
@@ -143,11 +143,12 @@ public class ConceptAssertion implements Assertion {
 				toBeAdded.add(new ConceptAssertion(c, newInd));
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
 				model.append(toBeAdded);
-				model = model.getNext();
-				List<TList<Assertion>> list = new ArrayList<>();
-				list.add(model);
-				return list;
 			}
+			model = model.getNext();
+			List<TList<Assertion>> list = new ArrayList<>();
+			list.add(model);
+			return list;
+			 
 		}
 		if (concept instanceof AtMostConcept) {
 			AtMostConcept amc = (AtMostConcept) concept;
@@ -217,7 +218,7 @@ public class ConceptAssertion implements Assertion {
 				return list;
 			}
 		}	
-		return new ArrayList<>(0);
+		return null;
 	}
 
 	private List<TList<Assertion>> syntacticUnionRule(TList<Assertion> model) {

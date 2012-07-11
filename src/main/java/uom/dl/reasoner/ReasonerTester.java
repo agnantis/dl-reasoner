@@ -3,6 +3,8 @@ package uom.dl.reasoner;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import javax.management.relation.Role;
+
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.AtomicRole;
@@ -111,7 +113,7 @@ public class ReasonerTester {
 		conSet = new HashSet<>(Arrays.asList(
 				new NotConcept(A),
 				new UnionConcept(A, B),
-				new UnionConcept(A, C)
+				new ExistsConcept(R, C)
 			));
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		System.out.println(wholeConcept);
