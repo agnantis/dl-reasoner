@@ -2,6 +2,7 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -97,14 +98,20 @@ public class ConceptAssertion implements Assertion {
 		if (concept instanceof UnionConcept) {
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
-			List<TList<Assertion>> newModels = new ArrayList<>(assertions.size());
+			int noOfNewModels = assertions.size();
+			List<TList<Assertion>> newModels = new ArrayList<>(noOfNewModels);
+			int counter = 0;
 			for (Assertion a : assertions) {
-				TList<Assertion> newModel = TList.duplicate(model, false);
-				//List<Assertion> list = new ArrayList<>();
-				//list.add(a);
+				TList<Assertion> newModel;
+				//use the existing model, avoiding one unnecessary duplication 
+				if (counter < noOfNewModels-1)
+					newModel = TList.duplicate(model, false);
+				else
+					newModel = model;
 				newModel.append(a);
 				newModel = newModel.getNext();
 				newModels.add(newModel);
+				++counter;
 			}
 			return newModels;
 		}
@@ -158,8 +165,14 @@ public class ConceptAssertion implements Assertion {
 				//find all possible couples
 				List<IndividualPair> subPairs = Individual.getPairs(new ArrayList<>(allFillers));
 				//create models for each substitution
+				int counter = 0;
 				for (IndividualPair pair : subPairs) {
-					TList<Assertion> newModel = TList.duplicate(model, true);
+					TList<Assertion> newModel;
+					//use the existing model, avoiding one unnecessary duplication 
+					if (counter < subPairs.size()-1)
+						newModel = TList.duplicate(model, true);
+					else
+						newModel = model;
 					newModel.substituteAssertions(pair.getFirst(), pair.getSecond());
 					TList.removeDuplicates(newModel);
 					if (newModel != null) {
@@ -168,6 +181,7 @@ public class ConceptAssertion implements Assertion {
 							newModels.add(newModel);
 						}					
 					}
+					++counter;
 				}	
 				//do not move forward
 				return newModels;
