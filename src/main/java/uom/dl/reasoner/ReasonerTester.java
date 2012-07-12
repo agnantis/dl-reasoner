@@ -115,6 +115,15 @@ public class ReasonerTester {
 				new UnionConcept(A, B),
 				new UnionConcept(A, C)
 			));
+		
+		//check local simplification
+		
+		conSet = new HashSet<>(Arrays.asList(
+				new UnionConcept(C, new IntersectionConcept(A, B)),
+				new UnionConcept(new NotConcept(A), new NotConcept(B), C),
+				new NotConcept(C)
+			));
+		
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		System.out.println(wholeConcept);
 		boolean containConcept = ConceptFactory.contains(wholeConcept, D);
@@ -127,15 +136,15 @@ public class ReasonerTester {
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
 		TableauxAlgorithm tableaux = new TableauxAlgorithm();
 		Model model = tableaux.findModel(ca);
-		tableaux.getClashes().add(model);
 		if (model.isSatisfiable()) {
+			tableaux.getClashes().add(model);
 			System.out.println(model.getInterpretation());
 			//model.printModel(true);
-			System.out.println("No of models: " + (TList.NO_OF_DUPLICATES+1));
-			System.out.println("No of clashes: " + tableaux.getClashes().size());
 		} else {
 			System.out.println("No Valid Interpretation");
 		}
+		System.out.println("No of models: " + (TList.NO_OF_DUPLICATES+1));
+		System.out.println("No of clashes: " + tableaux.getClashes().size());
 		Model.printModel(tableaux.getClashes(), true);
 		//subclassing test
 		/*

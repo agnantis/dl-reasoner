@@ -1,6 +1,6 @@
 package uom.dl.reasoner;
 
-import uom.dl.utils.Optimizations;
+import uom.dl.reasoner.opts.Optimizations;
 
 public class TableuaxConfiguration {
 	private static final TableuaxConfiguration configuration = new TableuaxConfiguration();

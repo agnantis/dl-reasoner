@@ -142,6 +142,15 @@ public class ConceptFactory {
 		}
 		return setOfConcepts;
 	}
+	
+	public static Concept getNegation(Concept c) {
+		if (c instanceof NotConcept)
+			return c.getConceptA();
+		
+		Concept cNeg = new NotConcept(c);
+		return NNFFactory.getNNF(cNeg);
+			
+	}
 		
 	public static void main(String[] main) {
 		AtomicConcept A = new AtomicConcept("A");

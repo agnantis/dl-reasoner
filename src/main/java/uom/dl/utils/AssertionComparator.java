@@ -6,6 +6,8 @@ import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
+import uom.dl.elements.IntersectionConcept;
+import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.Assertion;
 
 public class AssertionComparator implements Comparator<Assertion> {
@@ -34,9 +36,13 @@ public class AssertionComparator implements Comparator<Assertion> {
 		//if (e2 instanceof AtMostConcept)
 		//	return 1;
 		//****FOR TESTING ONLY - REMOVE IT AFTERWARDS*****
-		if (e1 instanceof BinaryConcept)
+		if (e1 instanceof IntersectionConcept)
 			return -1;
-		if (e2 instanceof BinaryConcept)
+		if (e2 instanceof IntersectionConcept)
+			return 1;
+		if (e1 instanceof UnionConcept)
+			return -1;
+		if (e2 instanceof UnionConcept)
 			return 1;
 		if (e1 instanceof ExistsConcept)
 			return -1;

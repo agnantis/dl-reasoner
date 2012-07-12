@@ -1,12 +1,8 @@
 package uom.dl.reasoner;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import uom.dl.elements.AtLeastConcept;
@@ -21,9 +17,11 @@ import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
+import uom.dl.reasoner.opts.LocalSimplification;
+import uom.dl.reasoner.opts.Optimizations;
+import uom.dl.reasoner.opts.SemanticBranching;
 import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
-import uom.dl.utils.Optimizations;
 
 public class ConceptAssertion implements Assertion {
 	private final Concept concept;
@@ -103,8 +101,24 @@ public class ConceptAssertion implements Assertion {
 		}
 		if (concept instanceof UnionConcept) {
 			List<TList<Assertion>> newModels;
+			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.LOCAL_SIMPLIFICATION)) {
+				try {
+					model = LocalSimplification.apply(model);
+					if (model.visited()) {
+						//current UnionConcept has simplified, so do not continue here
+						List<TList<Assertion>> list = new ArrayList<>();
+						list.add(model);
+						return list;
+					}
+				} catch (ClashException e) {
+					model.append(e.getAssertion());
+					List<TList<Assertion>> list = new ArrayList<>();
+					list.add(model);
+					return list; 
+				}
+			}
 			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.SEMANTIC_BRANCHING)) {
-				newModels = semanticUnionRule(model);
+				newModels = SemanticBranching.apply(model);
 			} else {
 				newModels = syntacticUnionRule(model);
 			}
@@ -248,99 +262,7 @@ public class ConceptAssertion implements Assertion {
 		return newModels;
 	}
 	
-	private List<TList<Assertion>> semanticUnionRule(TList<Assertion> model) {
-		List<Assertion> unionAssertions = getUnvisited(model, UnionConcept.class);
-		Assertion assertionToSplit = null;
-		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.SEMANTIC_BRANCHING)) {
-			assertionToSplit = getMomsSelection(unionAssertions);
-		} else {
-			//get a random
-			Individual indA = unionAssertions.get(0).getIndividualA();
-			Set<Concept> concepts = ConceptFactory.getUnionConcepts((Concept) unionAssertions.get(0).getElement());
-			for (Concept c : concepts) {
-				assertionToSplit = new ConceptAssertion(c, indA);
-				break;
-			}
-		}
-		//add the negation Assertion to the new model
-		//complementModel.append(assertionToSplit.getNegation());
-		//List with assertions to be added in the complement model
-		List<Assertion> assertionsOfComplement = new ArrayList<>();
-		assertionsOfComplement.add(assertionToSplit.getNegation());
-		//mark visited
-		for (Assertion ass : unionAssertions) {
-			Set<Concept> unions = ConceptFactory.getUnionConcepts((Concept) ass.getElement());
-			boolean found = unions.remove(assertionToSplit.getElement());
-			if (found) {
-				Concept newConcept = ConceptFactory.unionOfConcepts(unions);
-				Assertion a = new ConceptAssertion(newConcept, ass.getIndividualA());
-				assertionsOfComplement.add(a);
-				model.setChildVisited(ass);
-			}
-		}
-		//create the complement branch
-		TList<Assertion> complementModel = TList.duplicate(model, false);
-		//add selected Assertion to the existing model
-		model.append(assertionToSplit);
-		//move forward
-		model = model.getNext();
-		//add to complement all new
-		complementModel.append(assertionsOfComplement);
-		//move forward
-		complementModel = complementModel.getNext();
-		
-		List<TList<Assertion>> newModels = new ArrayList<>(2);
-		newModels.add(model);
-		newModels.add(complementModel);		
-		return newModels;
-	}
 	
-	private Assertion getMomsSelection(List<Assertion> unionAssertions) {
-		Map<Assertion, Integer> freqs = new HashMap<>();
-		for (Assertion a : unionAssertions) {
-			DLElement el = a.getElement();
-			assertTrue(el instanceof Concept);
-			Set<Concept> concepts = ConceptFactory.getUnionConcepts((Concept) el);
-			for (Concept c : concepts) {
-				ConceptAssertion ca = new ConceptAssertion(c, a.getIndividualA());
-				Integer count = freqs.get(ca);
-				if (count == null)
-					count = 1;
-				else
-					count += 1;
-				freqs.put(ca, count);
-			}
-		}
-		int max = -1;
-		Assertion selected = null;
-		for (Assertion a : freqs.keySet()) {
-			Integer freq = freqs.get(a);
-			if (freq > max) {
-				max = freq;
-				selected = a;
-			}
-		}
-		return selected;
-	}
-
-	private static List<Assertion> getUnvisited(final TList<Assertion> model, Class<? extends Concept> classInstance) {
-		List<Assertion> unionAssertions = new ArrayList<>();
-		Individual ind = null;
-		TList<Assertion> modelPnt = model;
-		while (modelPnt != null) {
-			Assertion ass = modelPnt.getValue();
-			if (ind == null) { ind = ass.getIndividualA(); }
-			if (!modelPnt.visited()) {
-				DLElement el = ass.getElement();
-				if (el.getClass() == classInstance) {
-					if (ind.equals(ass.getIndividualA()))
-						unionAssertions.add(ass);
-				}				
-			}
-			modelPnt = modelPnt.getNext();
-		}
-		return unionAssertions;
-	}
 
 	@Override
 	public void setIndividualA(Individual ind) {
