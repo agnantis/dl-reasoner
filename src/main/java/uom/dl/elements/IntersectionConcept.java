@@ -1,5 +1,8 @@
 package uom.dl.elements;
 
+import java.util.Set;
+
+import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.NNFFactory;
 
 public class IntersectionConcept implements BinaryConcept {
@@ -61,8 +64,9 @@ public class IntersectionConcept implements BinaryConcept {
 		if (!(obj instanceof IntersectionConcept))
 			return false;
 		
-		return this.getConceptA().equals(((IntersectionConcept)obj).getConceptA()) 
-				&& this.getConceptB().equals(((IntersectionConcept)obj).getConceptB());
+		Set<Concept> thisConcepts = ConceptFactory.getIntersectionConcepts(this);
+		Set<Concept> otherConcepts = ConceptFactory.getIntersectionConcepts((Concept) obj);
+		return thisConcepts.equals(otherConcepts);
 	}
 
 	@Override

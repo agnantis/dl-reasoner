@@ -1,5 +1,8 @@
 package uom.dl.elements;
 
+import java.util.Set;
+
+import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.NNFFactory;
 
 public class UnionConcept implements BinaryConcept {
@@ -51,14 +54,12 @@ public class UnionConcept implements BinaryConcept {
 	}
 	
 	@Override
-	//TODO: change it so that it recognizes 
-	// ((A | B) | C) == (A | (B | C)) 
 	public boolean equals(Object obj) {
 		if (!(obj instanceof UnionConcept))
 			return false;
-		
-		return this.getConceptA().equals(((UnionConcept)obj).getConceptA()) 
-				&& this.getConceptB().equals(((UnionConcept)obj).getConceptB());
+		Set<Concept> thisConcepts = ConceptFactory.getUnionConcepts(this);
+		Set<Concept> otherConcepts = ConceptFactory.getUnionConcepts((Concept) obj);
+		return thisConcepts.equals(otherConcepts);
 	}
 	
 	@Override
