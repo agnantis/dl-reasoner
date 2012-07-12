@@ -15,6 +15,15 @@ public class IntersectionConcept implements BinaryConcept {
 		this.concept2 = d;
 		this.isNNF = c.isNNF() && d.isNNF();
 	}
+	
+	public IntersectionConcept(Concept c1, Concept c2, Concept... concepts) {
+		IntersectionConcept c = new IntersectionConcept(c1, c2);
+		for (Concept concept : concepts) {
+			c = new IntersectionConcept(c, concept);
+		}
+		this.concept1 = c.getConceptA();
+		this.concept2 = c.getConceptB();
+	}
 
 	@Override
 	public Concept getConceptA() {

@@ -9,6 +9,15 @@ public class UnionConcept implements BinaryConcept {
 	private Concept concept1;
 	private Concept concept2;
 	private boolean isNNF;
+	
+	public UnionConcept(Concept c1, Concept c2, Concept... concepts) {
+		UnionConcept c = new UnionConcept(c1, c2);
+		for (Concept concept : concepts) {
+			c = new UnionConcept(c, concept);
+		}
+		this.concept1 = c.getConceptA();
+		this.concept2 = c.getConceptB();
+	}
 
 	public UnionConcept(Concept c, Concept d) {
 		this.concept1 = c;
