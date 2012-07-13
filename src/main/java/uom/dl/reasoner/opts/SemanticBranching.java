@@ -12,6 +12,7 @@ import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.ConceptAssertion;
 import uom.dl.reasoner.TList;
 import uom.dl.reasoner.TableuaxConfiguration;
+import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.utils.ConceptFactory;
 
 public class SemanticBranching {
@@ -19,7 +20,7 @@ public class SemanticBranching {
 	public static List<TList<Assertion>> apply(TList<Assertion> model) {
 		List<Assertion> unionAssertions = getUnvisitedUnionAssertions(model);
 		Assertion assertionToSplit = null;
-		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.SEMANTIC_BRANCHING)) {
+		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.SEMANTIC_BRANCHING)) {
 			assertionToSplit = new MOMSHeuristic().getBestSelection(unionAssertions);
 		} else {
 			//get a random

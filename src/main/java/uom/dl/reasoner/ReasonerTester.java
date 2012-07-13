@@ -24,6 +24,14 @@ public class ReasonerTester {
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept C = new AtomicConcept("C");
 		AtomicConcept D = new AtomicConcept("D");
+		AtomicConcept C1 = new AtomicConcept("C1");
+		AtomicConcept C2 = new AtomicConcept("C2");
+		AtomicConcept C3 = new AtomicConcept("C3");
+		AtomicConcept C4 = new AtomicConcept("C4");
+		AtomicConcept D1 = new AtomicConcept("D1");
+		AtomicConcept D2 = new AtomicConcept("D2");
+		AtomicConcept D3 = new AtomicConcept("D3");
+		AtomicConcept D4 = new AtomicConcept("D4");
 		AtomicRole R = new AtomicRole("R");
 		//HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
 		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(
@@ -115,14 +123,22 @@ public class ReasonerTester {
 				new UnionConcept(A, B),
 				new UnionConcept(A, C)
 			));
-		
 		//check local simplification
-		
 		conSet = new HashSet<>(Arrays.asList(
 				new UnionConcept(C, new IntersectionConcept(A, B)),
 				new UnionConcept(new NotConcept(A), new NotConcept(B), C),
 				new NotConcept(C)
-			));
+				));
+		
+		//check directed backtracking
+		conSet = new HashSet<>(Arrays.asList(
+				new UnionConcept(C1, D1),
+				new UnionConcept(C2, D2),
+				new UnionConcept(C3, D3),
+				new UnionConcept(C4, D4),
+				new ExistsConcept(R, new IntersectionConcept(A, B)),
+				new ForAllConcept(R, new NotConcept(A))
+				));
 		
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		System.out.println(wholeConcept);

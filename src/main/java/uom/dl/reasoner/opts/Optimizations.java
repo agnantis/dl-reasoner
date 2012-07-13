@@ -1,45 +1,34 @@
 package uom.dl.reasoner.opts;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Optimizations {
 	private static final Logger log = LoggerFactory.getLogger(Optimizations.class);
 	
-	public static final String SEMANTIC_BRANCHING = "semantic_branching";
-	public static final String MOMS_HEURISTIC = "moms_heuristics";
-	public static final String LOCAL_SIMPLIFICATION = "local_simplification";
-	private boolean semanticBranchingOpt = true;
-	private boolean momsHeuristic = false;
-	private boolean localSimplification = true;
+	private final Set<Optimization> activeOpts = new HashSet<>();
 	
-
-	public void setOptimization(String name, boolean value) {
-		switch (name) {
-		case SEMANTIC_BRANCHING:
-			this.semanticBranchingOpt = value;
-			break;
-		case MOMS_HEURISTIC:
-			this.momsHeuristic = value;
-		case LOCAL_SIMPLIFICATION:
-			this.localSimplification = value;
-		default:
-			log.warn("There is no such otimization: " + name);
-			break;
+	public void setOptimization(Optimization opt, boolean value) {
+		if (value) {
+			activeOpts.add(opt);
+		} else {
+			activeOpts.remove(opt);
 		}
 	}
 	
-	public boolean usesOptimization(String name) {
-		switch (name) {
-		case SEMANTIC_BRANCHING:
-			return semanticBranchingOpt;
-		case MOMS_HEURISTIC:
-			return momsHeuristic;
-		case LOCAL_SIMPLIFICATION:
-			return localSimplification;
-		default:
-			log.warn("There is no such otimization: " + name);
-			return false;
-		}
+	public boolean usesOptimization(Optimization opt) {
+		return activeOpts.contains(opt);
+	}
+	
+	public final Set<Optimization> getActiveOptimizations() {
+		return new HashSet<>(this.activeOpts); 
+	}
+	
+	//Available optimizations
+	public static enum Optimization {
+		SEMANTIC_BRANCHING, MOMS_HEURISTIC, LOCAL_SIMPLIFICATION, DIRECTED_BACKTRACKING
 	}
 }

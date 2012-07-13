@@ -20,6 +20,7 @@ import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.opts.LocalSimplification;
 import uom.dl.reasoner.opts.Optimizations;
 import uom.dl.reasoner.opts.SemanticBranching;
+import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
 
@@ -101,7 +102,7 @@ public class ConceptAssertion implements Assertion {
 		}
 		if (concept instanceof UnionConcept) {
 			List<TList<Assertion>> newModels;
-			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.LOCAL_SIMPLIFICATION)) {
+			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.LOCAL_SIMPLIFICATION)) {
 				try {
 					model = LocalSimplification.apply(model);
 					if (model.visited()) {
@@ -117,7 +118,7 @@ public class ConceptAssertion implements Assertion {
 					return list; 
 				}
 			}
-			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimizations.SEMANTIC_BRANCHING)) {
+			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.SEMANTIC_BRANCHING)) {
 				newModels = SemanticBranching.apply(model);
 			} else {
 				newModels = syntacticUnionRule(model);
