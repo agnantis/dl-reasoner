@@ -41,6 +41,7 @@ public class TListVisualizer {
 	//prefix = "0" -> root
 	//children of root -> 1.0, 1.1...
 	private static <T extends Assertion> String toDotFormatInner(TList<T> list) {
+		String clashNodeID = "clash_" + new Object().hashCode();
 		StringBuffer s = new StringBuffer();
 		int counter = 0;
 		
@@ -57,12 +58,17 @@ public class TListVisualizer {
 			current = current.getNext();
 			cName = nextName;
 		}
-		s.append("\t \"" + cName + "\"");
+		if (list.containsClash()) {
+			s.append("\t \"" + cName + "\" -> " + clashNodeID + ";\n");
+			s.append("\t \"" + clashNodeID + "\" [label=clash style=filled];\n");
+			//s.append("\t clash [style=filled];\n");
+		}
+		/*
 		if (current.isCurrentExpandable()) {
 			s.append(";\n");
 		} else {
 			s.append(" [style=filled];\n");
-		}
+		}*/
 			
 		return s.toString();
 	}

@@ -2,6 +2,7 @@ package uom.dl.reasoner;
 
 public class TListHead<T extends Assertion> extends TList<T> {
 	TriggerRules triggerRules;
+	private boolean clashFound = false;
 
 	public TListHead(T c) {
 		super(c);
@@ -16,5 +17,14 @@ public class TListHead<T extends Assertion> extends TList<T> {
 	
 	public TriggerRules getTriggerRules() {
 		return this.triggerRules;
+	}
+
+	public void clashFound() {
+		this.clashFound = true;		
+	}
+	
+	@Override
+	public boolean containsClash() {
+		return this.clashFound;
 	}
 }

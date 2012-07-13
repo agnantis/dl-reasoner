@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
@@ -12,12 +15,13 @@ import uom.dl.elements.Individual;
 import uom.dl.elements.Role;
 
 public class TList<T extends Assertion> {
+	private static final Logger log = LoggerFactory.getLogger(TList.class);
 	public static int NO_OF_DUPLICATES = 0;
 	
 	private Assertion value;
 	private TList<T> next = null;
 	private TList<T> previous = null;
-	private boolean isExpandable = true;
+	protected boolean isExpandable = true;
 	private TListHead<T> root;
 	private boolean visited = false;
 		
@@ -61,7 +65,12 @@ public class TList<T extends Assertion> {
 		if (a == null)
 			return;
 		if (a instanceof RoleAssertion){
-			this.getRoot().getTriggerRules().assertionAdded((RoleAssertion) a);
+			try {
+				this.getRoot().getTriggerRules().assertionAdded((RoleAssertion) a);
+			} catch (ClashException e) {
+				this.getRoot().clashFound();
+				log.debug("Clash found. Model: " + this + " . Assertion: " + e.getAssertion());
+			}
 		}
 	}
 	
@@ -90,22 +99,22 @@ public class TList<T extends Assertion> {
 		return this.previous;
 	}
 	
-	public void append(T child) {
+	public void append(T child) throws ClashException {
 		append(child, false);
 	}
 	
-	public void append(T child, boolean doNotCheckForDuplicate) {
+	public void append(T child, boolean doNotCheckForDuplicate) throws ClashException {
 		List<T> children = new ArrayList<>(1);
 		children.add(child);
 		append(children, doNotCheckForDuplicate);
 		
 	}
 	
-	public void append(List<T> children){
+	public void append(List<T> children) throws ClashException{
 		append(children, false);
 	}
 	
-	public void append(List<T> children, boolean doNotCheckForDuplicate){
+	public void append(List<T> children, boolean doNotCheckForDuplicate) throws ClashException{
 		if (children.isEmpty())
 			return;
 		TList<T> current = this;
@@ -124,7 +133,7 @@ public class TList<T extends Assertion> {
 		
 	}
 	
-	private boolean setNext(TList<T> node, boolean doNotCheckForDuplicate) {
+	private boolean setNext(TList<T> node, boolean doNotCheckForDuplicate) throws ClashException {
 		Assertion c = node.getValue();
 		if (c == null)
 			throw new NullPointerException("Concept cannot be null");
@@ -136,8 +145,10 @@ public class TList<T extends Assertion> {
 			while (current != null) {
 				Assertion ass = current.getValue();
 				if (c.isComplement(ass)) {
-					clashFound = true;
-					break;
+					//clashFound = true;
+					//break;
+					this.getRoot().clashFound();
+					throw new ClashException(ass);
 				}
 				//if it already exists, do not add it
 				if (!doNotCheckForDuplicate && ass.equals(c))
@@ -363,13 +374,7 @@ public class TList<T extends Assertion> {
 	}
 
 	public boolean containsClash() {
-		TList<T> current = this.getRoot();
-		while (current != null) {
-			if (!current.isCurrentExpandable())
-				return true;
-			current = current.getNext();
-		}
-		return false;
+		return this.getRoot().containsClash();
 	}
 	
 	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
@@ -418,7 +423,7 @@ public class TList<T extends Assertion> {
 	 * @param model
 	 * @return
 	 */
-	public static <T extends Assertion> boolean revalidateModel(TList<T> model) {
+	public static <T extends Assertion> void revalidateModel(TList<T> model) throws ClashException{
 		TList<T> current = model.getRoot();
 		List<DLElement> atomicConcepts = new ArrayList<>();
 		while (current != null) {
@@ -426,30 +431,18 @@ public class TList<T extends Assertion> {
 			Assertion nodeValue = current.getValue();
 			if (nodeValue.isAtomic()) {
 				//check for clash
-				boolean clashFound = false;
 				for (DLElement c : atomicConcepts) {
 					if (nodeValue.isComplement(c)) {
-						clashFound = true;
-						break;
+						//break;
+						model.getRoot().clashFound();
+						throw new ClashException(nodeValue);
 					}						
 				}
-				if (clashFound) {
-					//remove next assertions
-					//TODO: should I really remove others?
-					current.next = null;
-					current.isExpandable = false;
-					//to avoid memory leaks, like: 
-					//model=(AUB)(b)->A(b)->(-A(b))->*B(b)->C(a) then 
-					//model=(AUB)(b)->A(b)->*(-A(b)), otherwise its behavior is nondeterministic
-					model = current;
-					return false;
-				} else { //add it to existing atomic concepts
-					atomicConcepts.add(nodeValue);
-				}
+				atomicConcepts.add(nodeValue);
 			}
 			current = current.getNext();
 		}
-		return true;
+		//return true;
 	}
 	
 	public String toString(){
@@ -514,7 +507,7 @@ public class TList<T extends Assertion> {
 		return s.toString();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClashException {
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept B1 = new AtomicConcept("B1");

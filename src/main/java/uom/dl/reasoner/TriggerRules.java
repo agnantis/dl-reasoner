@@ -44,7 +44,7 @@ public class TriggerRules {
 		}
 	}
 	
-	public <T extends Assertion> void assertionAdded(RoleAssertion a) {
+	public <T extends Assertion> void assertionAdded(RoleAssertion a) throws ClashException{
 		Role role = a.getElement();
 		Individual indA = a.getIndividualA();
 		Individual indB = a.getIndividualB();

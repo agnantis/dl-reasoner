@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.Assertion;
+import uom.dl.reasoner.ClashException;
 import uom.dl.reasoner.ConceptAssertion;
 import uom.dl.reasoner.TList;
 import uom.dl.reasoner.TableuaxConfiguration;
@@ -16,6 +20,7 @@ import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.utils.ConceptFactory;
 
 public class SemanticBranching {
+	private static final Logger log = LoggerFactory.getLogger(SemanticBranching.class);
 	
 	public static List<TList<Assertion>> apply(TList<Assertion> model) {
 		List<Assertion> unionAssertions = getUnvisitedUnionAssertions(model);
@@ -49,18 +54,25 @@ public class SemanticBranching {
 		}
 		//create the complement branch
 		TList<Assertion> complementModel = TList.duplicate(model, false);
-		//add selected Assertion to the existing model
-		model.append(assertionToSplit);
-		//move forward
-		model = model.getNext();
-		//add to complement all new
-		complementModel.append(assertionsOfComplement);
-		//move forward
-		complementModel = complementModel.getNext();
-		
 		List<TList<Assertion>> newModels = new ArrayList<>(2);
-		newModels.add(model);
-		newModels.add(complementModel);		
+		try {
+			//add selected Assertion to the existing model
+			model.append(assertionToSplit);
+			//move forward
+			model = model.getNext();
+			newModels.add(model);
+		} catch (ClashException e) {
+			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+		}
+		try {
+			//add to complement all new
+			complementModel.append(assertionsOfComplement);
+			//move forward
+			complementModel = complementModel.getNext();
+			newModels.add(complementModel);
+		} catch (ClashException e) {
+			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+		}	
 		return newModels;
 	}
 	

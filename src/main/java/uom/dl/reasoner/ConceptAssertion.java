@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.Concept;
@@ -25,6 +28,7 @@ import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
 
 public class ConceptAssertion implements Assertion {
+	private static final Logger log = LoggerFactory.getLogger(ConceptAssertion.class);
 	private final Concept concept;
 	private Individual ind;
 	
@@ -91,14 +95,18 @@ public class ConceptAssertion implements Assertion {
 			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
 			List<Assertion> assList = new ArrayList<>(assertions);
 			Collections.sort(assList, AssertionComparator.getComparator());
-			model.append(assList);
-			model.visited(true);
-			model = model.getNext();
+			try {
+				model.append(assList);
+				model.visited(true);
+				model = model.getNext();
+			} catch (ClashException e) {
+				log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+			} 
 			if (model != null) {
 				List<TList<Assertion>> list = new ArrayList<>();
 				list.add(model);
 				return list;
-			}
+			} else { return null; }
 		}
 		if (concept instanceof UnionConcept) {
 			List<TList<Assertion>> newModels;
@@ -112,12 +120,14 @@ public class ConceptAssertion implements Assertion {
 						return list;
 					}
 				} catch (ClashException e) {
-					model.append(e.getAssertion());
-					List<TList<Assertion>> list = new ArrayList<>();
-					list.add(model);
-					return list; 
+					model.getRoot().clashFound();
+					log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
 				}
+				List<TList<Assertion>> list = new ArrayList<>();
+				list.add(model);
+				return list; 
 			}
+			
 			if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.SEMANTIC_BRANCHING)) {
 				newModels = SemanticBranching.apply(model);
 			} else {
@@ -135,17 +145,21 @@ public class ConceptAssertion implements Assertion {
 				//add C(i), 
 				toBeAdded.add(new ConceptAssertion(c, i));
 			}
-			model.append(toBeAdded);
-			model.visited(true);
-			model = model.getNext();
-			if (model != null) {
+			try {
+				model.append(toBeAdded);
+				model.visited(true);
+				model = model.getNext();
 				//add to trigger list
-				model.getRoot().getTriggerRules().addRule(ec, getIndividualA());
-				//return new status
+				if (model != null)
+					model.getRoot().getTriggerRules().addRule(ec, getIndividualA());
+			} catch (ClashException e) {
+				log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+			}
+			if (model != null) {
 				List<TList<Assertion>> list = new ArrayList<>();
 				list.add(model);
 				return list;
-			}
+			} else { return null; }
 		}
 		if (concept instanceof ExistsConcept) {
 			ExistsConcept ec = (ExistsConcept) concept;
@@ -160,14 +174,20 @@ public class ConceptAssertion implements Assertion {
 				List<Assertion> toBeAdded = new ArrayList<>(2);
 				toBeAdded.add(new ConceptAssertion(c, newInd));
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
-				model.append(toBeAdded);
+				try { 
+					model.append(toBeAdded);
+				} catch (ClashException e) {
+					log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+					List<TList<Assertion>> list = new ArrayList<>();
+					list.add(model);
+					return list;
+				}
 			}
 			model.visited(true);
 			model = model.getNext();
 			List<TList<Assertion>> list = new ArrayList<>();
 			list.add(model);
 			return list;
-			 
 		}
 		if (concept instanceof AtMostConcept) {
 			AtMostConcept amc = (AtMostConcept) concept;
@@ -190,10 +210,12 @@ public class ConceptAssertion implements Assertion {
 					newModel.substituteAssertions(pair.getFirst(), pair.getSecond());
 					TList.removeDuplicates(newModel);
 					if (newModel != null) {
-						boolean validModel = TList.revalidateModel(newModel);
-						if (validModel) {
+						try {
+							TList.revalidateModel(newModel);
 							newModels.add(newModel);
-						}					
+						} catch (ClashException e) {
+							log.debug("Clash found. Model: " + newModel + " . Assertion: " + e.getAssertion());
+						}
 					}
 					++counter;
 				}	
@@ -228,8 +250,16 @@ public class ConceptAssertion implements Assertion {
 				toBeAdded.add(new ConceptAssertion(c, newInd));
 				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
 			} 
-			if (toBeAdded.size() > 0)
-				model.append(toBeAdded);
+			if (toBeAdded.size() > 0) {
+				try {
+					model.append(toBeAdded);
+				} catch (ClashException e) {
+					log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+					log.error("You can have a clash in a AtLeast expansion rule. Something is erroneous");
+					List<TList<Assertion>> list = new ArrayList<>();
+					list.add(model);
+					return list;				}
+			}
 			model.visited(true);
 			model = model.getNext();
 			if (model != null) {
@@ -255,9 +285,13 @@ public class ConceptAssertion implements Assertion {
 				newModel = TList.duplicate(model, false);
 			else
 				newModel = model;
-			newModel.append(a);
-			newModel = newModel.getNext();
-			newModels.add(newModel);
+			try {
+				newModel.append(a);
+				newModel = newModel.getNext();
+				newModels.add(newModel);
+			} catch (ClashException e) {
+				log.debug("Clash found. Model: " + newModel + " . Assertion: " + e.getAssertion());
+			}
 			++counter;
 		}
 		return newModels;

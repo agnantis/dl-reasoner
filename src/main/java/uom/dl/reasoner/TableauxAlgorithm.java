@@ -79,7 +79,7 @@ public class TableauxAlgorithm {
 				for (Iterator<TList<Assertion>> it = newModels.iterator(); it.hasNext();) {
 					TList<Assertion> newModel = it.next();
 					//check for a clash
-					if (!newModel.modelExists()) {
+					if (newModel.containsClash()) {
 						invalidModels.add(new Model(newModel, false));
 						//discard model
 						it.remove();
