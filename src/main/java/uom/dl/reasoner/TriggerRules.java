@@ -23,12 +23,12 @@ public class TriggerRules {
 		this.list = (TListHead<Assertion>) tList;
 	}
 
-	public boolean addRule(ForAllConcept c, Individual i) {
-		return forAllRules.add(new ConceptAssertion(c, i));
+	public boolean addRule(ForAllConcept c, Individual i, Set<Integer> dset) {
+		return forAllRules.add(new ConceptAssertion(c, i, -1, dset));
 	}
 	
-	public boolean addRule(AtMostConcept c, Individual i) {
-		return atMostRules.add(new ConceptAssertion(c, i));
+	public boolean addRule(AtMostConcept c, Individual i, Set<Integer> dset) {
+		return atMostRules.add(new ConceptAssertion(c, i, -1, dset));
 	}
 	
 	public void substituteIndividual(Individual from, Individual to) {
@@ -44,7 +44,7 @@ public class TriggerRules {
 		}
 	}
 	
-	public <T extends Assertion> void assertionAdded(RoleAssertion a) throws ClashException{
+	public <T extends Assertion> void assertionAdded(RoleAssertion a) throws ClashException {
 		Role role = a.getElement();
 		Individual indA = a.getIndividualA();
 		Individual indB = a.getIndividualB();
@@ -54,7 +54,11 @@ public class TriggerRules {
 			Role r = c.getRole();
 			if (role.equals(r) && indA.equals(i)) {
 				//trigger rule
-				Assertion newAss = new ConceptAssertion(c.getConceptA(), indB);
+				int bFactor = -1;
+				//new dSet = union of dependencies
+				Set<Integer> dset = new HashSet<>(a.getDependencySet());
+				dset.addAll(ca.getDependencySet());
+				Assertion newAss = new ConceptAssertion(c.getConceptA(), indB, bFactor, dset);
 				if (list != null) {
 					log.debug("Rule triggered. Append to the model: " + newAss);
 					list.append(newAss);
@@ -80,10 +84,16 @@ public class TriggerRules {
 	public TriggerRules duplicate() {
 		TriggerRules copy = new TriggerRules();
 		for (ConceptAssertion ca : forAllRules) {
-			copy.addRule((ForAllConcept)ca.getElement(), new Individual(ca.getIndividualA().getName()));
+			copy.addRule(
+					(ForAllConcept)ca.getElement(), 
+					new Individual(ca.getIndividualA().getName()),
+					ca.getDependencySet());
 		}
 		for (ConceptAssertion ca : atMostRules) {
-			copy.addRule((AtMostConcept)ca.getElement(), new Individual(ca.getIndividualA().getName()));
+			copy.addRule(
+					(AtMostConcept)ca.getElement(), 
+					new Individual(ca.getIndividualA().getName()),
+					ca.getDependencySet());
 		}
 		return copy;
 	}

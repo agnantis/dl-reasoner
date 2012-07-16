@@ -2,7 +2,9 @@ package uom.dl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -21,9 +23,8 @@ import uom.dl.elements.NotConcept;
 import uom.dl.elements.Role;
 import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.opts.LocalSimplification;
-import uom.dl.reasoner.opts.Optimizations;
-import uom.dl.reasoner.opts.SemanticBranching;
 import uom.dl.reasoner.opts.Optimizations.Optimization;
+import uom.dl.reasoner.opts.SemanticBranching;
 import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
 
@@ -31,10 +32,20 @@ public class ConceptAssertion implements Assertion {
 	private static final Logger log = LoggerFactory.getLogger(ConceptAssertion.class);
 	private final Concept concept;
 	private Individual ind;
+	private int branchFactor = -1;
+	private Set<Integer> dependencySet = new HashSet<>();
 	
+	/*
 	public ConceptAssertion(Concept concept, Individual ind) {
 		this.concept = concept;
 		this.ind = ind;
+	}*/
+	
+	public ConceptAssertion(Concept concept, Individual ind, int bFactor, Set<Integer> dependencySet) {
+		this.concept = concept;
+		this.ind = ind;
+		this.branchFactor = bFactor;
+		this.dependencySet = dependencySet;
 	}
 
 	@Override
@@ -67,6 +78,26 @@ public class ConceptAssertion implements Assertion {
 	}
 	
 	@Override
+	public int getBranchFactor() {
+		return this.branchFactor;
+	}
+	
+	@Override
+	public void setBranchFactor(int bFactor) {
+		this.branchFactor = bFactor;
+	}
+	
+	@Override
+	public Set<Integer> getDependencySet() {
+		return this.dependencySet;
+	}
+	
+	@Override
+	public void setDependencySet(Set<Integer> dset) {
+		this.dependencySet = dset;		
+	}
+	
+	@Override
 	public String toString() {
 		if (this.getElement().isAtomic()) {
 			return this.getElement() + "(" + this.getIndividualA() + ")";	
@@ -92,7 +123,11 @@ public class ConceptAssertion implements Assertion {
 	public List<TList<Assertion>> executeRule(TList<Assertion> model) {
 		if (concept instanceof IntersectionConcept) {
 			Set<Concept> concepts = ConceptFactory.getIntersectionConcepts(concept);
-			Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
+			Set<Assertion> assertions = new HashSet<>(concepts.size());
+			for (Concept c : concepts) {
+				Assertion a = new ConceptAssertion(c, this.getIndividualA(), -1, this.getDependencySet());
+				assertions.add(a);
+			}
 			List<Assertion> assList = new ArrayList<>(assertions);
 			Collections.sort(assList, AssertionComparator.getComparator());
 			try {
@@ -139,19 +174,25 @@ public class ConceptAssertion implements Assertion {
 			ForAllConcept ec = (ForAllConcept) concept;
 			Concept c = ec.getConceptA();
 			Role role = ec.getRole();
-			Set<Individual> casesBeAdded = model.getUnspecifiedFiller(role, getIndividualA());
-			List<Assertion> toBeAdded = new ArrayList<>(casesBeAdded.size());
-			for (Individual i : casesBeAdded) {
-				//add C(i), 
-				toBeAdded.add(new ConceptAssertion(c, i));
-			}
+			//Set<Individual> casesBeAdded = model.getUnspecifiedFiller(role, c, getIndividualA());
+			Map<Individual, Set<Integer>> casesBeAdded = model.getUnspecifiedFillerWithDependencies(role, c, getIndividualA());
+			//List<Assertion> toBeAdded = new ArrayList<>(casesBeAdded.size());
+			//add C(i)
+			Set<Integer> currentDSet = model.getDependencySet();
+			int bFactor = model.getBranchingFactor();
 			try {
-				model.append(toBeAdded);
+				for (Individual i : casesBeAdded.keySet()) {
+					//toBeAdded.add(new ConceptAssertion(c, i));
+					Set<Integer> newDSet = new HashSet<>(casesBeAdded.get(i));
+					newDSet.addAll(currentDSet);
+					Assertion ca = new ConceptAssertion(c, i, bFactor, newDSet);
+					model.append(ca);//dependency the concept itself, and the R(x,y) statement
+				}
 				model.visited(true);
 				model = model.getNext();
 				//add to trigger list
 				if (model != null)
-					model.getRoot().getTriggerRules().addRule(ec, getIndividualA());
+					model.getRoot().getTriggerRules().addRule(ec, getIndividualA(), getDependencySet());
 			} catch (ClashException e) {
 				log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
 			}
@@ -168,14 +209,18 @@ public class ConceptAssertion implements Assertion {
 			boolean containsInd = model.containsFiller(role, c, getIndividualA());
 			//model.visited(true);
 			if (!containsInd) {
+				Set<Integer> currentDSet = model.getDependencySet();
+				int bFactor = model.getBranchingFactor();
 				//create a random individual
 				Individual newInd = new Individual();
 				//add C(x), R(b,x)
-				List<Assertion> toBeAdded = new ArrayList<>(2);
-				toBeAdded.add(new ConceptAssertion(c, newInd));
-				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
+				Assertion ca = new ConceptAssertion(c, newInd, bFactor, currentDSet);
+				Assertion ra = new RoleAssertion(role, getIndividualA(), newInd, bFactor, currentDSet);
+				List<Assertion> alist = new ArrayList<>(2);
+				alist.add(ca);
+				alist.add(ra);
 				try { 
-					model.append(toBeAdded);
+					model.append(alist);
 				} catch (ClashException e) {
 					log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
 					List<TList<Assertion>> list = new ArrayList<>();
@@ -227,7 +272,7 @@ public class ConceptAssertion implements Assertion {
 				model = model.getNext();
 				if (model != null) {
 					//add to trigger list
-					model.getRoot().getTriggerRules().addRule(amc, getIndividualA());
+					model.getRoot().getTriggerRules().addRule(amc, getIndividualA(), getDependencySet());
 					//return new status
 					List<TList<Assertion>> list = new ArrayList<>();
 					list.add(model);
@@ -240,25 +285,34 @@ public class ConceptAssertion implements Assertion {
 			Role role = amc.getRole();
 			Concept c = amc.getConceptA();
 			int card = amc.getCardinality();
-			Set<Individual> allFillers = model.getFillers(role, ind);
-			//List<TList<Assertion>> newModels = new ArrayList<>(allFillers.size());
-			List<Assertion> toBeAdded = new ArrayList<>(card);
-			for (int i = allFillers.size(); i < card; ++i) {
-				//create a random individual
-				Individual newInd = new Individual();
-				//add C(x), R(b,x)
-				toBeAdded.add(new ConceptAssertion(c, newInd));
-				toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd));
-			} 
-			if (toBeAdded.size() > 0) {
-				try {
-					model.append(toBeAdded);
-				} catch (ClashException e) {
-					log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
-					log.error("You can have a clash in a AtLeast expansion rule. Something is erroneous");
-					List<TList<Assertion>> list = new ArrayList<>();
-					list.add(model);
-					return list;				}
+			Map<Individual, Set<Integer>> allFillers = model.getFillersWithDependencies(role, ind);
+			if (allFillers.size() < card) {
+				List<Assertion> toBeAdded = new ArrayList<>(card);
+				//The dependency of the new fillers is the union of the dependency sets of the AtLeast rule
+				//and all the existing role filers
+				int bFactor = model.getBranchingFactor();
+				Set<Integer> currentDSet = new HashSet<>(model.getDependencySet());
+				for (Individual i : allFillers.keySet())
+					currentDSet.addAll(allFillers.get(i));
+				
+				for (int i = allFillers.size(); i < card; ++i) {
+					//create a random individual
+					Individual newInd = new Individual();
+					//add C(x), R(b,x)
+					toBeAdded.add(new ConceptAssertion(c, newInd, bFactor, currentDSet));
+					toBeAdded.add(new RoleAssertion(role, getIndividualA(), newInd, bFactor, currentDSet));
+				} 
+				if (toBeAdded.size() > 0) {
+					try {
+						model.append(toBeAdded); //bf and ds is the same for each new chld
+					} catch (ClashException e) {
+						log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+						log.error("You can have a clash in a AtLeast expansion rule. Something is erroneous");
+						List<TList<Assertion>> list = new ArrayList<>();
+						list.add(model);
+						return list;				
+					}
+				}
 			}
 			model.visited(true);
 			model = model.getNext();
@@ -306,16 +360,22 @@ public class ConceptAssertion implements Assertion {
 
 	@Override
 	public Assertion getACopy() {
-		ConceptAssertion ass = new ConceptAssertion(this.concept, new Individual(this.ind.getName()));
+		ConceptAssertion ass = new ConceptAssertion(
+				this.concept, new Individual(this.ind.getName()),
+				this.branchFactor, this.dependencySet);
 		return ass;
 	}
 
 	@Override
 	public Assertion getNegation() {
 		if (this.concept instanceof NotConcept) {
-			return new ConceptAssertion(this.concept.getConceptA(), new Individual(this.ind.getName()));
+			return new ConceptAssertion(
+					this.concept.getConceptA(), new Individual(this.ind.getName()),
+					this.branchFactor, this.dependencySet);
 		} else {
-			return new ConceptAssertion(new NotConcept(concept), new Individual(this.ind.getName()));
+			return new ConceptAssertion(
+					new NotConcept(concept), new Individual(this.ind.getName()), 
+					this.branchFactor, this.dependencySet);
 		}
 	}
 

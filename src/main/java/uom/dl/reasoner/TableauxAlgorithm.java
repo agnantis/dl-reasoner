@@ -1,6 +1,7 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class TableauxAlgorithm {
 		DLElement element = assertion.getElement();
 		if (element instanceof Concept) {
 			Concept c = (Concept) element;
-			assertion = new ConceptAssertion(NNFFactory.getNNF(c), assertion.getIndividualA());
+			assertion = new ConceptAssertion(NNFFactory.getNNF(c), assertion.getIndividualA(), -1, new HashSet<Integer>());
 		}
 		TListHead<Assertion> list = new TListHead<Assertion>(assertion);
 		return runTableauxForConcept(list);
@@ -44,7 +45,7 @@ public class TableauxAlgorithm {
 		Concept nnfC1 = NNFFactory.getNNF(subsumee);
 		log.debug("Convert subsumee to NNF: " + nnfC1);
 		Concept whole = new IntersectionConcept(nnfC1, negC2);
-		Assertion assertion = new ConceptAssertion(whole, new Individual("b"));
+		Assertion assertion = new ConceptAssertion(whole, new Individual("b"), -1, new HashSet<Integer>());
 		log.debug("Find Model for: " + assertion);
 		Model model = findModel(assertion);
 		//System.out.println(model.getInterpretation());

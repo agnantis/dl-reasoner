@@ -1,6 +1,7 @@
 package uom.dl.reasoner.opts;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,14 +26,14 @@ public class SemanticBranching {
 	public static List<TList<Assertion>> apply(TList<Assertion> model) {
 		List<Assertion> unionAssertions = getUnvisitedUnionAssertions(model);
 		Assertion assertionToSplit = null;
-		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.SEMANTIC_BRANCHING)) {
+		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.MOMS_HEURISTIC)) {
 			assertionToSplit = new MOMSHeuristic().getBestSelection(unionAssertions);
 		} else {
 			//get a random
 			Individual indA = unionAssertions.get(0).getIndividualA();
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts((Concept) unionAssertions.get(0).getElement());
 			for (Concept c : concepts) {
-				assertionToSplit = new ConceptAssertion(c, indA);
+				assertionToSplit = new ConceptAssertion(c, indA, -1, new HashSet<Integer>());
 				break;
 			}
 		}
@@ -47,7 +48,8 @@ public class SemanticBranching {
 			boolean found = unions.remove(assertionToSplit.getElement());
 			if (found) {
 				Concept newConcept = ConceptFactory.unionOfConcepts(unions);
-				Assertion a = new ConceptAssertion(newConcept, ass.getIndividualA());
+				//DO not put bcktrack info yet
+				Assertion a = new ConceptAssertion(newConcept, ass.getIndividualA(), -1, new HashSet<Integer>());
 				assertionsOfComplement.add(a);
 				model.setChildVisited(ass);
 			}
@@ -57,6 +59,12 @@ public class SemanticBranching {
 		List<TList<Assertion>> newModels = new ArrayList<>(2);
 		try {
 			//add selected Assertion to the existing model
+			Set<Integer> dSet = new HashSet<>(1);
+			int bFactor = model.getRoot().getBranchDepthCounter();
+			dSet.add(bFactor);			
+			assertionToSplit.setBranchFactor(bFactor);
+			assertionToSplit.setDependencySet(dSet);
+			model.getRoot().incrementBranchDepthCounter();
 			model.append(assertionToSplit);
 			//move forward
 			model = model.getNext();

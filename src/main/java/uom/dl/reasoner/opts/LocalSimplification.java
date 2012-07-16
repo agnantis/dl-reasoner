@@ -25,8 +25,10 @@ public class LocalSimplification {
 		Map<Assertion, Assertion> simplified = new HashMap<>();
 		
 		Set<Assertion> atAssSet = new HashSet<>();
+		//negate atomic assertions for easy comparison
 		for (Assertion atAss : atomicAssertions) {
 			atAssSet.add(atAss.getNegation());
+			//TODO: add backtrack info
 		}
 		for (Assertion a : unionAssertions) {
 			DLElement el = a.getElement();
@@ -34,18 +36,30 @@ public class LocalSimplification {
 			Set<Concept> concepts1 = ConceptFactory.getUnionConcepts((Concept) el);
 			Set<Assertion> splittedAssertions = new HashSet<>();
 			for (Concept c : concepts1) {
-				splittedAssertions.add(new ConceptAssertion(c, a.getIndividualA()));
+				splittedAssertions.add(new ConceptAssertion(c, a.getIndividualA(), a.getBranchFactor(), a.getDependencySet()));
 			}
-			boolean changed = splittedAssertions.removeAll(atAssSet);
+			//no use with backtracking
+			//boolean changed = splittedAssertions.removeAll(atAssSet);
+			Set<Integer> dset = new HashSet<>();
+			dset.addAll(a.getDependencySet());
+			boolean changed = false;
+			for (Assertion atAss : atAssSet) {
+				boolean found = splittedAssertions.remove(atAss);
+				if (found) {
+					dset.addAll(atAss.getDependencySet());
+					changed = true;
+				}
+			}
+			
+			//no simplification occurred
 			if (!changed) {
-				//no simplification occurred
 				continue;
 			}
 			//is there a clash?
 			if (splittedAssertions.size() == 0) {
 				//Select one arbitrary removed concept
 				Concept arbitraryConcept = ((Concept) a.getElement()).getConceptA();
-				Assertion tmpAss = new ConceptAssertion(arbitraryConcept, a.getIndividualA());
+				Assertion tmpAss = new ConceptAssertion(arbitraryConcept, a.getIndividualA(), a.getBranchFactor(), a.getDependencySet());
 				throw new ClashException(tmpAss);
 			}
 			//reconstruct full assertion

@@ -1,22 +1,34 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
-import uom.dl.elements.NotConcept;
 import uom.dl.elements.Role;
 
 public class RoleAssertion implements BinaryAssertion {
 	private final Role role;
 	private Individual indA;
 	private Individual indB;
+	private int branchFactor = -1;
+	private Set<Integer> dependencySet = new HashSet<>();
 
+	/*
 	public RoleAssertion(Role role, Individual indA, Individual indB) {
 		this.role = role;
 		this.indA = indA;
 		this.indB = indB;
+	}*/
+	
+	public RoleAssertion(Role role, Individual indA, Individual indB, int bFactor, Set<Integer> dSet) {
+		this.role = role;
+		this.indA = indA;
+		this.indB = indB;
+		this.branchFactor = bFactor;
+		this.dependencySet = dSet;
 	}
 
 	@Override
@@ -38,6 +50,26 @@ public class RoleAssertion implements BinaryAssertion {
 	public boolean isAtomic() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+	
+	@Override
+	public int getBranchFactor() {
+		return this.branchFactor;
+	}
+	
+	@Override
+	public Set<Integer> getDependencySet() {
+		return this.dependencySet;
+	}
+	
+	@Override
+	public void setBranchFactor(int bFactor) {
+		this.branchFactor = bFactor;
+	}
+	
+	@Override
+	public void setDependencySet(Set<Integer> dset) {
+		this.dependencySet = dset;		
 	}
 
 	@Override
@@ -98,7 +130,7 @@ public class RoleAssertion implements BinaryAssertion {
 	public Assertion getACopy() {
 		Individual ind1 = new Individual(this.indA.getName());
 		Individual ind2 = new Individual(this.indB.getName());
-		RoleAssertion ass = new RoleAssertion(this.role, ind1, ind2);
+		RoleAssertion ass = new RoleAssertion(this.role, ind1, ind2, this.branchFactor, this.dependencySet);
 		return ass;
 	}
 

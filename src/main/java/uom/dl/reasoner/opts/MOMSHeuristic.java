@@ -3,6 +3,7 @@ package uom.dl.reasoner.opts;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class MOMSHeuristic {
 			assertTrue(el instanceof Concept);
 			Set<Concept> concepts = ConceptFactory.getUnionConcepts((Concept) el);
 			for (Concept c : concepts) {
-				ConceptAssertion ca = new ConceptAssertion(c, a.getIndividualA());
+				ConceptAssertion ca = new ConceptAssertion(c, a.getIndividualA(), -1, new HashSet<Integer>());
 				Integer count = freqs.get(ca);
 				if (count == null)
 					count = 1;

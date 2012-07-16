@@ -1,8 +1,10 @@
 package uom.dl.reasoner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -24,6 +26,10 @@ public class TList<T extends Assertion> {
 	protected boolean isExpandable = true;
 	private TListHead<T> root;
 	private boolean visited = false;
+	
+	//backtracking info
+	private int branchingFactor = -1;
+	private Set<Integer> dependencySet = new HashSet<>();
 		
 	public TList(T c) {
 		this.value = c;
@@ -99,22 +105,21 @@ public class TList<T extends Assertion> {
 		return this.previous;
 	}
 	
-	public void append(T child) throws ClashException {
+	public void append(T child/*, int brancingFactor, Set<Integer> dependencySet*/) throws ClashException{
 		append(child, false);
 	}
 	
-	public void append(T child, boolean doNotCheckForDuplicate) throws ClashException {
+	public void append(T child, boolean doNotCheckForDuplicate/*, int brancingFactor, Set<Integer> dependencySet*/) throws ClashException {
 		List<T> children = new ArrayList<>(1);
 		children.add(child);
 		append(children, doNotCheckForDuplicate);
-		
 	}
 	
-	public void append(List<T> children) throws ClashException{
+	public void append(List<T> children/*, int brancingFactor, Set<Integer> dependencySet*/) throws ClashException{
 		append(children, false);
 	}
 	
-	public void append(List<T> children, boolean doNotCheckForDuplicate) throws ClashException{
+	public void append(List<T> children, boolean doNotCheckForDuplicate/*, int brancingFactor, Set<Integer> dependencySet*/)throws ClashException{
 		if (children.isEmpty())
 			return;
 		TList<T> current = this;
@@ -196,19 +201,24 @@ public class TList<T extends Assertion> {
 	 * Returns all individuals x, such that:
 	 * R(ind, x)
 	 * @param role
-	 * @param ind
+	 * @param ind/13072012.png
 	 * @return Returns all individuals x, such that R(ind, x)
 	 */
 	public Set<Individual> getFillers(Role role, Individual ind) {
+		return getFillersWithDependencies(role, ind).keySet();
+	}
+	
+	public Map<Individual, Set<Integer>> getFillersWithDependencies(Role role, Individual ind) {
 		TList<T> current = this.getRoot();
-		Set<Individual> roleFillers = new HashSet<>();
+		//Set<Individual> roleFillers = new HashSet<>();
+		Map<Individual, Set<Integer>> roleFillers = new HashMap<>();
 		while (current != null) {
 			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
 				if (role.equals(el) && ind.equals(ra.getIndividualA()))
-					roleFillers.add(ra.getIndividualB());
+					roleFillers.put(ra.getIndividualB(), current.getDependencySet());
 			} 
 			current = current.getNext();
 		}
@@ -253,28 +263,53 @@ public class TList<T extends Assertion> {
 	}
 	
 	/**
-	 * Returns a map with key a TTree object and its corresponding value
-	 * a list of all individuals x which belong to the TTree and R(ind,x)
+	 * Returns a list of all individuals x of TList, that exists an assertion R(ind,x)
+	 * but not an assertion C(x) 
 	 * @param role
+	 * @param concept
 	 * @param ind
 	 * @return
 	 */
-	public Set<Individual> getUnspecifiedFiller(Role role, Individual ind) {
+	public Set<Individual> getUnspecifiedFiller(Role role, Concept c, Individual ind) {
+		Map<Individual, Set<Integer>> map = getUnspecifiedFillerWithDependencies(role, c, ind);
+		return map.keySet();
+	}
+	
+	/**
+	 * Returns a map which its keys are all individuals x of TList, that exists an assertion R(ind,x)
+	 * but not an assertion C(x) 
+	 * @param role
+	 * @param concept
+	 * @param ind
+	 * @return
+	 */
+	public Map<Individual, Set<Integer>> getUnspecifiedFillerWithDependencies(Role role, Concept c, Individual ind) {
 		TList<T> current = this.getRoot();
 		//Map<TList<T>, List<Individual>> allCases = new HashMap<>();
-		Set<Individual> candidateRoles = new HashSet<>();
+		Map<Individual, Set<Integer>> candidateFillers = new HashMap<>();
+		Set<Individual> existingFillers = new HashSet<>();
 		//search up
 		while (current != null) {
 			Assertion aValue = current.getValue();
 			if (aValue instanceof RoleAssertion) {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
-				if (role.equals(el) && ind.equals(ra.getIndividualA()))
-					candidateRoles.add(ra.getIndividualB());
-			} 
+				if (role.equals(el) && ind.equals(ra.getIndividualA())) {
+					candidateFillers.put(ra.getIndividualB(), current.getDependencySet());
+				}
+			} else  {
+				DLElement el = aValue.getElement();
+				if (c.equals(el)) {
+					existingFillers.add(aValue.getIndividualA());
+				}
+			}
 			current = current.getNext();
 		}
-		return candidateRoles;
+		//remove existing
+		for (Individual ex : existingFillers) {
+			candidateFillers.remove(ex);
+		}
+		return candidateFillers;
 	}
 	
 	public TListHead<T> getRoot() {
@@ -396,6 +431,8 @@ public class TList<T extends Assertion> {
 			
 			newCurrent.isExpandable = current.isExpandable;
 			newCurrent.visited = current.visited;
+			newCurrent.branchingFactor = current.branchingFactor;
+			newCurrent.dependencySet = current.dependencySet;
 			TList<T> next = new TList<>(null);
 			newCurrent.addChild(next, true);
 			if (current == original)
@@ -512,9 +549,9 @@ public class TList<T extends Assertion> {
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept B1 = new AtomicConcept("B1");
 		Individual a = new Individual("a");
-		Assertion a1 = new ConceptAssertion(A, a);
-		Assertion a2 = new ConceptAssertion(B, a);
-		Assertion a3 = new ConceptAssertion(B1, a);
+		Assertion a1 = new ConceptAssertion(A, a, -1, new HashSet<Integer>(0));
+		Assertion a2 = new ConceptAssertion(B, a, -1, new HashSet<Integer>(0));
+		Assertion a3 = new ConceptAssertion(B1, a, -1, new HashSet<Integer>(0));
 		TList<Assertion> orig1 = new TList<>(a1);
 		TList<Assertion> orig2 = new TList<>(a2);
 		TList<Assertion> orig3 = new TList<>(a3);
@@ -525,6 +562,22 @@ public class TList<T extends Assertion> {
 		System.out.println(orig2.repr());
 		TList<Assertion> copy1 = TList.duplicate(orig3, false);
 		System.out.println(copy1.repr());
+	}
+
+	public int getBranchingFactor() {
+		return branchingFactor;
+	}
+
+	public void setBranchingFactor(int branchingFactor) {
+		this.branchingFactor = branchingFactor;
+	}
+
+	public Set<Integer> getDependencySet() {
+		return dependencySet;
+	}
+
+	public void setDependencySet(Set<Integer> dependencySet) {
+		this.dependencySet = dependencySet;
 	}
 
 	

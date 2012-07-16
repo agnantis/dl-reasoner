@@ -187,7 +187,7 @@ public class ConceptFactory {
 	public static Set<Assertion> createAssertions(Set<Concept> concepts, Individual ind) {
 		Set<Assertion> assertions = new HashSet<>(concepts.size());
 		for (Concept c : concepts) {
-			assertions.add(new ConceptAssertion(c, ind));
+			assertions.add(new ConceptAssertion(c, ind, -1, new HashSet<Integer>()));
 		}
 		
 		return assertions;

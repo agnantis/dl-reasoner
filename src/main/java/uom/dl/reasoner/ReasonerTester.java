@@ -28,10 +28,14 @@ public class ReasonerTester {
 		AtomicConcept C2 = new AtomicConcept("C2");
 		AtomicConcept C3 = new AtomicConcept("C3");
 		AtomicConcept C4 = new AtomicConcept("C4");
+		AtomicConcept C5 = new AtomicConcept("C5");
+		AtomicConcept C6 = new AtomicConcept("C6");
 		AtomicConcept D1 = new AtomicConcept("D1");
 		AtomicConcept D2 = new AtomicConcept("D2");
 		AtomicConcept D3 = new AtomicConcept("D3");
 		AtomicConcept D4 = new AtomicConcept("D4");
+		AtomicConcept D5 = new AtomicConcept("D5");
+		AtomicConcept D6 = new AtomicConcept("D6");
 		AtomicRole R = new AtomicRole("R");
 		//HashSet<Concept> conSet = new HashSet<>(Arrays.asList(A, B, new UnionConcept(new IntersectionConcept(D, new NotConcept(C)), C), new NotConcept(D)));
 		HashSet<Concept> conSet = new HashSet<>(Arrays.asList(
@@ -135,7 +139,9 @@ public class ReasonerTester {
 				new UnionConcept(C1, D1),
 				new UnionConcept(C2, D2),
 				new UnionConcept(C3, D3),
-				new UnionConcept(C4, D4),
+				//new UnionConcept(C4, D4),
+				//new UnionConcept(C5, D5),
+				//new UnionConcept(C6, D6),
 				new ExistsConcept(R, new IntersectionConcept(A, B)),
 				new ForAllConcept(R, new NotConcept(A))
 				));
@@ -149,7 +155,7 @@ public class ReasonerTester {
 		System.out.println(ConceptFactory.getAllAtomicConcepts(wholeConcept));
 		
 		
-		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'));
+		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'), -1, new HashSet<Integer>());
 		TableauxAlgorithm tableaux = new TableauxAlgorithm();
 		Model model = tableaux.findModel(ca);
 		if (model.isSatisfiable()) {
