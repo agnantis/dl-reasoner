@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
 import uom.dl.utils.NNFFactory;
+import uom.dl.utils.TListVisualizer;
 
 public class TableauxAlgorithm {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithm.class);
@@ -64,9 +66,16 @@ public class TableauxAlgorithm {
 	}
 		
 	private Model runTableauxForConcept(TList<Assertion> model) {
+		if (model.containsClash()) { //check for a clash
+			Model m = new Model(model, false);
+			return m;
+		} else if (!model.canBeFurtherExpanded()) {//check for model
+			return new Model(model, true); //model found
+		}
+
 		TList<Assertion> current = model;
 		List<TList<Assertion>> newModels = new ArrayList<>();
-		
+		//TListVisualizer.showGraph(model.getRoot(), true);
 		while (true) {
 			Assertion value = current.getValue();
 			if (!current.visited() && !value.isAtomic()) {
@@ -76,29 +85,37 @@ public class TableauxAlgorithm {
 				if (newModels.isEmpty()) {
 					return new Model(current, true);
 				}
-				//check if a model exists
-				for (Iterator<TList<Assertion>> it = newModels.iterator(); it.hasNext();) {
-					TList<Assertion> newModel = it.next();
-					//check for a clash
-					if (newModel.containsClash()) {
-						invalidModels.add(new Model(newModel, false));
-						//discard model
-						it.remove();
-					} else { //check for model
-						if (!newModel.canBeFurtherExpanded()) {
-							//model found
-							return new Model(newModel, true);
-						}
-					}
-				}
+				
 				//run tableaux to each new model
-				if (!newModels.isEmpty()) {
-					for (TList<Assertion> list : newModels){
-						Model aModel = runTableauxForConcept(list);
-						if (aModel.isSatisfiable()) {
-							//model found
-							return aModel;
-						} 
+				Set<Integer> clashSet = null;
+				for (TList<Assertion> list : newModels){
+					if (clashSet != null) {
+						list.getLeaf().getValue().setDependencySet(clashSet);
+					}
+					Model aModel = runTableauxForConcept(list);
+					if (aModel.isSatisfiable()) {
+						//model found
+						return aModel;
+					} else {
+						//clash found
+						invalidModels.add(aModel);
+						Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
+						//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
+						log.info("Clash found. Backtrack. DSet: " + dset);
+						clashSet = new HashSet<Integer>(dset);
+						int bFactor = aModel.getExtension().getLeaf().getValue().getBranchFactor(); 
+						log.info("Leaf: " + aModel.getExtension().getLeaf().getValue());
+						//bFactor > -1 -> branch position
+						//if (bFactor > -1) {
+							if (bFactor > -1 && clashSet.contains(bFactor)) {
+								clashSet.remove(bFactor);
+							} else {
+								//do not check its siblings
+								TList<Assertion> newTList = aModel.getExtension().removeLeaf();
+								aModel.setExtension(newTList);
+								return aModel;
+							}
+						//}
 					}
 				}
 				//no model found

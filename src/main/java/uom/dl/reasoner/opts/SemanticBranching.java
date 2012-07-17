@@ -11,14 +11,16 @@ import org.slf4j.LoggerFactory;
 import uom.dl.elements.Concept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
+import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.ClashException;
 import uom.dl.reasoner.ConceptAssertion;
 import uom.dl.reasoner.TList;
-import uom.dl.reasoner.TableuaxConfiguration;
+import uom.dl.reasoner.TableauxConfiguration;
 import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.utils.ConceptFactory;
+import uom.dl.utils.NNFFactory;
 
 public class SemanticBranching {
 	private static final Logger log = LoggerFactory.getLogger(SemanticBranching.class);
@@ -26,7 +28,7 @@ public class SemanticBranching {
 	public static List<TList<Assertion>> apply(TList<Assertion> model) {
 		List<Assertion> unionAssertions = getUnvisitedUnionAssertions(model);
 		Assertion assertionToSplit = null;
-		if (TableuaxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.MOMS_HEURISTIC)) {
+		if (TableauxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.MOMS_HEURISTIC)) {
 			assertionToSplit = new MOMSHeuristic().getBestSelection(unionAssertions);
 		} else {
 			//get a random
@@ -40,8 +42,9 @@ public class SemanticBranching {
 		//add the negation Assertion to the new model
 		//complementModel.append(assertionToSplit.getNegation());
 		//List with assertions to be added in the complement model
-		List<Assertion> assertionsOfComplement = new ArrayList<>();
-		assertionsOfComplement.add(assertionToSplit.getNegation());
+		//List<Assertion> assertionsOfComplement = new ArrayList<>();
+		//assertionsOfComplement.add(assertionToSplit.getNegation(true));
+		Concept negCon = (Concept) assertionToSplit.getNegation(true).getElement();
 		//mark visited
 		for (Assertion ass : unionAssertions) {
 			Set<Concept> unions = ConceptFactory.getUnionConcepts((Concept) ass.getElement());
@@ -49,8 +52,9 @@ public class SemanticBranching {
 			if (found) {
 				Concept newConcept = ConceptFactory.unionOfConcepts(unions);
 				//DO not put bcktrack info yet
-				Assertion a = new ConceptAssertion(newConcept, ass.getIndividualA(), -1, new HashSet<Integer>());
-				assertionsOfComplement.add(a);
+				negCon = new IntersectionConcept(negCon, newConcept);
+				//Assertion a = new ConceptAssertion(newConcept, ass.getIndividualA(), -1, new HashSet<Integer>());
+				//assertionsOfComplement.add(a);
 				model.setChildVisited(ass);
 			}
 		}
@@ -67,19 +71,21 @@ public class SemanticBranching {
 			model.getRoot().incrementBranchDepthCounter();
 			model.append(assertionToSplit);
 			//move forward
-			model = model.getNext();
+			//model = model.getNext();
 			newModels.add(model);
 		} catch (ClashException e) {
-			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAddedAssertion());
 		}
 		try {
 			//add to complement all new
-			complementModel.append(assertionsOfComplement);
+			Assertion aNeg = new ConceptAssertion(negCon, assertionToSplit.getIndividualA(), -1, new HashSet<Integer>());
+			//complementModel.append(assertionsOfComplement);
+			complementModel.append(aNeg);
 			//move forward
-			complementModel = complementModel.getNext();
+			//complementModel = complementModel.getNext();
 			newModels.add(complementModel);
 		} catch (ClashException e) {
-			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAssertion());
+			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAddedAssertion());
 		}	
 		return newModels;
 	}

@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import uom.dl.reasoner.Assertion;
 import uom.dl.reasoner.TList;
 
 public class TListVisualizer {
+	private static final Random RANDOM = new Random();
 	private static final Logger log = LoggerFactory
 			.getLogger(TListVisualizer.class);
 
@@ -41,7 +43,7 @@ public class TListVisualizer {
 	//prefix = "0" -> root
 	//children of root -> 1.0, 1.1...
 	private static <T extends Assertion> String toDotFormatInner(TList<T> list) {
-		String clashNodeID = "clash_" + new Object().hashCode();
+		//String clashNodeID = "clash_" + new Object().hashCode();
 		StringBuffer s = new StringBuffer();
 		int counter = 0;
 		
@@ -59,24 +61,20 @@ public class TListVisualizer {
 			cName = nextName;
 		}
 		if (list.containsClash()) {
-			s.append("\t \"" + cName + "\" -> " + clashNodeID + ";\n");
+			String clashNodeID = "clash_" + cName;
+			s.append("\t \"" + cName + "\" -> \"" + clashNodeID + "\";\n");
 			s.append("\t \"" + clashNodeID + "\" [label=clash style=filled];\n");
 			//s.append("\t clash [style=filled];\n");
 		}
-		/*
-		if (current.isCurrentExpandable()) {
-			s.append(";\n");
-		} else {
-			s.append(" [style=filled];\n");
-		}*/
 			
 		return s.toString();
 	}
 
 	public static <T extends Assertion> boolean showGraph(TList<T> list, boolean isSatisfiable) {
 		String tmpFolder = System.getProperty("java.io.tmpdir");
-		String dotFile = "graph.dot";
-		String pngFile = "graph.png";
+		int id = RANDOM.nextInt();
+		String dotFile = "graph" + id + ".dot";
+		String pngFile = "graph" + id + ".png";
 		Path inputPath = Paths.get(tmpFolder, dotFile);
 		Path outputPath = Paths.get(tmpFolder, pngFile);
 		boolean fileCreated = saveGraph(list, inputPath, isSatisfiable);

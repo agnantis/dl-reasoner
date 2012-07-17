@@ -12,7 +12,7 @@ public interface Assertion extends DLElement {
 	public void setIndividualA(Individual ind);
 	public List<TList<Assertion>> executeRule(TList<Assertion> model);
 	public Assertion getACopy();
-	public Assertion getNegation();
+	public Assertion getNegation(boolean toNNF);
 	public int getBranchFactor();
 	public void setBranchFactor(int bFactor);
 	public Set<Integer> getDependencySet();

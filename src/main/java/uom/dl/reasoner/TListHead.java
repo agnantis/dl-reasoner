@@ -1,8 +1,12 @@
 package uom.dl.reasoner;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class TListHead<T extends Assertion> extends TList<T> {
 	TriggerRules triggerRules;
 	private boolean clashFound = false;
+	private Set<Integer> clashDependencySet = new HashSet<>();
 	private int branchDepthCounter = 1;
 
 	public TListHead(T c) {
@@ -20,8 +24,9 @@ public class TListHead<T extends Assertion> extends TList<T> {
 		return this.triggerRules;
 	}
 
-	public void clashFound() {
+	public void clashFound(Set<Integer> clashDependencySet) {
 		this.clashFound = true;		
+		setClashDependencySet(clashDependencySet);
 	}
 	
 	@Override
@@ -43,5 +48,13 @@ public class TListHead<T extends Assertion> extends TList<T> {
 	
 	public void decrementBranchDepthCounter() {
 		--this.branchDepthCounter;
+	}
+
+	public Set<Integer> getClashDependencySet() {
+		return clashDependencySet;
+	}
+
+	private void setClashDependencySet(Set<Integer> clashDependencySet) {
+		this.clashDependencySet = clashDependencySet;
 	}
 }

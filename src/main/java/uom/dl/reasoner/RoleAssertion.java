@@ -97,7 +97,7 @@ public class RoleAssertion implements BinaryAssertion {
 	
 	@Override
 	public String toString() {
-		return this.getElement() + "(" + this.getIndividualA() + "," + this.getIndividualB() + ")";
+		return this.getElement() + "(" + this.getIndividualA() + "," + this.getIndividualB() + ") " + getBranchFactor() + ", " + getDependencySet();
 	}
 	
 	@Override
@@ -135,7 +135,7 @@ public class RoleAssertion implements BinaryAssertion {
 	}
 
 	@Override
-	public Assertion getNegation() {
+	public Assertion getNegation(boolean toNNF) {
 		throw new UnsupportedOperationException("Role negation is not supported: " + this);
 	}
 

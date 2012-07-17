@@ -136,17 +136,20 @@ public class ReasonerTester {
 		
 		//check directed backtracking
 		conSet = new HashSet<>(Arrays.asList(
-				new UnionConcept(C1, D1),
+				(Concept)new UnionConcept(C1, D1),
 				new UnionConcept(C2, D2),
-				new UnionConcept(C3, D3),
+				//new UnionConcept(C3, D3),
 				//new UnionConcept(C4, D4),
 				//new UnionConcept(C5, D5),
 				//new UnionConcept(C6, D6),
 				new ExistsConcept(R, new IntersectionConcept(A, B)),
 				new ForAllConcept(R, new NotConcept(A))
+				//(Concept)new IntersectionConcept(C2,  new NotConcept(C2))
 				));
 		
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
+		//wholeConcept = new UnionConcept(wholeConcept, new IntersectionConcept(C4, D4));
+		//wholeConcept = new UnionConcept(new IntersectionConcept(C4, D4), wholeConcept);
 		System.out.println(wholeConcept);
 		boolean containConcept = ConceptFactory.contains(wholeConcept, D);
 		System.out.println("Contains D: " + containConcept);

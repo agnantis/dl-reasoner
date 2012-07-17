@@ -27,7 +27,7 @@ public class LocalSimplification {
 		Set<Assertion> atAssSet = new HashSet<>();
 		//negate atomic assertions for easy comparison
 		for (Assertion atAss : atomicAssertions) {
-			atAssSet.add(atAss.getNegation());
+			atAssSet.add(atAss.getNegation(true));
 			//TODO: add backtrack info
 		}
 		for (Assertion a : unionAssertions) {
@@ -59,11 +59,12 @@ public class LocalSimplification {
 			if (splittedAssertions.size() == 0) {
 				//Select one arbitrary removed concept
 				Concept arbitraryConcept = ((Concept) a.getElement()).getConceptA();
-				Assertion tmpAss = new ConceptAssertion(arbitraryConcept, a.getIndividualA(), a.getBranchFactor(), a.getDependencySet());
-				throw new ClashException(tmpAss);
+				Assertion tmpAss = new ConceptAssertion(arbitraryConcept, a.getIndividualA(), -1, dset);
+				throw new ClashException(tmpAss, null);
 			}
 			//reconstruct full assertion
 			Assertion tmpAss = AssertionFactory.mergeAllAssertionsAsUnions(splittedAssertions, a.getIndividualA());
+			tmpAss.setDependencySet(dset);
 			simplified.put(a, tmpAss);
 		}
 				

@@ -13,7 +13,7 @@ import uom.dl.utils.TListVisualizer;
 public class Model {
 	private static final Logger log = LoggerFactory.getLogger(Model.class);
 	private final boolean isSatisfiable;
-	private final TList<Assertion> extension;
+	private TList<Assertion> extension;
 	private Interpretation interpretation;
 	
 	public Model(TList<Assertion> extension, boolean isSatisfiable) {
@@ -29,8 +29,16 @@ public class Model {
 		return extension;
 	}
 	
+	public void setExtension(TList<Assertion> extension) {
+		this.extension = extension;
+	}
+	
 	public DLElement initialConcept() {
 		return this.extension.getRoot().getValue().getElement();
+	}
+	
+	public Assertion initialAssertion() {
+		return this.extension.getRoot().getValue();
 	}
 	
 	public Interpretation getInterpretation(){

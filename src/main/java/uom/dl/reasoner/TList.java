@@ -28,8 +28,6 @@ public class TList<T extends Assertion> {
 	private boolean visited = false;
 	
 	//backtracking info
-	private int branchingFactor = -1;
-	private Set<Integer> dependencySet = new HashSet<>();
 		
 	public TList(T c) {
 		this.value = c;
@@ -74,8 +72,8 @@ public class TList<T extends Assertion> {
 			try {
 				this.getRoot().getTriggerRules().assertionAdded((RoleAssertion) a);
 			} catch (ClashException e) {
-				this.getRoot().clashFound();
-				log.debug("Clash found. Model: " + this + " . Assertion: " + e.getAssertion());
+				this.getRoot().clashFound(e.getDependencyUnion());
+				log.debug("Clash found. Model: " + this + " . Assertion: " + e.getAddedAssertion());
 			}
 		}
 	}
@@ -152,8 +150,13 @@ public class TList<T extends Assertion> {
 				if (c.isComplement(ass)) {
 					//clashFound = true;
 					//break;
-					this.getRoot().clashFound();
-					throw new ClashException(ass);
+					ClashException ce = new ClashException(c, ass);
+					this.getRoot().clashFound(ce.getDependencyUnion());
+					//union of the dependency sets of the two clash concepts
+					//Set<Integer> dset = new HashSet<>(ass.getDependencySet());
+					//dset.addAll(c.getDependencySet());
+					//ass.setDependencySet(dset);
+					throw ce;
 				}
 				//if it already exists, do not add it
 				if (!doNotCheckForDuplicate && ass.equals(c))
@@ -165,6 +168,17 @@ public class TList<T extends Assertion> {
 		}
 		this.addChild(node, !clashFound);
 		return true;
+	}
+	
+	//public static <T extends Assertion> TList<T> removeLeaf(TList<T> tlist) {
+	public TList<T> removeLeaf() {
+		if (this.isLeaf()) {
+			if (this.getPrevious() == null) //one and only element
+				return null;
+		}
+		TList<T> temp = this.getLeaf().getPrevious();
+		temp.setLeaf();
+		return temp;
 	}
 	
 	/**
@@ -218,7 +232,7 @@ public class TList<T extends Assertion> {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
 				if (role.equals(el) && ind.equals(ra.getIndividualA()))
-					roleFillers.put(ra.getIndividualB(), current.getDependencySet());
+					roleFillers.put(ra.getIndividualB(), ra.getDependencySet());
 			} 
 			current = current.getNext();
 		}
@@ -295,7 +309,7 @@ public class TList<T extends Assertion> {
 				RoleAssertion ra = (RoleAssertion) aValue;
 				DLElement el = ra.getElement();
 				if (role.equals(el) && ind.equals(ra.getIndividualA())) {
-					candidateFillers.put(ra.getIndividualB(), current.getDependencySet());
+					candidateFillers.put(ra.getIndividualB(), ra.getDependencySet());
 				}
 			} else  {
 				DLElement el = aValue.getElement();
@@ -431,8 +445,6 @@ public class TList<T extends Assertion> {
 			
 			newCurrent.isExpandable = current.isExpandable;
 			newCurrent.visited = current.visited;
-			newCurrent.branchingFactor = current.branchingFactor;
-			newCurrent.dependencySet = current.dependencySet;
 			TList<T> next = new TList<>(null);
 			newCurrent.addChild(next, true);
 			if (current == original)
@@ -471,8 +483,9 @@ public class TList<T extends Assertion> {
 				for (DLElement c : atomicConcepts) {
 					if (nodeValue.isComplement(c)) {
 						//break;
-						model.getRoot().clashFound();
-						throw new ClashException(nodeValue);
+						ClashException ce = new ClashException(nodeValue, (Assertion) c); 
+						model.getRoot().clashFound(ce.getDependencyUnion());
+						throw ce;
 					}						
 				}
 				atomicConcepts.add(nodeValue);
@@ -563,22 +576,4 @@ public class TList<T extends Assertion> {
 		TList<Assertion> copy1 = TList.duplicate(orig3, false);
 		System.out.println(copy1.repr());
 	}
-
-	public int getBranchingFactor() {
-		return branchingFactor;
-	}
-
-	public void setBranchingFactor(int branchingFactor) {
-		this.branchingFactor = branchingFactor;
-	}
-
-	public Set<Integer> getDependencySet() {
-		return dependencySet;
-	}
-
-	public void setDependencySet(Set<Integer> dependencySet) {
-		this.dependencySet = dependencySet;
-	}
-
-	
 }
