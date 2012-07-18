@@ -68,16 +68,9 @@ public class ReasonerTester {
 						new UnionConcept(new NotConcept(A), new NotConcept(C))),
 				new AtMostConcept(1, R)
 			));
-		/*
-		conSet = new HashSet<>(Arrays.asList(
-				(Concept)new ExistsConcept(R, A),
-				new ExistsConcept(R, B),
-				//new ExistsConcept(R, C),
-				new ForAllConcept(R, new UnionConcept(new NotConcept(A), new NotConcept(B))),
-				new AtMostConcept(1, R)
-				//new AtLeastConcept(3, R)
-			));
 		
+		
+		/*
 		Role p1 = new AtomicRole("P1");
 		Role p2 = new AtomicRole("P2");
 		Role p3 = new AtomicRole("P3");
@@ -146,6 +139,13 @@ public class ReasonerTester {
 				new ForAllConcept(R, new NotConcept(A))
 				//(Concept)new IntersectionConcept(C2,  new NotConcept(C2))
 				));
+		//simple test with at least/most
+		conSet = new HashSet<>(Arrays.asList(
+				(Concept)new ExistsConcept(R, A),
+				new ExistsConcept(R, B),
+				new ForAllConcept(R, new UnionConcept(new NotConcept(A), new NotConcept(B))),
+				new AtMostConcept(1, R)
+			));
 		
 		Concept wholeConcept = ConceptFactory.intersectionOfConcepts(conSet);
 		//wholeConcept = new UnionConcept(wholeConcept, new IntersectionConcept(C4, D4));
@@ -161,16 +161,16 @@ public class ReasonerTester {
 		ConceptAssertion ca = new ConceptAssertion(wholeConcept, new Individual('b'), -1, new HashSet<Integer>());
 		TableauxAlgorithm tableaux = new TableauxAlgorithm();
 		Model model = tableaux.findModel(ca);
+		tableaux.getClashes().add(model);
 		if (model.isSatisfiable()) {
-			tableaux.getClashes().add(model);
 			System.out.println(model.getInterpretation());
-			//model.printModel(true);
+			model.printModel(true);
 		} else {
 			System.out.println("No Valid Interpretation");
+			Model.printModel(tableaux.getClashes(), true);
 		}
 		System.out.println("No of models: " + (TList.NO_OF_DUPLICATES+1));
 		System.out.println("No of clashes: " + tableaux.getClashes().size());
-		Model.printModel(tableaux.getClashes(), true);
 		//subclassing test
 		/*
 		Concept c1 = new AtMostConcept(1, R);

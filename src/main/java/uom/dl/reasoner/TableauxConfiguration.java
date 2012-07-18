@@ -10,9 +10,9 @@ public class TableauxConfiguration {
 	
 	private TableauxConfiguration() {
 		this.optimizations = new Optimizations();
-		this.optimizations.setOptimization(Optimization.SEMANTIC_BRANCHING, true);
+		this.optimizations.setOptimization(Optimization.SEMANTIC_BRANCHING, false);
 		this.optimizations.setOptimization(Optimization.MOMS_HEURISTIC, true);
-		this.optimizations.setOptimization(Optimization.DIRECTED_BACKTRACKING, false);
+		this.optimizations.setOptimization(Optimization.DIRECTED_BACKTRACKING, true);
 	}
 	
 	public static TableauxConfiguration getConfiguration() {

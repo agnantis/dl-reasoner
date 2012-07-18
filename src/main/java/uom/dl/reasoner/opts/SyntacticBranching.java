@@ -40,10 +40,11 @@ private static final Logger log = LoggerFactory.getLogger(SemanticBranching.clas
 				a.setDependencySet(new HashSet<>(dSet));
 				newModel.append(a);
 				//newModel = newModel.getNext();
-				newModels.add(newModel);
 			} catch (ClashException e) {
 				log.debug("Clash found. Model: " + newModel + " . Assertion: " + e.getAddedAssertion());
+				newModel.getRoot().clashFound(e.getDependencyUnion());
 			}
+			newModels.add(newModel);
 			++counter;
 		}
 		return newModels;

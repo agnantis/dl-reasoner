@@ -35,7 +35,7 @@ public class TListVisualizer {
 		StringBuffer s = new StringBuffer();
 		s.append("digraph G {\n");
 		s.append("\tlabelloc = t;\n");
-		s.append("\tlabel=\"The concept IS" + (isSatisfiable ? " NOT" : "") + " satisfiable\";\n");
+		s.append("\tlabel=\"The concept " + (isSatisfiable ? "IS" : "is NOT") + " satisfiable\";\n");
 		s.append(toDotFormatInner(list));
 		s.append("}\n");
 		System.out.println(s);

@@ -267,7 +267,10 @@ public class ConceptAssertion implements Assertion {
 					else
 						newModel = model;
 					newModel.substituteAssertions(pair.getFirst(), pair.getSecond());
-					TList.removeDuplicates(newModel);
+					log.debug("Removing duplicates of the model after AtMost substitutions");
+					boolean removedAny = TList.removeDuplicates(newModel);
+					if (removedAny)
+						log.debug("Some duplicates were found and removed");
 					if (newModel != null) {
 						try {
 							TList.revalidateModel(newModel);

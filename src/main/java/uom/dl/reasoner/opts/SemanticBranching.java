@@ -75,10 +75,11 @@ public class SemanticBranching {
 			model.append(assertionToSplit);
 			//move forward
 			//model = model.getNext();
-			newModels.add(model);
 		} catch (ClashException e) {
 			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAddedAssertion());
+			model.getRoot().clashFound(e.getDependencyUnion());
 		}
+		newModels.add(model);
 		try {
 			//add to complement all new
 			Assertion aNeg = new ConceptAssertion(negCon, assertionToSplit.getIndividualA(), -1, new HashSet<Integer>());
@@ -89,10 +90,11 @@ public class SemanticBranching {
 				complementModel = new TList<Assertion>(aNeg);
 			//move forward
 			//complementModel = complementModel.getNext();
-			newModels.add(complementModel);
 		} catch (ClashException e) {
 			log.debug("Clash found. Model: " + model + " . Assertion: " + e.getAddedAssertion());
+			model.getRoot().clashFound(e.getDependencyUnion());
 		}	
+		newModels.add(complementModel);
 		return newModels;
 	}
 	
