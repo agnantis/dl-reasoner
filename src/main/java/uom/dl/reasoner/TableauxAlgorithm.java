@@ -66,66 +66,87 @@ public class TableauxAlgorithm {
 	}
 		
 	private Model runTableauxForConcept(TList<Assertion> model) {
-		if (model.containsClash()) { //check for a clash
-			Model m = new Model(model, false);
-			return m;
-		} else if (!model.canBeFurtherExpanded()) {//check for model
-			return new Model(model, true); //model found
-		}
-
-		TList<Assertion> current = model;
-		List<TList<Assertion>> newModels = new ArrayList<>();
-		//TListVisualizer.showGraph(model.getRoot(), true);
 		while (true) {
-			Assertion value = current.getValue();
-			if (!current.visited() && !value.isAtomic()) {
-				newModels = value.executeRule(current);
-				//if the model is empty, it means that we reach the end
-				//no clash found, so the model is satisfiable!
-				if (newModels.isEmpty()) {
-					return new Model(current, true);
-				}
-				
-				//run tableaux to each new model
-				Set<Integer> clashSet = null;
-				for (TList<Assertion> list : newModels){
-					if (clashSet != null) {
-						list.getLeaf().getValue().setDependencySet(clashSet);
+			if (model.containsClash()) { //check for a clash
+				Model m = new Model(model, false);
+				return m;
+			} else if (!model.canBeFurtherExpanded()) {//check for model
+				return new Model(model, true); //model found
+			}
+			
+			TList<Assertion> current = model;
+			List<TList<Assertion>> newModels = new ArrayList<>();
+			while (true) {
+				Assertion value = current.getValue();
+				if (!current.visited() && !value.isAtomic()) {
+					newModels = value.executeRule(current);
+					//if the model is empty, it means that we reach the end
+					//no clash found, so the model is satisfiable!
+					if (newModels.isEmpty()) {
+						return new Model(current, true);
 					}
-					Model aModel = runTableauxForConcept(list);
-					if (aModel.isSatisfiable()) {
-						//model found
-						return aModel;
-					} else {
-						//clash found
-						invalidModels.add(aModel);
-						Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
-						//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
-						log.info("Clash found. Backtrack. DSet: " + dset);
-						clashSet = new HashSet<Integer>(dset);
-						int bFactor = aModel.getExtension().getLeaf().getValue().getBranchFactor(); 
-						log.info("Leaf: " + aModel.getExtension().getLeaf().getValue());
-						//bFactor > -1 -> branch position
-						//if (bFactor > -1) {
-							if (bFactor > -1 && clashSet.contains(bFactor)) {
+					//if newModels,size = 1 -> expanding current
+					if (newModels.size() == 1) {
+						//deterministic expansion
+						model = newModels.get(0);
+						//rerun algorithm
+						break;
+					}
+					
+					//run tableaux to each new model
+					Set<Integer> clashSet = null;
+					for (TList<Assertion> list : newModels){
+						if (clashSet != null) {
+							list.getLeaf().getValue().setDependencySet(clashSet);
+						}
+						Model aModel = runTableauxForConcept(list);
+						if (aModel.isSatisfiable()) {
+							//model found
+							return aModel;
+						} else {
+							//clash found
+							Model invalidModel = new Model(TList.duplicate(aModel.getExtension(), false), aModel.isSatisfiable());
+							invalidModels.add(invalidModel);
+							Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
+							//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
+							log.info("Clash found. Backtrack. DSet: " + dset);
+							if (dset.isEmpty()) {
+								//the clash depends on the root. //No solution available
+								log.info("Dependency set is empty. The clash comes from root. No need for further search");
+								return aModel;
+							}
+							clashSet = new HashSet<Integer>(dset);
+							//bFactor > -1 -> branch position
+							int bFactor = -1;
+							while (bFactor < 0) {
+								bFactor = aModel.getExtension().getLeaf().getValue().getBranchFactor(); 
+								log.info("Leaf: " + aModel.getExtension().getLeaf().getValue());
+								TList<Assertion> newTList = aModel.getExtension().removeLeaf();
+								if (newTList == null) {
+									//we reach the end. No further crop
+									return aModel;
+								}
+								aModel.setExtension(newTList);
+							}
+							if (clashSet.contains(bFactor)) {
 								clashSet.remove(bFactor);
 							} else {
 								//do not check its siblings
 								TList<Assertion> newTList = aModel.getExtension().removeLeaf();
 								aModel.setExtension(newTList);
 								return aModel;
-							}
-						//}
+							}	
+						}
 					}
-				}
-				//no model found
-				return new Model(model, false);
-			} else {
-				//value is atomic, so move to the next
-				if (current.getNext() == null)
-					return new Model(current, true);
-				current = current.getNext();
-			}			
+					//no model found
+					return new Model(model, false);
+				} else {
+					//value is atomic, so move to the next
+					if (current.getNext() == null)
+						return new Model(current, true);
+					current = current.getNext();
+				}			
+			}
 		}
 	}
 	
