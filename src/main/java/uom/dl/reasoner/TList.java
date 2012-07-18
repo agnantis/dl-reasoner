@@ -437,7 +437,7 @@ public class TList<T extends Assertion> {
 		
 		TListHead<T> orig = original.getRoot();
 		//original = original.getRoot();
-		TList<T> newCopy = new TListHead<>(null);
+		TList<T> newCopy = TListHead.duplicateMetadata(orig);
 		TList<T> current = orig;
 		TList<T> newCurrent = newCopy;
 		//copy down

@@ -139,9 +139,9 @@ public class ReasonerTester {
 				(Concept)new UnionConcept(C1, D1),
 				new UnionConcept(C2, D2),
 				new UnionConcept(C3, D3),
-				//new UnionConcept(C4, D4),
-				//new UnionConcept(C5, D5),
-				//new UnionConcept(C6, D6),
+				new UnionConcept(C4, D4),
+				new UnionConcept(C5, D5),
+				new UnionConcept(C6, D6),
 				new ExistsConcept(R, new IntersectionConcept(A, B)),
 				new ForAllConcept(R, new NotConcept(A))
 				//(Concept)new IntersectionConcept(C2,  new NotConcept(C2))

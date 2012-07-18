@@ -57,4 +57,12 @@ public class TListHead<T extends Assertion> extends TList<T> {
 	private void setClashDependencySet(Set<Integer> clashDependencySet) {
 		this.clashDependencySet = clashDependencySet;
 	}
+	
+	public static <T extends Assertion> TListHead<T> duplicateMetadata(TListHead<T> copy) {
+		TListHead<T> newCopy = new TListHead<T>(null);
+		newCopy.branchDepthCounter = copy.branchDepthCounter;
+		newCopy.clashFound = copy.clashFound;
+		newCopy.clashDependencySet = copy.clashDependencySet;
+		return newCopy;		
+	}
 }

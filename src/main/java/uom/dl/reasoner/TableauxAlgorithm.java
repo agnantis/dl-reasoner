@@ -131,7 +131,7 @@ public class TableauxAlgorithm {
 				return aModel;
 			} else {
 				//clash found
-				Model invalidModel = new Model(TList.duplicate(aModel.getExtension(), false, false), aModel.isSatisfiable());
+				Model invalidModel = new Model(TList.duplicate(aModel.getExtension(), false, false), false);
 				invalidModels.add(invalidModel);
 				Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
 				//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
