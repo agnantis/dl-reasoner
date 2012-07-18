@@ -7,12 +7,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.log4j.TTCCLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,45 @@ public class TListVisualizer {
 		return s.toString();
 	}
 
+	private static <T extends Assertion> String toDotFormatInner(TreeVisualizer list) {
+		//String clashNodeID = "clash_" + new Object().hashCode();
+		StringBuffer s = new StringBuffer();
+		
+		List<TreeVisualizer> frontier = new ArrayList<>();
+		frontier.add(list);
+		while (!frontier.isEmpty()) {
+			list = frontier.remove(0);
+			if (list.getValue() == null) { //clash
+				continue;				
+			}
+			String pName = list.getValue().toString() + "_" + list.hashCode();
+			s.append("\t \"" + pName + "\" [label=\"" + list.getValue().toString() + "\"];\n");
+			List<TreeVisualizer> children = list.getChildren();
+			frontier.addAll(list.getChildren());
+			for (TreeVisualizer child : children) {
+				String cName;
+				if (child.getValue() == null) {
+					//String pName = "clash_" + list.hashCode();
+					cName = "clash_" + list.hashCode();
+					s.append("\t \"" + cName + "\" [label=clash style=filled];\n");
+				}
+				else {
+					cName = child.getValue().toString() + "_" + child.hashCode();
+				}
+				s.append("\t \"" + pName + "\" -> ");
+				s.append("\"" + cName + "\";\n");				
+			}
+		}
+//		if (list.containsClash()) {
+//			String clashNodeID = "clash_" + cName;
+//			s.append("\t \"" + cName + "\" -> \"" + clashNodeID + "\";\n");
+//			s.append("\t \"" + clashNodeID + "\" [label=clash style=filled];\n");
+//			//s.append("\t clash [style=filled];\n");
+//		}
+			
+		return s.toString();
+	}
+	
 	public static <T extends Assertion> boolean showGraph(TList<T> list, boolean isSatisfiable) {
 		String tmpFolder = System.getProperty("java.io.tmpdir");
 		int id = RANDOM.nextInt();
@@ -163,8 +204,10 @@ public class TListVisualizer {
 	
 	public static <T extends Assertion> String toDotFormat(List<TList<T>> models, boolean isSatisfiable) {
 		StringBuffer s = new StringBuffer();
-		for (TList<T> model : models)
-			s.append(toDotFormatInner(model));			
+		//for (TList<T> model : models)
+		//	s.append(toDotFormatInner(model));
+		TreeVisualizer tree = TreeVisualizer.buildModelTree(models);
+		s.append(toDotFormatInner(tree));
 		
 		String satLabel = isSatisfiable ? "IS" : "IS NOT";
 		String[] lines = s.toString().split("\n");
