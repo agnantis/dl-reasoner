@@ -25,6 +25,7 @@ import uom.dl.elements.UnionConcept;
 import uom.dl.reasoner.opts.LocalSimplification;
 import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.reasoner.opts.SemanticBranching;
+import uom.dl.reasoner.opts.SyntacticBranching;
 import uom.dl.utils.AssertionComparator;
 import uom.dl.utils.ConceptFactory;
 import uom.dl.utils.NNFFactory;
@@ -181,7 +182,8 @@ public class ConceptAssertion implements Assertion {
 			if (TableauxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.SEMANTIC_BRANCHING)) {
 				newModels = SemanticBranching.apply(model);
 			} else {
-				newModels = syntacticUnionRule(model);
+				//newModels = syntacticUnionRule(model);
+				newModels = SyntacticBranching.apply(model);
 			}
 			return newModels;				
 		}
@@ -333,34 +335,6 @@ public class ConceptAssertion implements Assertion {
 		log.error("Unhandled Concept Assertion: " + this.concept.getClass());
 		return null;
 	}
-
-	private List<TList<Assertion>> syntacticUnionRule(TList<Assertion> model) {
-		Set<Concept> concepts = ConceptFactory.getUnionConcepts(concept);
-		Set<Assertion> assertions = ConceptFactory.createAssertions(concepts, getIndividualA());
-		int noOfNewModels = assertions.size();
-		List<TList<Assertion>> newModels = new ArrayList<>(noOfNewModels);
-		int counter = 0;
-		model.visited(true);
-		for (Assertion a : assertions) {
-			TList<Assertion> newModel;
-			//use the existing model, avoiding one unnecessary duplication 
-			if (counter < noOfNewModels-1)
-				newModel = TList.duplicate(model, false);
-			else
-				newModel = model;
-			try {
-				newModel.append(a);
-				//newModel = newModel.getNext();
-				newModels.add(newModel);
-			} catch (ClashException e) {
-				log.debug("Clash found. Model: " + newModel + " . Assertion: " + e.getAddedAssertion());
-			}
-			++counter;
-		}
-		return newModels;
-	}
-	
-	
 
 	@Override
 	public void setIndividualA(Individual ind) {

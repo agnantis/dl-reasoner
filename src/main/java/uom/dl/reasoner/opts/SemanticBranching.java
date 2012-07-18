@@ -28,7 +28,7 @@ public class SemanticBranching {
 	public static List<TList<Assertion>> apply(TList<Assertion> model) {
 		List<Assertion> unionAssertions = getUnvisitedUnionAssertions(model);
 		Assertion assertionToSplit = null;
-		if (TableauxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.MOMS_HEURISTIC)) {
+		if (TableauxConfiguration.usesOptimization(Optimization.MOMS_HEURISTIC)) {
 			assertionToSplit = new MOMSHeuristic().getBestSelection(unionAssertions);
 		} else {
 			//get a random

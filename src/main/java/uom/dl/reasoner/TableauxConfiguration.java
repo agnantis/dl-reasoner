@@ -12,7 +12,7 @@ public class TableauxConfiguration {
 		this.optimizations = new Optimizations();
 		this.optimizations.setOptimization(Optimization.SEMANTIC_BRANCHING, true);
 		this.optimizations.setOptimization(Optimization.MOMS_HEURISTIC, true);
-		this.optimizations.setOptimization(Optimization.DIRECTED_BACKTRACKING, true);
+		this.optimizations.setOptimization(Optimization.DIRECTED_BACKTRACKING, false);
 	}
 	
 	public static TableauxConfiguration getConfiguration() {

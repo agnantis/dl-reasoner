@@ -114,9 +114,16 @@ public class TableauxAlgorithm {
 	private Model expandWithBacktracking(TList<Assertion> currentModel, List<TList<Assertion>> expansionModels) { 
 		Set<Integer> clashSet = null;
 		Model aModel = null;
+		Set<Integer> totalClashSet = new HashSet<Integer>();
+		int expansionsNo = expansionModels.size();
+		int counter = 0;
 		for (TList<Assertion> list : expansionModels){
+			++counter;
 			if (clashSet != null) {
-				list.getLeaf().getValue().setDependencySet(clashSet);
+				totalClashSet.addAll(clashSet);
+				if (counter == expansionsNo) { //last branch
+					list.getLeaf().getValue().setDependencySet(totalClashSet);
+				}
 				TList<Assertion> newList = aModel.getExtension();
 				try {
 					newList.append(list.getValue());
