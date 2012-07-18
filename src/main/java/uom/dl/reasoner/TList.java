@@ -136,7 +136,7 @@ public class TList<T extends Assertion> {
 		
 	}
 	
-	private boolean setNext(TList<T> node, boolean doNotCheckForDuplicate) throws ClashException {
+	public boolean setNext(TList<T> node, boolean doNotCheckForDuplicate) throws ClashException {
 		Assertion c = node.getValue();
 		if (c == null)
 			throw new NullPointerException("Concept cannot be null");
@@ -427,7 +427,11 @@ public class TList<T extends Assertion> {
 	}
 	
 	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy) {
-		++NO_OF_DUPLICATES;
+		return duplicate(original, deepCopy, true);
+	}
+	
+	public static <T extends Assertion> TList<T> duplicate(TList<T> original, boolean deepCopy, boolean countAsNew) {
+		if (countAsNew) { ++NO_OF_DUPLICATES; }
 		if (original == null)
 			return null;
 		

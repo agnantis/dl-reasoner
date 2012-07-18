@@ -59,7 +59,10 @@ public class SemanticBranching {
 			}
 		}
 		//create the complement branch
-		TList<Assertion> complementModel = TList.duplicate(model, false);
+		TList<Assertion> complementModel = null;
+		if (!TableauxConfiguration.usesOptimization(Optimization.DIRECTED_BACKTRACKING))
+			complementModel = TList.duplicate(model, false);
+		
 		List<TList<Assertion>> newModels = new ArrayList<>(2);
 		try {
 			//add selected Assertion to the existing model
@@ -80,7 +83,10 @@ public class SemanticBranching {
 			//add to complement all new
 			Assertion aNeg = new ConceptAssertion(negCon, assertionToSplit.getIndividualA(), -1, new HashSet<Integer>());
 			//complementModel.append(assertionsOfComplement);
-			complementModel.append(aNeg);
+			if (!TableauxConfiguration.usesOptimization(Optimization.DIRECTED_BACKTRACKING))
+				complementModel.append(aNeg);
+			else
+				complementModel = new TList<Assertion>(aNeg);
 			//move forward
 			//complementModel = complementModel.getNext();
 			newModels.add(complementModel);

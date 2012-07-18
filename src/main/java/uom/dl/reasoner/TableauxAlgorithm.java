@@ -14,8 +14,8 @@ import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;
+import uom.dl.reasoner.opts.Optimizations.Optimization;
 import uom.dl.utils.NNFFactory;
-import uom.dl.utils.TListVisualizer;
 
 public class TableauxAlgorithm {
 	private static Logger log = LoggerFactory.getLogger(TableauxAlgorithm.class);
@@ -94,52 +94,13 @@ public class TableauxAlgorithm {
 					}
 					
 					//run tableaux to each new model
-					Set<Integer> clashSet = null;
-					for (TList<Assertion> list : newModels){
-						if (clashSet != null) {
-							list.getLeaf().getValue().setDependencySet(clashSet);
-						}
-						Model aModel = runTableauxForConcept(list);
-						if (aModel.isSatisfiable()) {
-							//model found
-							return aModel;
-						} else {
-							//clash found
-							Model invalidModel = new Model(TList.duplicate(aModel.getExtension(), false), aModel.isSatisfiable());
-							invalidModels.add(invalidModel);
-							Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
-							//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
-							log.info("Clash found. Backtrack. DSet: " + dset);
-							if (dset.isEmpty()) {
-								//the clash depends on the root. //No solution available
-								log.info("Dependency set is empty. The clash comes from root. No need for further search");
-								return aModel;
-							}
-							clashSet = new HashSet<Integer>(dset);
-							//bFactor > -1 -> branch position
-							int bFactor = -1;
-							while (bFactor < 0) {
-								bFactor = aModel.getExtension().getLeaf().getValue().getBranchFactor(); 
-								log.info("Leaf: " + aModel.getExtension().getLeaf().getValue());
-								TList<Assertion> newTList = aModel.getExtension().removeLeaf();
-								if (newTList == null) {
-									//we reach the end. No further crop
-									return aModel;
-								}
-								aModel.setExtension(newTList);
-							}
-							if (clashSet.contains(bFactor)) {
-								clashSet.remove(bFactor);
-							} else {
-								//do not check its siblings
-								TList<Assertion> newTList = aModel.getExtension().removeLeaf();
-								aModel.setExtension(newTList);
-								return aModel;
-							}	
-						}
-					}
-					//no model found
-					return new Model(model, false);
+					Model expanded = null;
+					if (TableauxConfiguration.getConfiguration().getOptimizations().usesOptimization(Optimization.DIRECTED_BACKTRACKING)) {
+						expanded = expandWithBacktracking(model, newModels);
+					} else {
+						expanded = expandWithoutBacktracking(model, newModels);
+					}					
+					return expanded;
 				} else {
 					//value is atomic, so move to the next
 					if (current.getNext() == null)
@@ -148,6 +109,78 @@ public class TableauxAlgorithm {
 				}			
 			}
 		}
+	}
+	
+	private Model expandWithBacktracking(TList<Assertion> currentModel, List<TList<Assertion>> expansionModels) { 
+		Set<Integer> clashSet = null;
+		Model aModel = null;
+		for (TList<Assertion> list : expansionModels){
+			if (clashSet != null) {
+				list.getLeaf().getValue().setDependencySet(clashSet);
+				TList<Assertion> newList = aModel.getExtension();
+				try {
+					newList.append(list.getValue());
+				} catch (ClashException e) {
+					newList.getRoot().clashFound(e.getDependencyUnion());
+				}
+				list = newList;
+			}
+			aModel = runTableauxForConcept(list);
+			if (aModel.isSatisfiable()) {
+				//model found
+				return aModel;
+			} else {
+				//clash found
+				Model invalidModel = new Model(TList.duplicate(aModel.getExtension(), false, false), aModel.isSatisfiable());
+				invalidModels.add(invalidModel);
+				Set<Integer> dset = aModel.getExtension().getRoot().getClashDependencySet();
+				//TListVisualizer.showGraph(aModel.getExtension().getRoot(), false);
+				log.info("Clash found. Backtrack. DSet: " + dset);
+				if (dset.isEmpty()) {
+					//the clash depends on the root. //No solution available
+					log.info("Dependency set is empty. The clash comes from root. No need for further search");
+					return aModel;
+				}
+				clashSet = new HashSet<Integer>(dset);
+				//bFactor > -1 -> branch position
+				int bFactor = -1;
+				while (bFactor < 0) {
+					bFactor = aModel.getExtension().getLeaf().getValue().getBranchFactor(); 
+					log.info("Leaf: " + aModel.getExtension().getLeaf().getValue());
+					TList<Assertion> newTList = aModel.getExtension().removeLeaf();
+					if (newTList == null) {
+						//we reach the end. No further crop
+						return aModel;
+					}
+					aModel.setExtension(newTList);
+				}
+				TList<Assertion> newTList = aModel.getExtension().removeLeaf();
+				aModel.setExtension(newTList);
+				if (clashSet.contains(bFactor)) {
+					clashSet.remove(bFactor);
+				} else {
+					//do not check its siblings
+					return aModel;
+				}	
+			}
+		}
+		//no model found
+		return new Model(currentModel, false);		
+	}
+	
+	private Model expandWithoutBacktracking(TList<Assertion> currentModel, List<TList<Assertion>> expansionModels) {
+		//run tableaux to each new model
+		for (TList<Assertion> list : expansionModels){
+			Model aModel = runTableauxForConcept(list);
+			if (aModel.isSatisfiable()) {
+				//model found
+				return aModel;
+			} else {
+				invalidModels.add(aModel);
+			}
+		}
+		//no model found
+		return new Model(currentModel, false);	
 	}
 	
 	/**
