@@ -1,18 +1,14 @@
 package uom.dl.utils;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import uom.dl.elements.AtLeastConcept;
 import uom.dl.elements.AtomicConcept;
 import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.Concept;
 import uom.dl.elements.Constants;
-import uom.dl.elements.DLElement;
-import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.Individual;
 import uom.dl.elements.IntersectionConcept;
 import uom.dl.elements.NotConcept;

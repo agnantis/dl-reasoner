@@ -5,7 +5,6 @@ import java.util.List;
 
 import uom.dl.elements.DLElement;
 import uom.dl.elements.Individual;
-import uom.dl.elements.NotConcept;
 import uom.dl.elements.Role;
 
 public class RoleAssertion implements BinaryAssertion {

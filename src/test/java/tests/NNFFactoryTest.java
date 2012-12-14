@@ -21,14 +21,14 @@ import uom.dl.utils.NNFFactory;
 
 public class NNFFactoryTest {
 
-	private Concept A, B, C; 
+	private Concept A, B; 
 	private Role R, F;
 
 	@Before
 	public void setUp() throws Exception {
 		A = new AtomicConcept("A");
 		B = new AtomicConcept("B");
-		C = new AtomicConcept("C");
+		//C = new AtomicConcept("C");
 		R = new AtomicRole("R");
 		F = new AtomicRole("F");
 	}

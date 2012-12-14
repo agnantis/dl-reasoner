@@ -3,7 +3,6 @@ package uom.dl.utils;
 import java.util.Comparator;
 
 import uom.dl.elements.AtLeastConcept;
-import uom.dl.elements.BinaryConcept;
 import uom.dl.elements.DLElement;
 import uom.dl.elements.ExistsConcept;
 import uom.dl.elements.IntersectionConcept;

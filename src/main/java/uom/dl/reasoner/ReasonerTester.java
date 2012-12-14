@@ -3,7 +3,8 @@ package uom.dl.reasoner;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import javax.management.relation.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uom.dl.elements.AtMostConcept;
 import uom.dl.elements.AtomicConcept;
@@ -18,8 +19,14 @@ import uom.dl.elements.UnionConcept;
 import uom.dl.utils.ConceptFactory;
 
 public class ReasonerTester {
-
+	private static final Logger log = LoggerFactory
+			.getLogger(ReasonerTester.class);
+	
 	public static void main(String[] args) {
+		log.error("This is an error");
+		log.debug("This is an debug");
+		log.info("This is an info");
+		log.warn("This is an warn");
 		AtomicConcept A = new AtomicConcept("A");
 		AtomicConcept B = new AtomicConcept("B");
 		AtomicConcept C = new AtomicConcept("C");
